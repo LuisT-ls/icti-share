@@ -34,7 +34,11 @@ export const signupSchema = z
         /[^A-Za-z0-9]/,
         "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
       ),
-    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+    confirmPassword: z
+      .string({
+        required_error: "Confirmação de senha é obrigatória",
+      })
+      .min(1, "Confirmação de senha é obrigatória"),
     course: z
       .string({
         required_error: "Selecione um curso",
@@ -56,6 +60,10 @@ export const signupSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",
     path: ["confirmPassword"],
+  })
+  .refine((data) => data.course && data.course !== "", {
+    message: "Selecione um curso",
+    path: ["course"],
   });
 
 export type SignupFormData = z.infer<typeof signupSchema>;

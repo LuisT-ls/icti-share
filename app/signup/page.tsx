@@ -37,12 +37,53 @@ export default function SignupPage() {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    mode: "onChange", // Validar em tempo real
   });
 
   const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const course = watch("course");
+  const name = watch("name");
+  const email = watch("email");
+
+  // Verificar se todos os campos obrigatórios estão preenchidos
+  const allFieldsFilled =
+    name &&
+    name.length >= 2 &&
+    email &&
+    password &&
+    password.length >= 8 &&
+    confirmPassword &&
+    course &&
+    course !== "";
+
+  // Verificar se as senhas coincidem
+  const passwordsMatch =
+    password && confirmPassword && password === confirmPassword;
+
+  // Verificar se a senha atende aos requisitos
+  const passwordMeetsRequirements =
+    password &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
+
+  // Verificar se o curso é válido
+  const courseIsValid =
+    course &&
+    COURSE_OPTIONS.includes(course as (typeof COURSE_OPTIONS)[number]);
+
+  // Formulário válido quando todos os critérios são atendidos
+  const isFormValid =
+    allFieldsFilled &&
+    passwordsMatch &&
+    passwordMeetsRequirements &&
+    courseIsValid &&
+    isValid;
 
   const onSubmit = async (data: SignupFormData) => {
     setServerError(null);
@@ -205,7 +246,18 @@ export default function SignupPage() {
                   </label>
                   <PasswordInput
                     id="confirmPassword"
-                    {...register("confirmPassword")}
+                    {...register("confirmPassword", {
+                      required: "Confirmação de senha é obrigatória",
+                      validate: (value) => {
+                        if (!value || value === "") {
+                          return "Confirmação de senha é obrigatória";
+                        }
+                        if (value !== password) {
+                          return "As senhas não coincidem";
+                        }
+                        return true;
+                      },
+                    })}
                     placeholder="Digite a senha novamente"
                     aria-required="true"
                     aria-invalid={errors.confirmPassword ? "true" : "false"}
@@ -237,6 +289,19 @@ export default function SignupPage() {
                     id="course"
                     {...register("course", {
                       required: "Selecione um curso",
+                      validate: (value) => {
+                        if (!value || value === "") {
+                          return "Selecione um curso";
+                        }
+                        if (
+                          !COURSE_OPTIONS.includes(
+                            value as (typeof COURSE_OPTIONS)[number]
+                          )
+                        ) {
+                          return "Selecione um curso válido";
+                        }
+                        return true;
+                      },
                     })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-required="true"
@@ -288,7 +353,7 @@ export default function SignupPage() {
 
                 <Button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || !isFormValid}
                   className="w-full"
                   size="lg"
                 >
