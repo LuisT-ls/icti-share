@@ -30,12 +30,21 @@ export async function deleteMaterial(materialId: string) {
       material.uploadedById !== session.user.id &&
       session.user.role !== "ADMIN"
     ) {
-      return { success: false, error: "Sem permissão para excluir este material" };
+      return {
+        success: false,
+        error: "Sem permissão para excluir este material",
+      };
     }
 
-    // Deletar arquivo físico
-    if (existsSync(material.path)) {
-      await unlink(material.path);
+    // Deletar arquivo físico apenas se não estiver em base64 (Vercel)
+    // Arquivos em base64 são armazenados no banco, não precisam ser deletados do disco
+    if (!material.path.startsWith("base64:") && existsSync(material.path)) {
+      try {
+        await unlink(material.path);
+      } catch (error) {
+        console.error("Erro ao deletar arquivo físico:", error);
+        // Continua mesmo se não conseguir deletar o arquivo
+      }
     }
 
     // Deletar do banco (cascade deleta downloads)
@@ -46,6 +55,7 @@ export async function deleteMaterial(materialId: string) {
     revalidatePath("/meus-materiais");
     revalidatePath("/materiais");
     revalidatePath("/admin");
+    revalidatePath("/perfil");
 
     return { success: true };
   } catch (error) {
@@ -54,10 +64,7 @@ export async function deleteMaterial(materialId: string) {
   }
 }
 
-export async function updateMaterial(
-  materialId: string,
-  formData: FormData
-) {
+export async function updateMaterial(materialId: string, formData: FormData) {
   const session = await getServerSession();
 
   if (!session) {
@@ -78,7 +85,10 @@ export async function updateMaterial(
       material.uploadedById !== session.user.id &&
       session.user.role !== "ADMIN"
     ) {
-      return { success: false, error: "Sem permissão para editar este material" };
+      return {
+        success: false,
+        error: "Sem permissão para editar este material",
+      };
     }
 
     // Sanitizar e validar dados do formulário
@@ -132,4 +142,3 @@ export async function updateMaterial(
     return { success: false, error: "Erro ao atualizar material" };
   }
 }
-

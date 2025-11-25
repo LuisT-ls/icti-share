@@ -12,13 +12,28 @@ export default async function PerfilPage() {
     redirect("/login");
   }
 
-  // Buscar estatísticas do usuário
-  const [materialsCount, downloadsCount] = await Promise.all([
+  // Buscar estatísticas e materiais do usuário
+  const [materialsCount, downloadsCount, materials] = await Promise.all([
     prisma.material.count({
       where: { uploadedById: session.user.id },
     }),
     prisma.download.count({
       where: { userId: session.user.id },
+    }),
+    prisma.material.findMany({
+      where: { uploadedById: session.user.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        course: true,
+        discipline: true,
+        semester: true,
+        type: true,
+        downloadsCount: true,
+        createdAt: true,
+      },
     }),
   ]);
 
@@ -32,6 +47,7 @@ export default async function PerfilPage() {
           userRole={session.user.role}
           materialsCount={materialsCount}
           downloadsCount={downloadsCount}
+          materials={materials}
         />
       </main>
       <Footer />
