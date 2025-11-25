@@ -6,7 +6,9 @@ import { MaterialList } from "@/components/MaterialList";
 import { Pagination } from "@/components/Pagination";
 import { Suspense } from "react";
 import type { Prisma } from "@prisma/client";
-import { MaterialStatus } from "@prisma/client";
+
+// Constante para status aprovado (usando valor literal compatível com Prisma)
+const MATERIAL_STATUS_APPROVED = "APPROVED" as const;
 
 interface SearchParams {
   q?: string;
@@ -33,11 +35,13 @@ interface PaginatedMaterials {
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
 
-async function getMaterials(searchParams: SearchParams): Promise<PaginatedMaterials> {
+async function getMaterials(
+  searchParams: SearchParams
+): Promise<PaginatedMaterials> {
   const where: Prisma.MaterialWhereInput = {
     // Apenas materiais aprovados são exibidos publicamente
-    status: MaterialStatus.APPROVED,
-  };
+    status: MATERIAL_STATUS_APPROVED,
+  } as Prisma.MaterialWhereInput;
 
   // Busca por texto
   if (searchParams.q) {
@@ -108,40 +112,42 @@ async function getFilterOptions() {
     prisma.material.findMany({
       select: { course: true },
       distinct: ["course"],
-      where: { 
+      where: {
         course: { not: null },
-        status: MaterialStatus.APPROVED,
-      },
+        status: MATERIAL_STATUS_APPROVED,
+      } as Prisma.MaterialWhereInput,
     }),
     prisma.material.findMany({
       select: { discipline: true },
       distinct: ["discipline"],
-      where: { 
+      where: {
         discipline: { not: null },
-        status: MaterialStatus.APPROVED,
-      },
+        status: MATERIAL_STATUS_APPROVED,
+      } as Prisma.MaterialWhereInput,
     }),
     prisma.material.findMany({
       select: { semester: true },
       distinct: ["semester"],
-      where: { 
+      where: {
         semester: { not: null },
-        status: MaterialStatus.APPROVED,
-      },
+        status: MATERIAL_STATUS_APPROVED,
+      } as Prisma.MaterialWhereInput,
     }),
     prisma.material.findMany({
       select: { type: true },
       distinct: ["type"],
-      where: { 
+      where: {
         type: { not: null },
-        status: MaterialStatus.APPROVED,
-      },
+        status: MATERIAL_STATUS_APPROVED,
+      } as Prisma.MaterialWhereInput,
     }),
   ]);
 
   return {
     courses: courses.map((c) => c.course).filter(Boolean) as string[],
-    disciplines: disciplines.map((d) => d.discipline).filter(Boolean) as string[],
+    disciplines: disciplines
+      .map((d) => d.discipline)
+      .filter(Boolean) as string[],
     semesters: semesters.map((s) => s.semester).filter(Boolean) as string[],
     types: types.map((t) => t.type).filter(Boolean) as string[],
   };
@@ -215,4 +221,3 @@ export default async function MateriaisPage({
     </div>
   );
 }
-
