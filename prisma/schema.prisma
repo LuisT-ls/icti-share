@@ -16,6 +16,12 @@ enum UserRole {
   ADMIN
 }
 
+enum MaterialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -38,22 +44,23 @@ model User {
 }
 
 model Material {
-  id             String   @id @default(cuid())
+  id             String         @id @default(cuid())
   title          String
-  description    String?  @db.Text
+  description    String?        @db.Text
   filename       String
   path           String
   mimeType       String
   size           Int // Tamanho em bytes
   uploadedById   String
-  uploadedBy     User     @relation("MaterialUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
-  downloadsCount Int      @default(0)
+  uploadedBy     User           @relation("MaterialUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  downloadsCount Int            @default(0)
+  status         MaterialStatus @default(APPROVED)
   course         String?
   discipline     String?
   semester       String?
   type           String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   // Relacionamentos
   downloads Download[]
@@ -65,6 +72,7 @@ model Material {
   @@index([type])
   @@index([createdAt])
   @@index([title])
+  @@index([status])
   @@map("materials")
 }
 

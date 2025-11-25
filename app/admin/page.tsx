@@ -12,11 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MaterialActions } from "@/components/MaterialActions";
+import { AdminMaterialActions } from "@/components/AdminMaterialActions";
+import { UserRoleEditor } from "@/components/UserRoleEditor";
 import { motion } from "framer-motion";
-import { Users, FileText, Download, Shield } from "lucide-react";
+import { Users, FileText, Download, Shield, Clock, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { MaterialStatus } from "@prisma/client";
 
 export default async function AdminPage() {
   const session = await getServerSession();
@@ -29,25 +31,31 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  // Buscar estatísticas
+  // Buscar todas as estatísticas e dados necessários
   const [
-    materialsCount,
-    usersCount,
-    downloadsCount,
+    totalMaterials,
+    pendingMaterials,
+    approvedMaterials,
+    totalDownloads,
+    totalUsers,
     adminCount,
-    recentMaterials,
-    recentUsers,
+    pendingMaterialsList,
+    allUsers,
+    topMaterials,
   ] = await Promise.all([
     prisma.material.count(),
-    prisma.user.count(),
+    prisma.material.count({ where: { status: MaterialStatus.PENDING } }),
+    prisma.material.count({ where: { status: MaterialStatus.APPROVED } }),
     prisma.download.count(),
+    prisma.user.count(),
     prisma.user.count({ where: { role: "ADMIN" } }),
     prisma.material.findMany({
-      take: 10,
-      orderBy: { createdAt: "desc" },
+      where: { status: MaterialStatus.PENDING },
+      orderBy: { createdAt: "asc" },
       include: {
         uploadedBy: {
           select: {
+            id: true,
             name: true,
             email: true,
           },
@@ -55,7 +63,6 @@ export default async function AdminPage() {
       },
     }),
     prisma.user.findMany({
-      take: 10,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -66,13 +73,26 @@ export default async function AdminPage() {
         _count: {
           select: {
             uploadedMaterials: true,
+            downloads: true,
+          },
+        },
+      },
+    }),
+    prisma.material.findMany({
+      take: 10,
+      orderBy: { downloadsCount: "desc" },
+      include: {
+        uploadedBy: {
+          select: {
+            name: true,
+            email: true,
           },
         },
       },
     }),
   ]);
 
-  const adminPercentage = usersCount > 0 ? Math.round((adminCount / usersCount) * 100) : 0;
+  const adminPercentage = totalUsers > 0 ? Math.round((adminCount / totalUsers) * 100) : 0;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -98,8 +118,11 @@ export default async function AdminPage() {
                 <div className="flex items-center gap-3">
                   <FileText className="h-8 w-8 text-primary" />
                   <div>
-                    <p className="text-2xl font-bold">{materialsCount}</p>
-                    <p className="text-sm text-muted-foreground">Materiais</p>
+                    <p className="text-2xl font-bold">{totalMaterials}</p>
+                    <p className="text-sm text-muted-foreground">Total de Materiais</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {approvedMaterials} aprovados
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -107,10 +130,13 @@ export default async function AdminPage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <Users className="h-8 w-8 text-primary" />
+                  <Clock className="h-8 w-8 text-yellow-600" />
                   <div>
-                    <p className="text-2xl font-bold">{usersCount}</p>
-                    <p className="text-sm text-muted-foreground">Usuários</p>
+                    <p className="text-2xl font-bold">{pendingMaterials}</p>
+                    <p className="text-sm text-muted-foreground">Pendentes</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Aguardando aprovação
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -120,8 +146,8 @@ export default async function AdminPage() {
                 <div className="flex items-center gap-3">
                   <Download className="h-8 w-8 text-primary" />
                   <div>
-                    <p className="text-2xl font-bold">{downloadsCount}</p>
-                    <p className="text-sm text-muted-foreground">Downloads</p>
+                    <p className="text-2xl font-bold">{totalDownloads}</p>
+                    <p className="text-sm text-muted-foreground">Total Downloads</p>
                   </div>
                 </div>
               </CardContent>
@@ -129,22 +155,83 @@ export default async function AdminPage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <Shield className="h-8 w-8 text-primary" />
+                  <Users className="h-8 w-8 text-primary" />
                   <div>
-                    <p className="text-2xl font-bold">{adminPercentage}%</p>
-                    <p className="text-sm text-muted-foreground">Admins</p>
+                    <p className="text-2xl font-bold">{totalUsers}</p>
+                    <p className="text-sm text-muted-foreground">Usuários</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {adminCount} administradores
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Materiais Recentes */}
+          {/* Materiais Pendentes */}
+          {pendingMaterialsList.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-yellow-600" />
+                  Materiais Pendentes
+                </CardTitle>
+                <CardDescription>
+                  {pendingMaterialsList.length} material(is) aguardando aprovação
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Autor</TableHead>
+                        <TableHead>Data de Upload</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingMaterialsList.map((material) => (
+                        <TableRow key={material.id}>
+                          <TableCell className="font-medium">
+                            <a
+                              href={`/material/${material.id}`}
+                              className="hover:text-primary transition-colors"
+                            >
+                              {material.title}
+                            </a>
+                          </TableCell>
+                          <TableCell>
+                            {material.uploadedBy?.name || material.uploadedBy?.email || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            {formatDistanceToNow(new Date(material.createdAt), {
+                              addSuffix: true,
+                              locale: ptBR,
+                            })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <AdminMaterialActions material={material} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Top 10 Downloads */}
           <Card>
             <CardHeader>
-              <CardTitle>Materiais Recentes</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Top 10 Materiais Mais Baixados
+              </CardTitle>
               <CardDescription>
-                Últimos materiais enviados na plataforma
+                Materiais com maior número de downloads
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -152,51 +239,64 @@ export default async function AdminPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>#</TableHead>
                       <TableHead>Título</TableHead>
                       <TableHead>Autor</TableHead>
                       <TableHead>Downloads</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentMaterials.map((material) => (
-                      <TableRow key={material.id}>
-                        <TableCell className="font-medium">
-                          <a
-                            href={`/material/${material.id}`}
-                            className="hover:text-primary transition-colors"
-                          >
-                            {material.title}
-                          </a>
-                        </TableCell>
-                        <TableCell>
-                          {material.uploadedBy?.name || material.uploadedBy?.email}
-                        </TableCell>
-                        <TableCell>{material.downloadsCount}</TableCell>
-                        <TableCell>
-                          {formatDistanceToNow(new Date(material.createdAt), {
-                            addSuffix: true,
-                            locale: ptBR,
-                          })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <MaterialActions material={material} />
+                    {topMaterials.length > 0 ? (
+                      topMaterials.map((material, index) => (
+                        <TableRow key={material.id}>
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell className="font-medium">
+                            <a
+                              href={`/material/${material.id}`}
+                              className="hover:text-primary transition-colors"
+                            >
+                              {material.title}
+                            </a>
+                          </TableCell>
+                          <TableCell>
+                            {material.uploadedBy?.name || material.uploadedBy?.email || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-semibold text-primary">
+                              {material.downloadsCount}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {formatDistanceToNow(new Date(material.createdAt), {
+                              addSuffix: true,
+                              locale: ptBR,
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          Nenhum material encontrado
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
             </CardContent>
           </Card>
 
-          {/* Usuários Recentes */}
+          {/* Listagem de Usuários */}
           <Card>
             <CardHeader>
-              <CardTitle>Usuários Recentes</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Usuários
+              </CardTitle>
               <CardDescription>
-                Últimos usuários cadastrados na plataforma
+                Gerencie roles e permissões dos usuários
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -208,11 +308,13 @@ export default async function AdminPage() {
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Materiais</TableHead>
+                      <TableHead>Downloads</TableHead>
                       <TableHead>Data</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentUsers.map((user) => (
+                    {allUsers.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                           {user.name || "Sem nome"}
@@ -220,23 +322,27 @@ export default async function AdminPage() {
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           <span
-                            className={`px-2 py-1 rounded text-xs ${
+                            className={`px-2 py-1 rounded text-xs font-medium ${
                               user.role === "ADMIN"
-                                ? "bg-red-100 text-red-800"
+                                ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
                                 : user.role === "USUARIO"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                             }`}
                           >
                             {user.role}
                           </span>
                         </TableCell>
                         <TableCell>{user._count.uploadedMaterials}</TableCell>
+                        <TableCell>{user._count.downloads}</TableCell>
                         <TableCell>
                           {formatDistanceToNow(new Date(user.createdAt), {
                             addSuffix: true,
                             locale: ptBR,
                           })}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <UserRoleEditor user={user} currentUserId={session.user.id} />
                         </TableCell>
                       </TableRow>
                     ))}

@@ -6,6 +6,7 @@ import { MaterialList } from "@/components/MaterialList";
 import { Pagination } from "@/components/Pagination";
 import { Suspense } from "react";
 import type { Prisma } from "@prisma/client";
+import { MaterialStatus } from "@prisma/client";
 
 interface SearchParams {
   q?: string;
@@ -33,7 +34,10 @@ const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
 
 async function getMaterials(searchParams: SearchParams): Promise<PaginatedMaterials> {
-  const where: Prisma.MaterialWhereInput = {};
+  const where: Prisma.MaterialWhereInput = {
+    // Apenas materiais aprovados são exibidos publicamente
+    status: MaterialStatus.APPROVED,
+  };
 
   // Busca por texto
   if (searchParams.q) {
@@ -104,22 +108,34 @@ async function getFilterOptions() {
     prisma.material.findMany({
       select: { course: true },
       distinct: ["course"],
-      where: { course: { not: null } },
+      where: { 
+        course: { not: null },
+        status: MaterialStatus.APPROVED,
+      },
     }),
     prisma.material.findMany({
       select: { discipline: true },
       distinct: ["discipline"],
-      where: { discipline: { not: null } },
+      where: { 
+        discipline: { not: null },
+        status: MaterialStatus.APPROVED,
+      },
     }),
     prisma.material.findMany({
       select: { semester: true },
       distinct: ["semester"],
-      where: { semester: { not: null } },
+      where: { 
+        semester: { not: null },
+        status: MaterialStatus.APPROVED,
+      },
     }),
     prisma.material.findMany({
       select: { type: true },
       distinct: ["type"],
-      where: { type: { not: null } },
+      where: { 
+        type: { not: null },
+        status: MaterialStatus.APPROVED,
+      },
     }),
   ]);
 
