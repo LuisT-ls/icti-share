@@ -12,11 +12,7 @@ export const signupSchema = z.object({
     .min(2, "Nome deve ter no mínimo 2 caracteres")
     .max(100, "Nome muito longo")
     .trim(),
-  email: z
-    .string()
-    .email("Email inválido")
-    .toLowerCase()
-    .trim(),
+  email: z.string().email("Email inválido").toLowerCase().trim(),
   password: z
     .string()
     .min(6, "Senha deve ter no mínimo 6 caracteres")
@@ -27,14 +23,8 @@ export type SignupFormData = z.infer<typeof signupSchema>;
 
 // Schema de Login
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .email("Email inválido")
-    .toLowerCase()
-    .trim(),
-  password: z
-    .string()
-    .min(1, "Senha é obrigatória"),
+  email: z.string().email("Email inválido").toLowerCase().trim(),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -75,15 +65,51 @@ export const uploadMaterialSchema = z.object({
     .or(z.literal("")),
   file: z
     .any()
-    .refine((file) => file instanceof File && file.size > 0, {
-      message: "Arquivo é obrigatório",
-    })
-    .refine((file) => file instanceof File && file.size <= MAX_FILE_SIZE, {
-      message: `Arquivo muito grande. Tamanho máximo: ${MAX_FILE_SIZE / 1024 / 1024} MB`,
-    })
-    .refine((file) => file instanceof File && file.type === "application/pdf", {
-      message: "Apenas arquivos PDF são permitidos",
-    }),
+    .refine(
+      (file) => {
+        // Aceitar File ou FileList
+        if (file instanceof File) {
+          return file.size > 0;
+        }
+        if (file instanceof FileList) {
+          return file.length > 0 && file[0] instanceof File && file[0].size > 0;
+        }
+        return false;
+      },
+      {
+        message: "Arquivo é obrigatório",
+      }
+    )
+    .refine(
+      (file) => {
+        const actualFile =
+          file instanceof File
+            ? file
+            : file instanceof FileList && file.length > 0
+              ? file[0]
+              : null;
+        return actualFile instanceof File && actualFile.size <= MAX_FILE_SIZE;
+      },
+      {
+        message: `Arquivo muito grande. Tamanho máximo: ${MAX_FILE_SIZE / 1024 / 1024} MB`,
+      }
+    )
+    .refine(
+      (file) => {
+        const actualFile =
+          file instanceof File
+            ? file
+            : file instanceof FileList && file.length > 0
+              ? file[0]
+              : null;
+        return (
+          actualFile instanceof File && actualFile.type === "application/pdf"
+        );
+      },
+      {
+        message: "Apenas arquivos PDF são permitidos",
+      }
+    ),
 });
 
 export type UploadMaterialFormData = z.infer<typeof uploadMaterialSchema>;
@@ -100,26 +126,14 @@ export const uploadMaterialServerSchema = z.object({
     .max(1000, "Descrição muito longa")
     .optional()
     .nullable(),
-  course: z
-    .string()
-    .max(100, "Curso muito longo")
-    .optional()
-    .nullable(),
+  course: z.string().max(100, "Curso muito longo").optional().nullable(),
   discipline: z
     .string()
     .max(100, "Disciplina muito longa")
     .optional()
     .nullable(),
-  semester: z
-    .string()
-    .max(50, "Semestre muito longo")
-    .optional()
-    .nullable(),
-  type: z
-    .string()
-    .max(50, "Tipo muito longo")
-    .optional()
-    .nullable(),
+  semester: z.string().max(50, "Semestre muito longo").optional().nullable(),
+  type: z.string().max(50, "Tipo muito longo").optional().nullable(),
 });
 
 // Schema de Edição de Material
@@ -168,4 +182,3 @@ export const editProfileSchema = z.object({
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;
-

@@ -34,6 +34,7 @@ export function UploadForm() {
     formState: { errors },
     watch,
     reset,
+    getValues,
   } = useForm<UploadMaterialFormData>({
     resolver: zodResolver(uploadMaterialSchema),
   });
@@ -50,8 +51,11 @@ export function UploadForm() {
     setSuccess(null);
 
     startTransition(async () => {
-      const file = data.file as File;
-      if (!file) {
+      // Obter o arquivo do FileList, não do data.file
+      const fileList = getValues("file") as FileList | undefined;
+      const file = fileList && fileList.length > 0 ? fileList[0] : null;
+
+      if (!file || !(file instanceof File)) {
         setError("Arquivo é obrigatório");
         return;
       }
