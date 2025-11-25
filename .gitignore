@@ -8,6 +8,10 @@
 
 # testing
 /coverage
+/.nyc_output
+/test-results
+/playwright-report
+/playwright/.cache
 
 # next.js
 /.next/
@@ -35,7 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# prisma
-/prisma/migrations
-
