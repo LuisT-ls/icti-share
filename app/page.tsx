@@ -5,13 +5,25 @@ import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturedMaterialsSection } from "@/components/FeaturedMaterialsSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
+import type { Prisma } from "@prisma/client";
+
+type MaterialWithUploader = Prisma.MaterialGetPayload<{
+  include: {
+    uploadedBy: {
+      select: {
+        name: true;
+        email: true;
+      };
+    };
+  };
+}>;
 
 export default async function Home() {
   const session = await getServerSession();
 
   // Buscar materiais em destaque (mais recentes ou mais baixados)
   // Tratamento de erro para evitar 500 se o banco não estiver disponível
-  let featuredMaterials = [];
+  let featuredMaterials: MaterialWithUploader[] = [];
   try {
     featuredMaterials = await prisma.material.findMany({
       take: 6,
