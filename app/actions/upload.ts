@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
@@ -131,15 +131,54 @@ export async function uploadMaterial(
     const originalFilename = sanitizeFilename(file.name);
     console.log("📝 Nome do arquivo sanitizado:", originalFilename);
 
-    // Obter diretório de upload
-    const uploadDir =
-      process.env.RAILWAY_VOLUME_PATH || process.env.UPLOAD_DIR || "./uploads";
-    console.log("📁 Diretório de upload:", uploadDir);
+    // Detectar ambiente e definir diretório de upload
+    const isVercel = !!process.env.VERCEL;
+    const isRailway = !!process.env.RAILWAY_ENVIRONMENT;
+
+    let uploadDir: string;
+
+    if (isVercel) {
+      // No Vercel, usar /tmp (único diretório gravável)
+      uploadDir = "/tmp/uploads";
+      console.log("🌐 Ambiente detectado: Vercel - usando /tmp/uploads");
+    } else if (isRailway && process.env.RAILWAY_VOLUME_PATH) {
+      // No Railway com volume configurado
+      uploadDir = process.env.RAILWAY_VOLUME_PATH;
+      console.log("🚂 Ambiente detectado: Railway - usando volume persistente");
+    } else if (process.env.UPLOAD_DIR) {
+      // Diretório customizado via variável de ambiente
+      uploadDir = process.env.UPLOAD_DIR;
+      console.log("📁 Usando diretório customizado via UPLOAD_DIR");
+    } else {
+      // Fallback para desenvolvimento local - resolver para caminho absoluto
+      uploadDir = resolve(process.cwd(), "uploads");
+      console.log("💻 Ambiente: Desenvolvimento local - usando ./uploads");
+    }
+
+    // Garantir que o caminho seja absoluto
+    if (!uploadDir.startsWith("/") && !uploadDir.startsWith("\\")) {
+      uploadDir = resolve(process.cwd(), uploadDir);
+    }
+
+    console.log("📁 Diretório de upload final (absoluto):", uploadDir);
 
     // Criar diretório se não existir
-    if (!existsSync(uploadDir)) {
-      console.log("📁 Criando diretório de upload...");
-      await mkdir(uploadDir, { recursive: true });
+    try {
+      if (!existsSync(uploadDir)) {
+        console.log("📁 Criando diretório de upload...");
+        await mkdir(uploadDir, { recursive: true });
+        console.log("✅ Diretório criado com sucesso");
+      } else {
+        console.log("✅ Diretório já existe");
+      }
+    } catch (error) {
+      console.error("❌ Erro ao criar diretório:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        success: false,
+        error: `Erro ao criar diretório de upload: ${errorMessage}. Verifique as permissões ou configure UPLOAD_DIR.`,
+      };
     }
 
     // Gerar nome único: UUID + nome original (já sanitizado)
