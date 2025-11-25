@@ -73,6 +73,9 @@ export async function GET(
       );
     }
 
+    // Detectar ambiente
+    const isVercel = !!process.env.VERCEL;
+
     // Verificar se o arquivo está armazenado em base64 (Vercel) ou no sistema de arquivos
     let fileBuffer: Buffer;
 
@@ -99,6 +102,24 @@ export async function GET(
         "📁 Verificando arquivo no sistema de arquivos:",
         material.path
       );
+
+      // Se estamos no Vercel e o arquivo não está em base64, é um arquivo antigo
+      // que foi salvo antes da correção e não existe mais
+      if (isVercel) {
+        console.error(
+          "❌ Arquivo antigo detectado no Vercel (não está em base64):",
+          material.path
+        );
+        return NextResponse.json(
+          {
+            error:
+              "Este arquivo foi enviado antes da atualização do sistema. Por favor, reenvie o arquivo para poder fazer download.",
+            code: "LEGACY_FILE",
+          },
+          { status: 404 }
+        );
+      }
+
       if (!existsSync(material.path)) {
         console.error("❌ Arquivo não encontrado no caminho:", material.path);
         return NextResponse.json(
