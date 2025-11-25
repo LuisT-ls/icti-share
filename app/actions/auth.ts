@@ -27,7 +27,9 @@ export async function signup(formData: FormData) {
 
   if (!rateLimitResult.success) {
     return {
-      error: rateLimitResult.error || "Muitas tentativas. Tente novamente mais tarde.",
+      error:
+        rateLimitResult.error ||
+        "Muitas tentativas. Tente novamente mais tarde.",
     };
   }
 
@@ -74,20 +76,27 @@ export async function signup(formData: FormData) {
     });
 
     // Fazer login automático após cadastro
+    // Se falhar, ainda retornamos sucesso pois o usuário foi criado
     try {
       await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
+      // Se o signIn funcionou, redirecionar
       redirect("/");
     } catch (error) {
-      // Se o signIn lançar um redirect, deixar passar
+      // Se o signIn lançar um redirect, deixar passar (isso é esperado)
       if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
         throw error;
       }
-      // Se não conseguir fazer login, retornar sucesso mesmo assim
-      // (usuário pode fazer login manualmente depois)
+
+      // Se houver outro erro no login, logar mas não falhar
+      // O usuário foi criado com sucesso, então retornamos sucesso
+      console.warn("Usuário criado, mas login automático falhou:", error);
+
+      // Retornar sucesso mesmo se o login automático falhar
+      // O usuário pode fazer login manualmente depois
       return {
         success: true,
         user: {
@@ -95,9 +104,22 @@ export async function signup(formData: FormData) {
           email: user.email,
           name: user.name,
         },
+        message: "Conta criada com sucesso! Você pode fazer login agora.",
       };
     }
   } catch (error) {
+    // Verificar se é um erro de redirect (isso é esperado e não é um erro real)
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error; // Deixar o redirect passar
+    }
+
+    // Verificar se o erro é porque o usuário já existe
+    if (error instanceof Error && error.message.includes("Unique constraint")) {
+      return {
+        error: "Este email já está cadastrado",
+      };
+    }
+
     console.error("Erro ao criar usuário:", error);
     return {
       error: "Erro ao criar conta. Tente novamente.",
@@ -118,7 +140,9 @@ export async function login(formData: FormData) {
 
   if (!rateLimitResult.success) {
     return {
-      error: rateLimitResult.error || "Muitas tentativas. Tente novamente mais tarde.",
+      error:
+        rateLimitResult.error ||
+        "Muitas tentativas. Tente novamente mais tarde.",
     };
   }
 
@@ -166,4 +190,3 @@ export async function login(formData: FormData) {
 export async function logout() {
   await signOut({ redirectTo: "/" });
 }
-
