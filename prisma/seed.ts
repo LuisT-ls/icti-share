@@ -56,13 +56,13 @@ async function main() {
     },
   });
 
-  console.log(`✅ Usuários criados: ${admin.name}, ${user1.name}, ${user2.name}`);
+  console.log(
+    `✅ Usuários criados: ${admin.name}, ${user1.name}, ${user2.name}`
+  );
 
   // 2. Criar diretório de uploads se não existir
   const uploadDir =
-    process.env.RAILWAY_VOLUME_PATH ||
-    process.env.UPLOAD_DIR ||
-    "./uploads";
+    process.env.RAILWAY_VOLUME_PATH || process.env.UPLOAD_DIR || "./uploads";
 
   if (!existsSync(uploadDir)) {
     mkdirSync(uploadDir, { recursive: true });
@@ -191,7 +191,7 @@ async function main() {
     const filePath = join(uploadDir, filename);
 
     // Criar conteúdo PDF mock (apenas para seed - não é um PDF real)
-    const mockPdfContent = `%PDF-1.4
+    const pdfBody = `%PDF-1.4
 1 0 obj
 <<
 /Type /Catalog
@@ -242,8 +242,8 @@ trailer
 /Root 1 0 R
 >>
 startxref
-${mockPdfContent.length}
-%%EOF`;
+`;
+    const mockPdfContent = pdfBody + pdfBody.length + "\n%%EOF";
 
     writeFileSync(filePath, mockPdfContent);
 
@@ -267,7 +267,10 @@ ${mockPdfContent.length}
       },
     });
 
-    createdMaterials.push({ material, downloadsCount: materialData.downloadsCount });
+    createdMaterials.push({
+      material,
+      downloadsCount: materialData.downloadsCount,
+    });
   }
 
   console.log(`✅ ${createdMaterials.length} materiais criados`);
@@ -276,7 +279,13 @@ ${mockPdfContent.length}
   console.log("📥 Criando downloads históricos...");
 
   const users = [admin, user1, user2];
-  const ips = ["192.168.1.100", "192.168.1.101", "10.0.0.50", "172.16.0.10", null];
+  const ips = [
+    "192.168.1.100",
+    "192.168.1.101",
+    "10.0.0.50",
+    "172.16.0.10",
+    null,
+  ];
 
   let totalDownloads = 0;
 
@@ -293,7 +302,10 @@ ${mockPdfContent.length}
       );
 
       // Usuário aleatório (ou null para downloads anônimos)
-      const randomUser = Math.random() > 0.3 ? users[Math.floor(Math.random() * users.length)] : null;
+      const randomUser =
+        Math.random() > 0.3
+          ? users[Math.floor(Math.random() * users.length)]
+          : null;
 
       // IP aleatório
       const randomIp = ips[Math.floor(Math.random() * ips.length)];
@@ -333,4 +345,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

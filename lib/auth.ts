@@ -65,9 +65,9 @@ export const authConfig: NextAuthConfig = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
+      if (user && user.id) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role as UserRole;
       }
       return token;
     },
@@ -80,4 +80,3 @@ export const authConfig: NextAuthConfig = {
     },
   },
 };
-

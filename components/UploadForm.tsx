@@ -6,11 +6,20 @@ import { useState, useTransition } from "react";
 import { uploadMaterial } from "@/app/actions/upload";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Upload, FileText } from "lucide-react";
-import { uploadMaterialSchema, type UploadMaterialFormData } from "@/lib/validations/schemas";
+import {
+  uploadMaterialSchema,
+  type UploadMaterialFormData,
+} from "@/lib/validations/schemas";
 
 export function UploadForm() {
   const router = useRouter();
@@ -110,7 +119,11 @@ export function UploadForm() {
           aria-describedby={errors.title ? "title-error" : undefined}
         />
         {errors.title && (
-          <p id="title-error" className="mt-1 text-sm text-destructive" role="alert">
+          <p
+            id="title-error"
+            className="mt-1 text-sm text-destructive"
+            role="alert"
+          >
             {errors.title.message}
           </p>
         )}
@@ -167,9 +180,13 @@ export function UploadForm() {
             <span className="font-medium">{filePreview}</span>
           </p>
         )}
-        {errors.file && (
-          <p id="file-error" className="mt-1 text-sm text-destructive" role="alert">
-            {errors.file.message}
+        {errors.file?.message && (
+          <p
+            id="file-error"
+            className="mt-1 text-sm text-destructive"
+            role="alert"
+          >
+            {String(errors.file.message)}
           </p>
         )}
         <p className="mt-1 text-xs text-muted-foreground">
@@ -199,7 +216,10 @@ export function UploadForm() {
 
         {/* Disciplina */}
         <div>
-          <label htmlFor="discipline" className="block text-sm font-medium mb-2">
+          <label
+            htmlFor="discipline"
+            className="block text-sm font-medium mb-2"
+          >
             Disciplina
           </label>
           <Input
@@ -254,24 +274,25 @@ export function UploadForm() {
 
       {/* Mensagens de erro e sucesso */}
       {error && (
-        <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
+        <div
+          className="rounded-md bg-destructive/10 p-4 border border-destructive/20"
+          role="alert"
+        >
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="rounded-md bg-green-50 p-4 border border-green-200" role="alert">
+        <div
+          className="rounded-md bg-green-50 p-4 border border-green-200"
+          role="alert"
+        >
           <p className="text-sm text-green-800">{success}</p>
         </div>
       )}
 
       {/* Botão de submit */}
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="w-full"
-        size="lg"
-      >
+      <Button type="submit" disabled={isPending} className="w-full" size="lg">
         {isPending ? (
           <>
             <Upload className="mr-2 h-4 w-4 animate-pulse" />
