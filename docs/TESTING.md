@@ -42,6 +42,7 @@ pnpm test:coverage
 #### Validação Zod (`__tests__/validations/schemas.test.ts`)
 
 Testa todos os schemas de validação:
+
 - ✅ `signupSchema` - Validação de cadastro
 - ✅ `loginSchema` - Validação de login
 - ✅ `uploadMaterialSchema` - Validação de upload
@@ -49,6 +50,7 @@ Testa todos os schemas de validação:
 - ✅ `editProfileSchema` - Validação de perfil
 
 **Exemplo:**
+
 ```typescript
 it("deve validar dados corretos", () => {
   const validData = {
@@ -64,6 +66,7 @@ it("deve validar dados corretos", () => {
 #### Componente MaterialCard (`__tests__/components/MaterialCard.test.tsx`)
 
 Testa renderização e comportamento:
+
 - ✅ Renderização do título
 - ✅ Renderização de descrição (variants)
 - ✅ Exibição de downloads
@@ -73,6 +76,7 @@ Testa renderização e comportamento:
 #### Componente UploadForm (`__tests__/components/UploadForm.test.tsx`)
 
 Testa validação e comportamento do formulário:
+
 - ✅ Validação de campos obrigatórios
 - ✅ Mensagens de erro
 - ✅ Campos opcionais
@@ -130,6 +134,7 @@ pnpm test:e2e:headed
 ### Pré-requisitos
 
 1. Instalar dependências:
+
 ```bash
 pnpm install
 ```
@@ -196,6 +201,7 @@ A configuração do Jest define um threshold mínimo de cobertura:
 - **Statements**: 70%
 
 Para ver a cobertura:
+
 ```bash
 pnpm test:coverage
 ```
@@ -209,6 +215,7 @@ Os relatórios são gerados em `coverage/`.
 ### Jest
 
 Configuração em `jest.config.js`:
+
 - Ambiente: `jest-environment-jsdom`
 - Setup: `jest.setup.js`
 - Mocks: Next.js router, framer-motion, lucide-react
@@ -216,6 +223,7 @@ Configuração em `jest.config.js`:
 ### Playwright
 
 Configuração em `playwright.config.ts`:
+
 - Base URL: `http://localhost:3000`
 - Browsers: Chromium, Firefox, WebKit
 - Web Server: Inicia `pnpm dev` automaticamente
@@ -257,6 +265,7 @@ test("deve fazer algo", async ({ page }) => {
 ### Erro: "Cannot find module"
 
 Verifique se os paths no `tsconfig.json` estão corretos:
+
 ```json
 {
   "compilerOptions": {
@@ -286,4 +295,3 @@ Verifique se a porta 3000 está disponível ou ajuste `baseURL` no `playwright.c
 ---
 
 **Última atualização:** 2024
-

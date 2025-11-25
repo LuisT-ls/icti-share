@@ -21,6 +21,7 @@ O workflow de CI está configurado em `.github/workflows/ci.yml`.
 ### Jobs
 
 #### 1. lint-and-test
+
 - **Quando:** Em push e pull requests para `main` e `develop`
 - **Executa:**
   - ✅ `pnpm install --frozen-lockfile`
@@ -29,6 +30,7 @@ O workflow de CI está configurado em `.github/workflows/ci.yml`.
   - ✅ `pnpm build` (Next.js build)
 
 #### 2. e2e
+
 - **Quando:** Após `lint-and-test` passar
 - **Executa:**
   - ✅ Instala dependências
@@ -46,12 +48,14 @@ AUTH_URL: ${{ secrets.AUTH_URL }}
 ```
 
 **Configurar no GitHub:**
+
 1. Vá em Settings → Secrets and variables → Actions
 2. Adicione as variáveis necessárias
 
 ### Verificar Status
 
 O status do CI aparece:
+
 - ✅ No GitHub na aba "Actions"
 - ✅ Como badge no README (opcional)
 - ✅ Em pull requests como status check
@@ -67,17 +71,20 @@ Arquivo: `.eslintrc.json`
 ### Regras Configuradas
 
 #### TypeScript
+
 - ✅ `@typescript-eslint/no-unused-vars` - Erro para variáveis não usadas
 - ✅ `@typescript-eslint/no-explicit-any` - Aviso para uso de `any`
 - ✅ Desabilitado: `explicit-function-return-type` (inferência automática)
 
 #### React/Next.js
+
 - ✅ `react/react-in-jsx-scope` - Desabilitado (não necessário no Next.js)
 - ✅ `react-hooks/rules-of-hooks` - Erro para violações de hooks
 - ✅ `@next/next/no-html-link-for-pages` - Erro para links HTML em vez de Next.js Link
 - ✅ `@next/next/no-img-element` - Aviso para uso de `<img>` em vez de `<Image>`
 
 #### Geral
+
 - ✅ `no-console` - Aviso (permite `console.warn` e `console.error`)
 - ✅ `prefer-const` - Erro para variáveis que podem ser `const`
 - ✅ `no-var` - Erro para uso de `var`
@@ -95,6 +102,7 @@ pnpm lint --fix
 ### Ignorar Arquivos
 
 Arquivos ignorados:
+
 - `node_modules/`
 - `.next/`
 - `out/`, `build/`, `dist/`
@@ -113,14 +121,14 @@ Arquivo: `.prettierrc`
 
 ```json
 {
-  "semi": true,              // Usar ponto e vírgula
-  "trailingComma": "es5",    // Vírgula final quando possível
-  "singleQuote": false,      // Aspas duplas
-  "printWidth": 80,          // Largura máxima da linha
-  "tabWidth": 2,             // Espaços por tab
-  "useTabs": false,          // Usar espaços, não tabs
-  "arrowParens": "always",   // Sempre usar parênteses em arrow functions
-  "endOfLine": "lf"          // Line feed (Unix)
+  "semi": true, // Usar ponto e vírgula
+  "trailingComma": "es5", // Vírgula final quando possível
+  "singleQuote": false, // Aspas duplas
+  "printWidth": 80, // Largura máxima da linha
+  "tabWidth": 2, // Espaços por tab
+  "useTabs": false, // Usar espaços, não tabs
+  "arrowParens": "always", // Sempre usar parênteses em arrow functions
+  "endOfLine": "lf" // Line feed (Unix)
 }
 ```
 
@@ -137,6 +145,7 @@ npx prettier --check "**/*.{js,jsx,ts,tsx,json,css,md}"
 ### Arquivos Ignorados
 
 Ver `.prettierignore`:
+
 - Dependências (`node_modules`)
 - Build outputs (`.next`, `out`, `build`)
 - Arquivos de lock (`package-lock.json`, etc.)
@@ -154,11 +163,14 @@ Ver `.prettierignore`:
 ### Hooks Configurados
 
 #### pre-commit
+
 Executa `lint-staged` antes de cada commit:
+
 - ✅ ESLint nos arquivos `.js`, `.jsx`, `.ts`, `.tsx`
 - ✅ Prettier em todos os arquivos relevantes
 
 #### commit-msg
+
 Hook para validar mensagens de commit (opcional, comentado)
 
 ### Configuração no package.json
@@ -166,13 +178,8 @@ Hook para validar mensagens de commit (opcional, comentado)
 ```json
 {
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css,scss}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,css,scss}": ["prettier --write"]
   }
 }
 ```
@@ -207,6 +214,7 @@ git commit --no-verify
 ### Setup Inicial
 
 1. **Instalar dependências:**
+
 ```bash
 pnpm install
 ```
@@ -214,6 +222,7 @@ pnpm install
 2. **Husky será configurado automaticamente** via script `prepare`
 
 3. **Verificar configuração:**
+
 ```bash
 # Verificar ESLint
 pnpm lint
@@ -230,11 +239,13 @@ pnpm format
 1. **Fazer alterações no código**
 
 2. **Adicionar ao stage:**
+
 ```bash
 git add .
 ```
 
 3. **Tentar fazer commit:**
+
 ```bash
 git commit -m "feat: adiciona nova funcionalidade"
 ```
@@ -249,6 +260,7 @@ git commit -m "feat: adiciona nova funcionalidade"
 ### CI/CD no GitHub
 
 1. **Fazer push:**
+
 ```bash
 git push origin main
 ```
@@ -321,6 +333,7 @@ pnpm exec husky install
 
 1. Verifique logs em "Actions"
 2. Teste localmente:
+
 ```bash
 pnpm install
 pnpm lint
@@ -341,4 +354,3 @@ pnpm build
 ---
 
 **Última atualização:** 2024
-

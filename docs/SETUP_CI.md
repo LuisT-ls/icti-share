@@ -9,6 +9,7 @@ pnpm install
 ```
 
 Isso irá:
+
 - ✅ Instalar todas as dependências
 - ✅ Configurar Husky automaticamente (via script `prepare`)
 
@@ -102,4 +103,3 @@ pnpm build                 # Build de produção
 ## 📚 Documentação Completa
 
 Consulte `CI_CD.md` para documentação detalhada.
-

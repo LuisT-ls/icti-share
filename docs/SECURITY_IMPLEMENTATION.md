@@ -3,6 +3,7 @@
 ## ✅ Entregáveis Implementados
 
 ### 1. Sanitização de Inputs
+
 **Arquivo:** `lib/security/sanitize.ts`
 
 - ✅ `sanitizeString()` - Remove caracteres perigosos e tags HTML
@@ -11,6 +12,7 @@
 - ✅ `sanitizeEmail()` - Normaliza emails
 
 **Aplicado em:**
+
 - `app/actions/auth.ts` (signup/login)
 - `app/actions/upload.ts` (upload de materiais)
 - `app/actions/materials.ts` (edição de materiais)
@@ -19,25 +21,30 @@
 ---
 
 ### 2. Rate Limiting
+
 **Arquivo:** `lib/security/rate-limit.ts`
 
 **Configurações:**
+
 - **Autenticação:** 5 tentativas / 15 minutos
 - **Download:** 20 downloads / minuto
 - **Upload:** 5 uploads / hora
 
 **Implementado em:**
+
 - ✅ `app/actions/auth.ts` - Login e Signup
 - ✅ `app/material/download/[id]/route.ts` - Downloads
 - ✅ `app/actions/upload.ts` - Uploads
 
 **Identificação:**
+
 - Por IP (usuários não autenticados)
 - Por User ID (usuários autenticados)
 
 ---
 
 ### 3. Proteção CSRF
+
 **Status:** ✅ Automático via NextAuth v5
 
 - NextAuth gerencia tokens CSRF automaticamente
@@ -47,9 +54,11 @@
 ---
 
 ### 4. Headers de Segurança
+
 **Arquivo:** `lib/security/headers.ts` e `middleware.ts`
 
 **Headers Implementados:**
+
 - ✅ `X-Frame-Options: DENY`
 - ✅ `X-Content-Type-Options: nosniff`
 - ✅ `X-XSS-Protection: 1; mode=block`
@@ -58,14 +67,17 @@
 - ✅ `Content-Security-Policy` (configurável por ambiente)
 
 **Aplicado em:**
+
 - ✅ Todas as respostas via `middleware.ts`
 
 ---
 
 ### 5. Validação de Arquivos Maliciosos
+
 **Arquivo:** `lib/security/file-validation.ts`
 
 **Validações Implementadas:**
+
 1. ✅ Tamanho (máx. 25 MB)
 2. ✅ Nome do arquivo (remove caracteres perigosos)
 3. ✅ Extensão (apenas `.pdf`)
@@ -73,11 +85,13 @@
 5. ✅ **Magic Bytes** (verifica conteúdo real do arquivo)
 
 **Aplicado em:**
+
 - ✅ `app/actions/upload.ts`
 
 ---
 
 ### 6. Proteção contra SQL Injection
+
 **Status:** ✅ Automático via Prisma ORM
 
 - Prisma usa prepared statements
@@ -119,7 +133,7 @@ Ajuste os limites em `lib/security/rate-limit.ts`:
 export const RATE_LIMIT_CONFIGS = {
   AUTH: {
     windowMs: 15 * 60 * 1000, // Janela de tempo
-    maxRequests: 5,            // Máximo de requisições
+    maxRequests: 5, // Máximo de requisições
   },
   // ...
 };
@@ -195,4 +209,3 @@ Consulte `SECURITY.md` para documentação detalhada de cada medida de seguranç
 ---
 
 **Status:** ✅ Todas as medidas de segurança implementadas e documentadas.
-

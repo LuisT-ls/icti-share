@@ -5,12 +5,15 @@ Este documento descreve como popular o banco de dados com dados de exemplo.
 ## 📋 O que é populado
 
 ### Usuários (3)
+
 - ✅ **1 Admin**: `admin@icti.edu.br`
 - ✅ **2 Usuários**: `joao.silva@icti.edu.br` e `maria.santos@icti.edu.br`
 - ✅ Senha padrão para todos: `senha123`
 
 ### Materiais (10)
+
 Materiais de exemplo com metadados variados:
+
 - ✅ Cursos: Engenharia de Software, Ciência da Computação
 - ✅ Disciplinas: Cálculo I, Álgebra Linear, Estruturas de Dados, etc.
 - ✅ Semestres: 2024.1, 2023.2
@@ -18,6 +21,7 @@ Materiais de exemplo com metadados variados:
 - ✅ Downloads: 28 a 89 downloads por material
 
 ### Downloads Históricos
+
 - ✅ Downloads distribuídos ao longo do tempo
 - ✅ Alguns com usuários autenticados, outros anônimos
 - ✅ IPs variados para simular diferentes origens
@@ -56,15 +60,18 @@ npx tsx prisma/seed.ts
 ## 🔄 Comportamento
 
 ### Upsert de Usuários
+
 - Se os usuários já existirem (mesmo email), eles **não serão duplicados**
 - Os dados existentes serão mantidos
 
 ### Criação de Materiais
+
 - Materiais são criados com arquivos PDF mock
 - Arquivos são salvos no diretório de uploads configurado
 - Se o diretório não existir, será criado automaticamente
 
 ### Downloads
+
 - Downloads são criados com datas aleatórias
 - Distribuídos entre usuários autenticados e anônimos
 - IPs variados para simular diferentes origens
@@ -94,15 +101,16 @@ await prisma.user.deleteMany();
 
 ### Usuários
 
-| Email | Nome | Role | Senha |
-|-------|------|------|-------|
-| admin@icti.edu.br | Administrador | ADMIN | senha123 |
-| joao.silva@icti.edu.br | João Silva | USUARIO | senha123 |
-| maria.santos@icti.edu.br | Maria Santos | USUARIO | senha123 |
+| Email                    | Nome          | Role    | Senha    |
+| ------------------------ | ------------- | ------- | -------- |
+| admin@icti.edu.br        | Administrador | ADMIN   | senha123 |
+| joao.silva@icti.edu.br   | João Silva    | USUARIO | senha123 |
+| maria.santos@icti.edu.br | Maria Santos  | USUARIO | senha123 |
 
 ### Materiais
 
 10 materiais com:
+
 - Títulos descritivos
 - Descrições detalhadas
 - Metadados variados (curso, disciplina, semestre, tipo)
@@ -146,6 +154,7 @@ pnpm install tsx --save-dev
 ### Erro: "DATABASE_URL is not set"
 
 Certifique-se de que o arquivo `.env` existe e contém:
+
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/database"
 ```
@@ -153,6 +162,7 @@ DATABASE_URL="postgresql://user:password@localhost:5432/database"
 ### Erro: "Table does not exist"
 
 Execute as migrações primeiro:
+
 ```bash
 pnpm prisma migrate dev
 ```
@@ -160,6 +170,7 @@ pnpm prisma migrate dev
 ### Arquivos não são criados
 
 Verifique permissões do diretório de uploads:
+
 ```bash
 # Criar diretório manualmente se necessário
 mkdir -p uploads
@@ -174,4 +185,3 @@ chmod 755 uploads
 ---
 
 **Última atualização:** 2024
-

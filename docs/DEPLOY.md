@@ -49,6 +49,7 @@ O Railway detecta automaticamente projetos Next.js, mas você pode verificar:
 3. Copie o valor de `DATABASE_URL` (será usado no próximo passo)
 
 **Formato esperado:**
+
 ```
 postgresql://postgres:senha@containers-us-west-xxx.railway.app:5432/railway
 ```
@@ -87,49 +88,63 @@ postgresql://postgres:senha@containers-us-west-xxx.railway.app:5432/railway
 Adicione as seguintes variáveis:
 
 #### **DATABASE_URL**
+
 ```
 postgresql://postgres:senha@containers-us-west-xxx.railway.app:5432/railway
 ```
+
 **Nota:** Use o valor copiado do serviço PostgreSQL (Passo 2.2)
 
 #### **AUTH_SECRET** ou **NEXTAUTH_SECRET**
+
 ```
 seu-secret-gerado-aqui
 ```
+
 **Gerar secret seguro:**
+
 ```bash
 openssl rand -base64 32
 ```
+
 Ou use: https://generate-secret.vercel.app/32
 
 **Nota:** NextAuth v5 aceita ambos `AUTH_SECRET` e `NEXTAUTH_SECRET`. Use apenas um.
 
 #### **AUTH_URL** ou **NEXTAUTH_URL**
+
 ```
 https://seu-projeto.up.railway.app
 ```
+
 **Nota:** Substitua `seu-projeto` pelo domínio gerado pelo Railway. Você pode verificar em **Settings** → **Domains**.
 
 #### **RAILWAY_VOLUME_PATH**
+
 ```
 /data/uploads
 ```
+
 **Nota:** Este é o mount path configurado no Passo 3.2.
 
 #### **UPLOAD_DIR** (Opcional - Fallback)
+
 ```
 /data/uploads
 ```
+
 **Nota:** Se `RAILWAY_VOLUME_PATH` não estiver definido, a aplicação usará `UPLOAD_DIR` ou `./uploads` como fallback.
 
 #### **NODE_ENV**
+
 ```
 production
 ```
 
 ### 4.3. Variáveis Opcionais
 
-#### **SMTP_*** (Apenas se usar e-mail)
+#### **SMTP\_\*** (Apenas se usar e-mail)
+
 ```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -142,15 +157,15 @@ SMTP_SECURE=false
 
 ### 4.4. Resumo das Variáveis
 
-| Variável | Obrigatória | Descrição | Exemplo |
-|----------|-------------|-----------|---------|
-| `DATABASE_URL` | ✅ | URL de conexão PostgreSQL | `postgresql://postgres:...` |
-| `AUTH_SECRET` ou `NEXTAUTH_SECRET` | ✅ | Secret para NextAuth | `abc123...` (32+ chars) |
-| `AUTH_URL` ou `NEXTAUTH_URL` | ✅ | URL base da aplicação | `https://app.up.railway.app` |
-| `RAILWAY_VOLUME_PATH` | ✅ | Caminho do volume montado | `/data/uploads` |
-| `UPLOAD_DIR` | ⚠️ | Fallback para uploads | `/data/uploads` |
-| `NODE_ENV` | ✅ | Ambiente de execução | `production` |
-| `SMTP_*` | ❌ | Configuração de e-mail | (opcional) |
+| Variável                           | Obrigatória | Descrição                 | Exemplo                      |
+| ---------------------------------- | ----------- | ------------------------- | ---------------------------- |
+| `DATABASE_URL`                     | ✅          | URL de conexão PostgreSQL | `postgresql://postgres:...`  |
+| `AUTH_SECRET` ou `NEXTAUTH_SECRET` | ✅          | Secret para NextAuth      | `abc123...` (32+ chars)      |
+| `AUTH_URL` ou `NEXTAUTH_URL`       | ✅          | URL base da aplicação     | `https://app.up.railway.app` |
+| `RAILWAY_VOLUME_PATH`              | ✅          | Caminho do volume montado | `/data/uploads`              |
+| `UPLOAD_DIR`                       | ⚠️          | Fallback para uploads     | `/data/uploads`              |
+| `NODE_ENV`                         | ✅          | Ambiente de execução      | `production`                 |
+| `SMTP_*`                           | ❌          | Configuração de e-mail    | (opcional)                   |
 
 ## 🗃️ Passo 5: Executar Migrações do Banco de Dados
 
@@ -268,6 +283,7 @@ railway run npx prisma studio
 ```
 
 Ou conecte diretamente:
+
 ```bash
 railway run psql $DATABASE_URL
 ```
@@ -311,16 +327,19 @@ https://seu-dominio.com
 ### 9.2. Rate Limiting
 
 A aplicação já implementa rate limiting. Verifique os limites em:
+
 - `lib/security/rate-limit.ts`
 
 ### 9.3. Headers de Segurança
 
 A aplicação já inclui headers de segurança. Verifique em:
+
 - `lib/security/headers.ts`
 
 ### 9.4. Validação de Arquivos
 
 Uploads são validados automaticamente:
+
 - Tipos MIME permitidos
 - Tamanho máximo
 - Sanitização de nomes
@@ -401,6 +420,7 @@ Para produção, considere usar S3 ou similar:
 ### 10.3. Frequência de Backups
 
 **Recomendado:**
+
 - **Banco de Dados**: Diário (Railway faz automaticamente)
 - **Arquivos**: Semanal ou conforme necessidade
 - **Retenção**: Mínimo 30 dias, ideal 90 dias
@@ -410,6 +430,7 @@ Para produção, considere usar S3 ou similar:
 ### Erro: "Environment variable not found: DATABASE_URL"
 
 **Solução:**
+
 1. Verifique se a variável está configurada em **Variables**
 2. Certifique-se de que não há espaços extras
 3. Faça um novo deploy após adicionar variáveis
@@ -417,6 +438,7 @@ Para produção, considere usar S3 ou similar:
 ### Erro: "Prisma Client not generated"
 
 **Solução:**
+
 ```bash
 railway run npm run prisma:generate
 ```
@@ -424,6 +446,7 @@ railway run npm run prisma:generate
 ### Erro: "Migration failed"
 
 **Solução:**
+
 1. Verifique os logs do deployment
 2. Execute migrações manualmente:
    ```bash
@@ -434,6 +457,7 @@ railway run npm run prisma:generate
 ### Erro: "Cannot write to /data/uploads"
 
 **Solução:**
+
 1. Verifique se o volume está montado corretamente
 2. Confirme o mount path em **Settings** → **Volumes**
 3. Verifique permissões:
@@ -444,6 +468,7 @@ railway run npm run prisma:generate
 ### Erro: "Invalid AUTH_SECRET"
 
 **Solução:**
+
 1. Gere um novo secret:
    ```bash
    openssl rand -base64 32
@@ -454,6 +479,7 @@ railway run npm run prisma:generate
 ### Aplicação não inicia
 
 **Solução:**
+
 1. Verifique os logs em **Deployments**
 2. Confirme que todas as variáveis obrigatórias estão configuradas
 3. Verifique se o build foi bem-sucedido
@@ -462,6 +488,7 @@ railway run npm run prisma:generate
 ### Arquivos não persistem após redeploy
 
 **Solução:**
+
 1. Certifique-se de que o volume está montado
 2. Verifique se `RAILWAY_VOLUME_PATH` está configurado
 3. Confirme que os arquivos estão sendo salvos em `/data/uploads`
@@ -480,6 +507,7 @@ Ou no Dashboard: **Deployments** → Clique no deployment → **View Logs**
 ### 10.2. Métricas
 
 Railway fornece métricas básicas:
+
 - CPU Usage
 - Memory Usage
 - Network I/O
@@ -489,6 +517,7 @@ Acesse em **Metrics** no serviço.
 ### 10.3. Alertas
 
 Configure alertas em **Settings** → **Alerts**:
+
 - CPU acima de 80%
 - Memória acima de 80%
 - Falhas de deploy
@@ -572,4 +601,3 @@ Use este checklist para garantir que tudo está configurado:
 ---
 
 **Última atualização:** 2024-11-24
-

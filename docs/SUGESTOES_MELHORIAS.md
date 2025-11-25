@@ -7,9 +7,11 @@ Este documento contém sugestões detalhadas de Pull Requests para implementar a
 ## 📄 PR #1: Preview de PDF com pdf.js na Página de Detalhes
 
 ### Descrição
+
 Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-side) na página de detalhes do material (`/material/[id]`).
 
 ### Objetivos
+
 - Exibir primeira página do PDF como thumbnail/preview
 - Permitir visualização completa do PDF em modal/embed
 - Melhorar UX ao permitir preview antes do download
@@ -18,11 +20,13 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 ### Arquivos a Modificar/Criar
 
 #### Novos Arquivos
+
 - `components/PDFPreview.tsx` - Componente Client Component para preview
 - `components/PDFViewer.tsx` - Componente para visualização completa em modal
 - `lib/pdf-utils.ts` - Utilitários para manipulação de PDF (opcional)
 
 #### Arquivos Modificados
+
 - `app/material/[id]/page.tsx` - Adicionar seção de preview
 - `package.json` - Adicionar dependência `pdfjs-dist`
 
@@ -34,13 +38,14 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 // Componente para exibir thumbnail da primeira página
 // Usa pdf.js para renderizar canvas
 
-// components/PDFViewer.tsx  
+// components/PDFViewer.tsx
 "use client";
 // Modal com visualizador completo do PDF
 // Navegação entre páginas, zoom, etc.
 ```
 
 ### Dependências
+
 ```json
 {
   "pdfjs-dist": "^4.0.379"
@@ -48,6 +53,7 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 ```
 
 ### Considerações Técnicas
+
 - **Client Component obrigatório**: pdf.js requer acesso ao DOM
 - **Lazy loading**: Carregar PDF apenas quando visível (Intersection Observer)
 - **Error handling**: Fallback para ícone caso PDF não carregue
@@ -55,7 +61,9 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 - **Segurança**: Validar que é PDF válido antes de renderizar
 
 ### Estimativa
+
 **Tempo**: 6-8 horas
+
 - Setup pdf.js e configuração: 1h
 - Componente PDFPreview (thumbnail): 2h
 - Componente PDFViewer (modal completo): 2h
@@ -63,6 +71,7 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 - Testes e ajustes: 1-2h
 
 ### Trade-offs
+
 - ✅ **Pros**: Melhor UX, reduz downloads desnecessários, preview rápido
 - ⚠️ **Cons**: Aumenta bundle size (~500KB), requer JavaScript no client
 
@@ -71,6 +80,7 @@ Implementar visualização de thumbnails/preview de PDFs usando pdf.js (client-s
 ## 🔍 PR #2: Busca Full-Text com Postgres ou ElasticSearch
 
 ### Descrição
+
 Implementar busca full-text avançada para melhorar resultados de pesquisa em títulos, descrições e conteúdo de PDFs.
 
 ### Opções de Implementação
@@ -78,6 +88,7 @@ Implementar busca full-text avançada para melhorar resultados de pesquisa em t�
 #### Opção A: PostgreSQL Full-Text Search (Recomendada)
 
 **Vantagens:**
+
 - ✅ Sem infraestrutura adicional (usa banco existente)
 - ✅ Custo zero de manutenção
 - ✅ Integração nativa com Prisma
@@ -86,11 +97,13 @@ Implementar busca full-text avançada para melhorar resultados de pesquisa em t�
 - ✅ Suporte a múltiplos idiomas (português)
 
 **Desvantagens:**
+
 - ⚠️ Não indexa conteúdo de PDFs diretamente (apenas metadados)
 - ⚠️ Performance degrada com milhões de documentos
 - ⚠️ Menos flexível que ElasticSearch
 
 **Implementação:**
+
 1. Adicionar coluna `searchVector` (tsvector) no schema
 2. Criar índice GIN para busca rápida
 3. Atualizar query em `app/materiais/page.tsx`
@@ -99,6 +112,7 @@ Implementar busca full-text avançada para melhorar resultados de pesquisa em t�
 #### Opção B: ElasticSearch
 
 **Vantagens:**
+
 - ✅ Busca extremamente rápida mesmo com milhões de documentos
 - ✅ Pode indexar conteúdo completo de PDFs (com extração)
 - ✅ Recursos avançados: autocomplete, sugestões, faceting
@@ -106,6 +120,7 @@ Implementar busca full-text avançada para melhorar resultados de pesquisa em t�
 - ✅ Analytics e agregações poderosas
 
 **Desvantagens:**
+
 - ⚠️ Requer infraestrutura adicional (servidor ES)
 - ⚠️ Custo de manutenção e operação
 - ⚠️ Complexidade de setup e sincronização
@@ -114,6 +129,7 @@ Implementar busca full-text avançada para melhorar resultados de pesquisa em t�
 ### Recomendação: PostgreSQL Full-Text Search
 
 Para este projeto, **PostgreSQL Full-Text Search** é a melhor opção porque:
+
 1. Projeto já usa PostgreSQL
 2. Não requer infraestrutura adicional
 3. Performance suficiente para escala inicial/média
@@ -121,6 +137,7 @@ Para este projeto, **PostgreSQL Full-Text Search** é a melhor opção porque:
 5. Custo-benefício superior
 
 **ElasticSearch** deve ser considerado apenas se:
+
 - Volume de documentos > 100k
 - Necessidade de indexar conteúdo de PDFs
 - Requisitos de busca muito complexos
@@ -128,10 +145,12 @@ Para este projeto, **PostgreSQL Full-Text Search** é a melhor opção porque:
 ### Arquivos a Modificar/Criar
 
 #### Novos Arquivos
+
 - `prisma/migrations/XXXX_add_fulltext_search/migration.sql` - Migration para full-text
 - `lib/search.ts` - Funções utilitárias de busca
 
 #### Arquivos Modificados
+
 - `prisma/schema.prisma` - Adicionar campo searchVector (opcional, pode ser apenas no SQL)
 - `app/materiais/page.tsx` - Atualizar query de busca
 - `app/actions/materials.ts` - Adicionar server action para busca (se necessário)
@@ -140,15 +159,15 @@ Para este projeto, **PostgreSQL Full-Text Search** é a melhor opção porque:
 
 ```sql
 -- Adicionar coluna para full-text search
-ALTER TABLE materials 
-ADD COLUMN IF NOT EXISTS search_vector tsvector 
+ALTER TABLE materials
+ADD COLUMN IF NOT EXISTS search_vector tsvector
 GENERATED ALWAYS AS (
   setweight(to_tsvector('portuguese', coalesce(title, '')), 'A') ||
   setweight(to_tsvector('portuguese', coalesce(description, '')), 'B')
 ) STORED;
 
 -- Criar índice GIN para performance
-CREATE INDEX IF NOT EXISTS materials_search_vector_idx 
+CREATE INDEX IF NOT EXISTS materials_search_vector_idx
 ON materials USING GIN(search_vector);
 
 -- Função para busca
@@ -163,12 +182,14 @@ $$ LANGUAGE sql;
 ### Estimativa
 
 #### Opção A (PostgreSQL): 4-6 horas
+
 - Migration e índices: 1h
 - Atualizar queries: 1-2h
 - Testes e ajustes: 1-2h
 - Documentação: 1h
 
 #### Opção B (ElasticSearch): 12-16 horas
+
 - Setup infraestrutura: 2-3h
 - Configuração ES: 2-3h
 - Sincronização com DB: 3-4h
@@ -178,31 +199,34 @@ $$ LANGUAGE sql;
 
 ### Trade-offs Resumidos
 
-| Aspecto | PostgreSQL FTS | ElasticSearch |
-|---------|---------------|---------------|
-| **Setup** | ✅ Simples | ⚠️ Complexo |
-| **Custo** | ✅ Zero | ⚠️ Infraestrutura |
-| **Performance** | ✅ Boa (até 100k docs) | ✅ Excelente (milhões) |
-| **Manutenção** | ✅ Baixa | ⚠️ Média-Alta |
-| **Features** | ✅ Básicas | ✅ Avançadas |
-| **Escalabilidade** | ⚠️ Limitada | ✅ Horizontal |
+| Aspecto            | PostgreSQL FTS         | ElasticSearch          |
+| ------------------ | ---------------------- | ---------------------- |
+| **Setup**          | ✅ Simples             | ⚠️ Complexo            |
+| **Custo**          | ✅ Zero                | ⚠️ Infraestrutura      |
+| **Performance**    | ✅ Boa (até 100k docs) | ✅ Excelente (milhões) |
+| **Manutenção**     | ✅ Baixa               | ⚠️ Média-Alta          |
+| **Features**       | ✅ Básicas             | ✅ Avançadas           |
+| **Escalabilidade** | ⚠️ Limitada            | ✅ Horizontal          |
 
 ---
 
 ## 📊 PR #3: Relatórios CSV/Export e Gráficos no Admin
 
 ### Descrição
+
 Adicionar funcionalidades de exportação de dados (CSV) e visualização de gráficos (Recharts) no painel administrativo.
 
 ### Funcionalidades
 
 #### 1. Exportação CSV
+
 - Exportar lista de materiais (com filtros)
 - Exportar lista de usuários
 - Exportar estatísticas de downloads
 - Exportar relatório de atividades
 
 #### 2. Gráficos e Visualizações
+
 - Gráfico de materiais por status (pie/donut)
 - Gráfico de downloads ao longo do tempo (line)
 - Gráfico de materiais por curso/disciplina (bar)
@@ -212,6 +236,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 ### Arquivos a Modificar/Criar
 
 #### Novos Arquivos
+
 - `components/admin/ExportButton.tsx` - Botão de exportação CSV
 - `components/admin/ChartsSection.tsx` - Seção de gráficos
 - `components/admin/DownloadsChart.tsx` - Gráfico de downloads
@@ -221,6 +246,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 - `app/api/admin/export/route.ts` - API route para download CSV
 
 #### Arquivos Modificados
+
 - `app/admin/page.tsx` - Adicionar seções de gráficos e botões de export
 - `package.json` - Adicionar `recharts` e `papaparse`
 
@@ -237,6 +263,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 ```
 
 ### Dependências
+
 ```json
 {
   "recharts": "^2.12.0",
@@ -245,6 +272,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 ```
 
 ### Considerações Técnicas
+
 - **Server Actions para CSV**: Gerar CSV no servidor (segurança)
 - **Lazy loading de gráficos**: Carregar dados apenas quando necessário
 - **Responsividade**: Gráficos adaptáveis a mobile
@@ -252,7 +280,9 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 - **Performance**: Cache de dados agregados quando possível
 
 ### Estimativa
+
 **Tempo**: 8-10 horas
+
 - Setup Recharts e estrutura: 1h
 - Componentes de gráficos (3-4 gráficos): 3-4h
 - Exportação CSV (server actions + API routes): 2h
@@ -263,6 +293,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 ### Funcionalidades Detalhadas
 
 #### Exportação CSV
+
 1. **Exportar Materiais**
    - Campos: título, descrição, curso, disciplina, semestre, tipo, downloads, status, data
    - Suporta filtros aplicados na página
@@ -275,6 +306,7 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
    - Agrupado por período (opcional)
 
 #### Gráficos
+
 1. **Dashboard Overview**
    - Cards com métricas principais (já existe)
    - Gráfico de distribuição de status
@@ -297,12 +329,12 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 
 ## 📋 Resumo das Estimativas
 
-| PR | Feature | Estimativa | Complexidade |
-|----|---------|------------|--------------|
-| #1 | Preview PDF (pdf.js) | 6-8h | Média |
-| #2 | Full-Text Search (Postgres) | 4-6h | Média |
-| #2 | Full-Text Search (ElasticSearch) | 12-16h | Alta |
-| #3 | Export CSV + Gráficos | 8-10h | Média |
+| PR  | Feature                          | Estimativa | Complexidade |
+| --- | -------------------------------- | ---------- | ------------ |
+| #1  | Preview PDF (pdf.js)             | 6-8h       | Média        |
+| #2  | Full-Text Search (Postgres)      | 4-6h       | Média        |
+| #2  | Full-Text Search (ElasticSearch) | 12-16h     | Alta         |
+| #3  | Export CSV + Gráficos            | 8-10h      | Média        |
 
 **Total (com Postgres)**: 18-24 horas
 **Total (com ElasticSearch)**: 26-34 horas
@@ -320,22 +352,25 @@ Adicionar funcionalidades de exportação de dados (CSV) e visualização de gr�
 ## 📝 Notas Adicionais
 
 ### Segurança
+
 - Todas as exportações devem validar permissões de admin
 - CSV deve sanitizar dados para prevenir injection
 - Preview de PDF deve validar que o arquivo é PDF válido
 
 ### Performance
+
 - Implementar paginação nos exports grandes
 - Cache de dados agregados para gráficos
 - Lazy loading de componentes pesados
 
 ### Acessibilidade
+
 - Gráficos devem ter alternativas textuais
 - Exportações devem ter feedback claro
 - Preview deve ter fallback para leitores de tela
 
 ### Testes
+
 - Testes unitários para funções de export
 - Testes E2E para fluxo de preview
 - Testes de performance para busca full-text
-

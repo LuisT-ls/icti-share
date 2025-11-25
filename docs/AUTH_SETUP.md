@@ -46,6 +46,7 @@ AUTH_URL="http://localhost:3000"  # URL base da aplicação
 - Role padrão: `USUARIO`
 
 **Uso:**
+
 ```typescript
 import { signup } from "@/app/actions/auth";
 
@@ -62,6 +63,7 @@ if (result?.error) {
 - Redirecionamento após login bem-sucedido
 
 **Uso:**
+
 ```typescript
 import { login } from "@/app/actions/auth";
 
@@ -77,6 +79,7 @@ if (result?.error) {
 - Redireciona para home
 
 **Uso:**
+
 ```typescript
 import { logout } from "@/app/actions/auth";
 
@@ -203,6 +206,7 @@ As sessões são armazenadas em JWT (não no banco de dados) e incluem:
 ### Acessando Role no Token
 
 O role está disponível em:
+
 - `session.user.role` - No cliente e servidor
 - `token.role` - No callback JWT
 
@@ -336,4 +340,3 @@ Adicione `AUTH_SECRET` ou `NEXTAUTH_SECRET` ao `.env`.
 - Verifique se `middleware.ts` está na raiz do projeto
 - Confirme que o matcher está correto
 - Verifique logs do servidor
-

@@ -25,6 +25,7 @@ Abra o arquivo `.env` e configure as seguintes variáveis:
 URL de conexão com o banco PostgreSQL.
 
 **Formato:**
+
 ```
 postgresql://[usuário]:[senha]@[host]:[porta]/[database]?schema=public
 ```
@@ -32,16 +33,19 @@ postgresql://[usuário]:[senha]@[host]:[porta]/[database]?schema=public
 **Exemplos:**
 
 - **Local:**
+
   ```env
   DATABASE_URL="postgresql://postgres:minhasenha@localhost:5432/icti_share?schema=public"
   ```
 
 - **Railway:**
+
   ```env
   DATABASE_URL="postgresql://postgres:senha@containers-us-west-xxx.railway.app:5432/railway?schema=public"
   ```
 
 - **Supabase:**
+
   ```env
   DATABASE_URL="postgresql://postgres.xxx:senha@aws-0-us-west-1.pooler.supabase.com:6543/postgres?schema=public"
   ```
@@ -96,15 +100,17 @@ UPLOAD_PATH="/data/uploads"
 ```
 
 **Nota:** Crie a pasta `uploads` se estiver usando caminho local:
+
 ```bash
 mkdir -p uploads
 ```
 
-#### **SMTP_*** (Opcional - para envio de e-mail)
+#### **SMTP\_\*** (Opcional - para envio de e-mail)
 
 Configure apenas se precisar de funcionalidades de e-mail (verificação, notificações).
 
 **Gmail:**
+
 ```env
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT=587
@@ -116,12 +122,14 @@ SMTP_SECURE=false
 ```
 
 **Como obter App Password do Gmail:**
+
 1. Acesse: https://myaccount.google.com/apppasswords
 2. Selecione "Mail" e "Other (Custom name)"
 3. Digite "ICTI Share"
 4. Copie a senha gerada e use em `SMTP_PASSWORD`
 
 **SendGrid:**
+
 ```env
 SMTP_HOST="smtp.sendgrid.net"
 SMTP_PORT=587
@@ -133,6 +141,7 @@ SMTP_SECURE=false
 ```
 
 **Resend:**
+
 ```env
 SMTP_HOST="smtp.resend.com"
 SMTP_PORT=587
@@ -169,6 +178,7 @@ npm run dev
 ## 📝 Variáveis por Ambiente
 
 ### Desenvolvimento Local
+
 ```env
 DATABASE_URL="postgresql://postgres:senha@localhost:5432/icti_share?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
@@ -178,6 +188,7 @@ NODE_ENV="development"
 ```
 
 ### Produção (Railway/Vercel/etc)
+
 ```env
 DATABASE_URL="postgresql://..."  # Fornecido pelo serviço
 NEXTAUTH_URL="https://seu-dominio.com"
@@ -189,19 +200,22 @@ NODE_ENV="production"
 ## 🆘 Troubleshooting
 
 ### Erro: "Environment variable not found: DATABASE_URL"
+
 - Verifique se o arquivo `.env` existe na raiz do projeto
 - Confirme que a variável está escrita corretamente (sem espaços extras)
 
 ### Erro de conexão com PostgreSQL
+
 - Verifique se o PostgreSQL está rodando
 - Confirme usuário, senha, host e porta
 - Teste a conexão: `psql "postgresql://user:pass@host:port/db"`
 
 ### Erro: "Invalid NEXTAUTH_SECRET"
+
 - Gere um novo secret usando `openssl rand -base64 32`
 - Certifique-se de que o secret tem pelo menos 32 caracteres
 
 ### Arquivos não são salvos
+
 - Verifique se a pasta `UPLOAD_PATH` existe e tem permissões de escrita
 - Em produção, use volumes persistentes ou serviços de storage (S3, Cloudinary)
-
