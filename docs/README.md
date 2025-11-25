@@ -665,7 +665,8 @@ lib/
 ### Documentos Principais
 
 - **[ENV_SETUP.md](./ENV_SETUP.md)** - Configuração de variáveis de ambiente
-- **[DEPLOY.md](./DEPLOY.md)** - Guia completo de deploy no Railway
+- **[RAILWAY_SETUP.md](./RAILWAY_SETUP.md)** - Guia completo de configuração Railway + PostgreSQL (inclui criação de tabelas)
+- **[DEPLOY.md](./DEPLOY.md)** - Guia detalhado de deploy no Railway
 - **[AUTH_SETUP.md](./AUTH_SETUP.md)** - Configuração de autenticação
 - **[TESTING.md](./TESTING.md)** - Guia de testes
 - **[SEED.md](./SEED.md)** - População do banco de dados
