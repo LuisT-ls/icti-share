@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { editProfileSchema } from "@/lib/validations/schemas";
+import { sanitizeString } from "@/lib/security/sanitize";
 
 export async function updateProfile(formData: FormData) {
   const session = await getServerSession();
@@ -12,9 +13,10 @@ export async function updateProfile(formData: FormData) {
     return { success: false, error: "Não autenticado" };
   }
 
-  const rawData = {
-    name: formData.get("name") as string,
-  };
+    // Sanitizar dados
+    const rawData = {
+      name: sanitizeString(formData.get("name") as string),
+    };
 
     const parsed = editProfileSchema.safeParse(rawData);
 

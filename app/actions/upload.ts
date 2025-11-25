@@ -6,10 +6,15 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
+import { headers } from "next/headers";
 import { uploadMaterialServerSchema } from "@/lib/validations/schemas";
-
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB em bytes
-const ALLOWED_MIME_TYPES = ["application/pdf"];
+import {
+  checkRateLimit,
+  getRateLimitIdentifier,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/security/rate-limit";
+import { sanitizeString, sanitizeFilename } from "@/lib/security/sanitize";
+import { validateFile } from "@/lib/security/file-validation";
 
 type UploadResult =
   | { success: true; materialId: string }
@@ -28,14 +33,59 @@ export async function uploadMaterial(
       };
     }
 
-    // Validar dados do formulário
+    // Rate limiting
+    const headersList = await headers();
+    const ip =
+      headersList.get("x-forwarded-for")?.split(",")[0] ||
+      headersList.get("x-real-ip") ||
+      null;
+
+    const identifier = getRateLimitIdentifier(ip, session.user.id);
+    const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.UPLOAD);
+
+    if (!rateLimitResult.success) {
+      return {
+        success: false,
+        error: rateLimitResult.error || "Muitos uploads. Tente novamente mais tarde.",
+      };
+    }
+
+    // Validar arquivo primeiro (mais crítico)
+    const file = formData.get("file") as File | null;
+    if (!file) {
+      return {
+        success: false,
+        error: "Arquivo é obrigatório",
+      };
+    }
+
+    // Validação completa e segura do arquivo
+    const fileValidation = await validateFile(file);
+    if (!fileValidation.valid) {
+      return {
+        success: false,
+        error: fileValidation.error || "Arquivo inválido",
+      };
+    }
+
+    // Sanitizar e validar dados do formulário
     const rawData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string | null,
-      course: formData.get("course") as string | null,
-      discipline: formData.get("discipline") as string | null,
-      semester: formData.get("semester") as string | null,
-      type: formData.get("type") as string | null,
+      title: sanitizeString(formData.get("title") as string),
+      description: formData.get("description")
+        ? sanitizeString(formData.get("description") as string)
+        : null,
+      course: formData.get("course")
+        ? sanitizeString(formData.get("course") as string)
+        : null,
+      discipline: formData.get("discipline")
+        ? sanitizeString(formData.get("discipline") as string)
+        : null,
+      semester: formData.get("semester")
+        ? sanitizeString(formData.get("semester") as string)
+        : null,
+      type: formData.get("type")
+        ? sanitizeString(formData.get("type") as string)
+        : null,
     };
 
     const parsed = uploadMaterialServerSchema.safeParse(rawData);
@@ -46,53 +96,8 @@ export async function uploadMaterial(
       };
     }
 
-    // Validar arquivo
-    const file = formData.get("file") as File | null;
-    if (!file) {
-      return {
-        success: false,
-        error: "Arquivo é obrigatório",
-      };
-    }
-
-    // Validar tamanho
-    if (file.size > MAX_FILE_SIZE) {
-      return {
-        success: false,
-        error: `Arquivo muito grande. Tamanho máximo: ${MAX_FILE_SIZE / 1024 / 1024} MB`,
-      };
-    }
-
-    // Validar tipo MIME
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return {
-        success: false,
-        error: "Apenas arquivos PDF são permitidos",
-      };
-    }
-
-    // Validação adicional: verificar extensão do arquivo
-    const originalFilename = file.name;
-    const fileExtension = originalFilename.split(".").pop()?.toLowerCase();
-    if (fileExtension !== "pdf") {
-      return {
-        success: false,
-        error: "Apenas arquivos PDF são permitidos",
-      };
-    }
-
-    // Verificar tipo MIME real do arquivo (primeiros bytes)
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    
-    // Verificar magic bytes do PDF: %PDF
-    const pdfMagicBytes = buffer.slice(0, 4).toString("ascii");
-    if (pdfMagicBytes !== "%PDF") {
-      return {
-        success: false,
-        error: "Arquivo não é um PDF válido",
-      };
-    }
+    // Sanitizar nome do arquivo
+    const originalFilename = sanitizeFilename(file.name);
 
     // Obter diretório de upload
     const uploadDir =
@@ -105,13 +110,14 @@ export async function uploadMaterial(
       await mkdir(uploadDir, { recursive: true });
     }
 
-    // Gerar nome único: UUID + nome original (sanitizado)
+    // Gerar nome único: UUID + nome original (já sanitizado)
     const uuid = randomUUID();
-    const sanitizedFilename = originalFilename
-      .replace(/[^a-zA-Z0-9._-]/g, "_")
-      .substring(0, 100); // Limitar tamanho do nome
-    const uniqueFilename = `${uuid}-${sanitizedFilename}`;
+    const uniqueFilename = `${uuid}-${originalFilename.substring(0, 100)}`;
     const filePath = join(uploadDir, uniqueFilename);
+
+    // Ler buffer do arquivo (já validado)
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     // Salvar arquivo
     await writeFile(filePath, buffer);

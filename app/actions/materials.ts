@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { unlink } from "fs/promises";
 import { existsSync } from "fs";
 import { editMaterialSchema } from "@/lib/validations/schemas";
+import { sanitizeString } from "@/lib/security/sanitize";
 
 export async function deleteMaterial(materialId: string) {
   const session = await getServerSession();
@@ -80,14 +81,24 @@ export async function updateMaterial(
       return { success: false, error: "Sem permissão para editar este material" };
     }
 
-    // Validar dados do formulário
+    // Sanitizar e validar dados do formulário
     const rawData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string | null,
-      course: formData.get("course") as string | null,
-      discipline: formData.get("discipline") as string | null,
-      semester: formData.get("semester") as string | null,
-      type: formData.get("type") as string | null,
+      title: sanitizeString(formData.get("title") as string),
+      description: formData.get("description")
+        ? sanitizeString(formData.get("description") as string)
+        : null,
+      course: formData.get("course")
+        ? sanitizeString(formData.get("course") as string)
+        : null,
+      discipline: formData.get("discipline")
+        ? sanitizeString(formData.get("discipline") as string)
+        : null,
+      semester: formData.get("semester")
+        ? sanitizeString(formData.get("semester") as string)
+        : null,
+      type: formData.get("type")
+        ? sanitizeString(formData.get("type") as string)
+        : null,
     };
 
     const parsed = editMaterialSchema.safeParse(rawData);

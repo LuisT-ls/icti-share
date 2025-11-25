@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getSecurityHeaders } from "@/lib/security/headers";
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -22,7 +23,13 @@ export default auth((req) => {
 
   // Se for rota pública, permitir acesso
   if (isPublicRoute) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    // Aplicar headers de segurança
+    const securityHeaders = getSecurityHeaders();
+    for (const [key, value] of Object.entries(securityHeaders)) {
+      response.headers.set(key, value);
+    }
+    return response;
   }
 
   // Rotas protegidas
@@ -36,15 +43,33 @@ export default auth((req) => {
     // Redirecionar para login se não estiver autenticado
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    // Aplicar headers de segurança mesmo no redirect
+    const securityHeaders = getSecurityHeaders();
+    for (const [key, value] of Object.entries(securityHeaders)) {
+      response.headers.set(key, value);
+    }
+    return response;
   }
 
   // Proteção de rotas admin
   if (pathname.startsWith("/admin") && session?.user?.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", req.url));
+    const response = NextResponse.redirect(new URL("/", req.url));
+    // Aplicar headers de segurança
+    const securityHeaders = getSecurityHeaders();
+    for (const [key, value] of Object.entries(securityHeaders)) {
+      response.headers.set(key, value);
+    }
+    return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  // Aplicar headers de segurança
+  const securityHeaders = getSecurityHeaders();
+  for (const [key, value] of Object.entries(securityHeaders)) {
+    response.headers.set(key, value);
+  }
+  return response;
 });
 
 export const config = {

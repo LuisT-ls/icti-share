@@ -4,6 +4,12 @@ import { readFile } from "fs/promises";
 import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/auth";
+import {
+  checkRateLimit,
+  getRateLimitIdentifier,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/security/rate-limit";
+import { getSecurityHeaders } from "@/lib/security/headers";
 
 export async function GET(
   request: NextRequest,
@@ -11,6 +17,39 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    // Rate limiting
+    const headersList = await headers();
+    const ip =
+      headersList.get("x-forwarded-for")?.split(",")[0] ||
+      headersList.get("x-real-ip") ||
+      request.ip ||
+      null;
+    const session = await auth();
+    const userId = session?.user?.id || null;
+
+    const identifier = getRateLimitIdentifier(ip, userId);
+    const rateLimitResult = checkRateLimit(
+      identifier,
+      RATE_LIMIT_CONFIGS.DOWNLOAD
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error || "Muitas requisições. Tente novamente mais tarde.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(
+              Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+            ),
+            ...getSecurityHeaders(),
+          },
+        }
+      );
+    }
 
     // Buscar material no banco
     const material = await prisma.material.findUnique({
@@ -43,17 +82,7 @@ export async function GET(
     // Ler arquivo
     const fileBuffer = await readFile(material.path);
 
-    // Obter IP do usuário (se disponível)
-    const headersList = await headers();
-    const ip =
-      headersList.get("x-forwarded-for")?.split(",")[0] ||
-      headersList.get("x-real-ip") ||
-      request.ip ||
-      null;
-
-    // Obter userId da sessão (se autenticado)
-    const session = await auth();
-    const userId = session?.user?.id || null;
+    // IP e userId já obtidos acima para rate limiting
 
     // Incrementar contador de downloads e criar registro de download
     await prisma.$transaction(async (tx) => {
@@ -77,19 +106,27 @@ export async function GET(
       });
     });
 
-    // Retornar arquivo
-    return new NextResponse(fileBuffer, {
+    // Retornar arquivo com headers de segurança
+    const response = new NextResponse(fileBuffer, {
       headers: {
         "Content-Type": material.mimeType,
         "Content-Disposition": `attachment; filename="${encodeURIComponent(material.filename)}"`,
         "Content-Length": material.size.toString(),
+        "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        "X-RateLimit-Reset": String(rateLimitResult.resetTime),
+        ...getSecurityHeaders(),
       },
     });
+
+    return response;
   } catch (error) {
     console.error("Erro ao fazer download:", error);
     return NextResponse.json(
       { error: "Erro ao fazer download do arquivo" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: getSecurityHeaders(),
+      }
     );
   }
 }

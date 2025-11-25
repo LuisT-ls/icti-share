@@ -5,13 +5,37 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { signupSchema, loginSchema } from "@/lib/validations/schemas";
+import {
+  checkRateLimit,
+  getRateLimitIdentifier,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/security/rate-limit";
+import { sanitizeString, sanitizeEmail } from "@/lib/security/sanitize";
 
 export async function signup(formData: FormData) {
+  // Rate limiting
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0] ||
+    headersList.get("x-real-ip") ||
+    null;
+
+  const identifier = getRateLimitIdentifier(ip, null);
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
+
+  if (!rateLimitResult.success) {
+    return {
+      error: rateLimitResult.error || "Muitas tentativas. Tente novamente mais tarde.",
+    };
+  }
+
+  // Sanitizar e validar dados
   const rawData = {
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    name: sanitizeString(formData.get("name") as string),
+    email: sanitizeEmail(formData.get("email") as string),
+    password: formData.get("password") as string, // Senha não é sanitizada (pode conter caracteres especiais)
   };
 
   const parsed = signupSchema.safeParse(rawData);
@@ -82,9 +106,26 @@ export async function signup(formData: FormData) {
 }
 
 export async function login(formData: FormData) {
+  // Rate limiting
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0] ||
+    headersList.get("x-real-ip") ||
+    null;
+
+  const identifier = getRateLimitIdentifier(ip, null);
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
+
+  if (!rateLimitResult.success) {
+    return {
+      error: rateLimitResult.error || "Muitas tentativas. Tente novamente mais tarde.",
+    };
+  }
+
+  // Sanitizar e validar dados
   const rawData = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email: sanitizeEmail(formData.get("email") as string),
+    password: formData.get("password") as string, // Senha não é sanitizada
   };
 
   const parsed = loginSchema.safeParse(rawData);
