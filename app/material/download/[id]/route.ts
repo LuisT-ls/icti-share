@@ -23,7 +23,7 @@ export async function GET(
     const ip =
       headersList.get("x-forwarded-for")?.split(",")[0] ||
       headersList.get("x-real-ip") ||
-      request.ip ||
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
       null;
     const session = await auth();
     const userId = session?.user?.id || null;
@@ -37,7 +37,9 @@ export async function GET(
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          error: rateLimitResult.error || "Muitas requisições. Tente novamente mais tarde.",
+          error:
+            rateLimitResult.error ||
+            "Muitas requisições. Tente novamente mais tarde.",
         },
         {
           status: 429,
@@ -130,4 +132,3 @@ export async function GET(
     );
   }
 }
-
