@@ -26,7 +26,14 @@ export async function uploadMaterial(
   try {
     // Verificar autenticação
     const session = await auth();
+    console.log("🔐 Verificando autenticação...", {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+    });
+
     if (!session?.user?.id) {
+      console.error("❌ Usuário não autenticado");
       return {
         success: false,
         error: "Você precisa estar autenticado para fazer upload",
@@ -41,18 +48,39 @@ export async function uploadMaterial(
       null;
 
     const identifier = getRateLimitIdentifier(ip, session.user.id);
-    const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.UPLOAD);
+    console.log("⏱️ Verificando rate limit...", {
+      identifier,
+      ip,
+      userId: session.user.id,
+    });
+
+    const rateLimitResult = checkRateLimit(
+      identifier,
+      RATE_LIMIT_CONFIGS.UPLOAD
+    );
+    console.log("⏱️ Resultado do rate limit:", rateLimitResult);
 
     if (!rateLimitResult.success) {
+      console.error("❌ Rate limit excedido");
       return {
         success: false,
-        error: rateLimitResult.error || "Muitos uploads. Tente novamente mais tarde.",
+        error:
+          rateLimitResult.error ||
+          "Muitos uploads. Tente novamente mais tarde.",
       };
     }
 
     // Validar arquivo primeiro (mais crítico)
     const file = formData.get("file") as File | null;
+    console.log("📄 Validando arquivo...", {
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+    });
+
     if (!file) {
+      console.error("❌ Arquivo não encontrado no FormData");
       return {
         success: false,
         error: "Arquivo é obrigatório",
@@ -61,7 +89,9 @@ export async function uploadMaterial(
 
     // Validação completa e segura do arquivo
     const fileValidation = await validateFile(file);
+    console.log("✅ Validação do arquivo:", fileValidation);
     if (!fileValidation.valid) {
+      console.error("❌ Arquivo inválido:", fileValidation.error);
       return {
         success: false,
         error: fileValidation.error || "Arquivo inválido",
@@ -90,6 +120,7 @@ export async function uploadMaterial(
 
     const parsed = uploadMaterialServerSchema.safeParse(rawData);
     if (!parsed.success) {
+      console.error("❌ Erro na validação dos dados:", parsed.error.errors);
       return {
         success: false,
         error: parsed.error.errors[0]?.message || "Dados inválidos",
@@ -98,15 +129,16 @@ export async function uploadMaterial(
 
     // Sanitizar nome do arquivo
     const originalFilename = sanitizeFilename(file.name);
+    console.log("📝 Nome do arquivo sanitizado:", originalFilename);
 
     // Obter diretório de upload
     const uploadDir =
-      process.env.RAILWAY_VOLUME_PATH ||
-      process.env.UPLOAD_DIR ||
-      "./uploads";
+      process.env.RAILWAY_VOLUME_PATH || process.env.UPLOAD_DIR || "./uploads";
+    console.log("📁 Diretório de upload:", uploadDir);
 
     // Criar diretório se não existir
     if (!existsSync(uploadDir)) {
+      console.log("📁 Criando diretório de upload...");
       await mkdir(uploadDir, { recursive: true });
     }
 
@@ -114,15 +146,21 @@ export async function uploadMaterial(
     const uuid = randomUUID();
     const uniqueFilename = `${uuid}-${originalFilename.substring(0, 100)}`;
     const filePath = join(uploadDir, uniqueFilename);
+    console.log("💾 Caminho completo do arquivo:", filePath);
 
     // Ler buffer do arquivo (já validado)
+    console.log("📦 Lendo buffer do arquivo...");
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    console.log("📦 Buffer lido, tamanho:", buffer.length);
 
     // Salvar arquivo
+    console.log("💾 Salvando arquivo no disco...");
     await writeFile(filePath, buffer);
+    console.log("✅ Arquivo salvo com sucesso");
 
     // Salvar metadados no banco
+    console.log("💾 Salvando metadados no banco de dados...");
     const material = await prisma.material.create({
       data: {
         title: parsed.data.title,
@@ -139,16 +177,27 @@ export async function uploadMaterial(
       },
     });
 
+    console.log("✅ Upload concluído com sucesso! Material ID:", material.id);
     return {
       success: true,
       materialId: material.id,
     };
   } catch (error) {
-    console.error("Erro ao fazer upload:", error);
+    console.error("❌ Erro ao fazer upload:", error);
+    console.error(
+      "❌ Stack trace:",
+      error instanceof Error ? error.stack : "N/A"
+    );
+    console.error("❌ Error details:", {
+      name: error instanceof Error ? error.name : "Unknown",
+      message: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: false,
-      error: "Erro ao fazer upload. Tente novamente.",
+      error:
+        error instanceof Error
+          ? `Erro ao fazer upload: ${error.message}`
+          : "Erro ao fazer upload. Tente novamente.",
     };
   }
 }
-

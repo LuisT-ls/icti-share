@@ -79,23 +79,43 @@ export function UploadForm() {
       }
       formData.append("file", file);
 
-      const result = await uploadMaterial(formData);
+      console.log("📤 Iniciando upload...", {
+        title: data.title,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
 
-      if (result.success) {
-        setSuccess("Upload realizado com sucesso!");
-        reset();
-        setFilePreview(null);
-        // Resetar o input de arquivo manualmente
-        const fileInput = document.getElementById("file") as HTMLInputElement;
-        if (fileInput) {
-          fileInput.value = "";
+      try {
+        const result = await uploadMaterial(formData);
+
+        console.log("📥 Resposta do servidor:", result);
+
+        if (result.success) {
+          console.log("✅ Upload realizado com sucesso!");
+          setSuccess("Upload realizado com sucesso!");
+          reset();
+          setFilePreview(null);
+          // Resetar o input de arquivo manualmente
+          const fileInput = document.getElementById("file") as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = "";
+          }
+          setTimeout(() => {
+            router.push(`/meus-materiais`);
+            router.refresh();
+          }, 1500);
+        } else {
+          console.error("❌ Erro no upload:", result.error);
+          setError(result.error);
         }
-        setTimeout(() => {
-          router.push(`/meus-materiais`);
-          router.refresh();
-        }, 1500);
-      } else {
-        setError(result.error);
+      } catch (error) {
+        console.error("❌ Erro ao chamar uploadMaterial:", error);
+        setError(
+          error instanceof Error
+            ? `Erro: ${error.message}`
+            : "Erro ao fazer upload. Tente novamente."
+        );
       }
     });
   };
