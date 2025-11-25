@@ -11,8 +11,43 @@ const loginSchema = z.object({
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
 
+// Validar variáveis de ambiente necessárias
+const requiredEnvVars = {
+  AUTH_SECRET: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  AUTH_URL: process.env.AUTH_URL || process.env.NEXTAUTH_URL,
+  DATABASE_URL: process.env.DATABASE_URL,
+};
+
+if (!requiredEnvVars.AUTH_SECRET) {
+  console.error(
+    "❌ AUTH_SECRET ou NEXTAUTH_SECRET não está configurado. NextAuth não funcionará."
+  );
+}
+
+if (!requiredEnvVars.AUTH_URL) {
+  console.error(
+    "❌ AUTH_URL ou NEXTAUTH_URL não está configurado. NextAuth não funcionará."
+  );
+}
+
+if (!requiredEnvVars.DATABASE_URL) {
+  console.error(
+    "❌ DATABASE_URL não está configurado. NextAuth não funcionará."
+  );
+}
+
+// Criar adapter apenas se DATABASE_URL estiver configurado
+let adapter: any = undefined;
+if (requiredEnvVars.DATABASE_URL) {
+  try {
+    adapter = PrismaAdapter(prisma) as any;
+  } catch (error) {
+    console.error("❌ Erro ao criar PrismaAdapter:", error);
+  }
+}
+
 export const authConfig: NextAuthConfig = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter,
   session: {
     strategy: "jwt",
   },
@@ -21,6 +56,7 @@ export const authConfig: NextAuthConfig = {
     error: "/login",
   },
   trustHost: true,
+  secret: requiredEnvVars.AUTH_SECRET,
   providers: [
     Credentials({
       name: "credentials",
