@@ -17,7 +17,10 @@ import {
 import { Input } from "./ui/input";
 import { Trash2, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { editMaterialSchema, type EditMaterialFormData } from "@/lib/validations/schemas";
+import {
+  editMaterialSchema,
+  type EditMaterialFormData,
+} from "@/lib/validations/schemas";
 
 interface MaterialActionsProps {
   material: {
@@ -95,7 +98,7 @@ export function MaterialActions({ material }: MaterialActionsProps) {
       reset();
       router.refresh();
     } else {
-      setServerError(result.error);
+      setServerError(result.error ?? null);
     }
   };
 
@@ -117,7 +120,10 @@ export function MaterialActions({ material }: MaterialActionsProps) {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <label htmlFor="edit-title" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="edit-title"
+                  className="block text-sm font-medium mb-2"
+                >
                   Título <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -125,16 +131,25 @@ export function MaterialActions({ material }: MaterialActionsProps) {
                   {...register("title")}
                   aria-required="true"
                   aria-invalid={errors.title ? "true" : "false"}
-                  aria-describedby={errors.title ? "edit-title-error" : undefined}
+                  aria-describedby={
+                    errors.title ? "edit-title-error" : undefined
+                  }
                 />
                 {errors.title && (
-                  <p id="edit-title-error" className="mt-1 text-sm text-destructive" role="alert">
+                  <p
+                    id="edit-title-error"
+                    className="mt-1 text-sm text-destructive"
+                    role="alert"
+                  >
                     {errors.title.message}
                   </p>
                 )}
               </div>
               <div>
-                <label htmlFor="edit-description" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="edit-description"
+                  className="block text-sm font-medium mb-2"
+                >
                   Descrição
                 </label>
                 <textarea
@@ -143,75 +158,117 @@ export function MaterialActions({ material }: MaterialActionsProps) {
                   className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   rows={4}
                   aria-invalid={errors.description ? "true" : "false"}
-                  aria-describedby={errors.description ? "edit-description-error" : undefined}
+                  aria-describedby={
+                    errors.description ? "edit-description-error" : undefined
+                  }
                 />
                 {errors.description && (
-                  <p id="edit-description-error" className="mt-1 text-sm text-destructive" role="alert">
+                  <p
+                    id="edit-description-error"
+                    className="mt-1 text-sm text-destructive"
+                    role="alert"
+                  >
                     {errors.description.message}
                   </p>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="edit-course" className="block text-sm font-medium mb-2">
+                  <label
+                    htmlFor="edit-course"
+                    className="block text-sm font-medium mb-2"
+                  >
                     Curso
                   </label>
                   <Input
                     id="edit-course"
                     {...register("course")}
                     aria-invalid={errors.course ? "true" : "false"}
-                    aria-describedby={errors.course ? "edit-course-error" : undefined}
+                    aria-describedby={
+                      errors.course ? "edit-course-error" : undefined
+                    }
                   />
                   {errors.course && (
-                    <p id="edit-course-error" className="mt-1 text-sm text-destructive" role="alert">
+                    <p
+                      id="edit-course-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
                       {errors.course.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label htmlFor="edit-discipline" className="block text-sm font-medium mb-2">
+                  <label
+                    htmlFor="edit-discipline"
+                    className="block text-sm font-medium mb-2"
+                  >
                     Disciplina
                   </label>
                   <Input
                     id="edit-discipline"
                     {...register("discipline")}
                     aria-invalid={errors.discipline ? "true" : "false"}
-                    aria-describedby={errors.discipline ? "edit-discipline-error" : undefined}
+                    aria-describedby={
+                      errors.discipline ? "edit-discipline-error" : undefined
+                    }
                   />
                   {errors.discipline && (
-                    <p id="edit-discipline-error" className="mt-1 text-sm text-destructive" role="alert">
+                    <p
+                      id="edit-discipline-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
                       {errors.discipline.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label htmlFor="edit-semester" className="block text-sm font-medium mb-2">
+                  <label
+                    htmlFor="edit-semester"
+                    className="block text-sm font-medium mb-2"
+                  >
                     Semestre
                   </label>
                   <Input
                     id="edit-semester"
                     {...register("semester")}
                     aria-invalid={errors.semester ? "true" : "false"}
-                    aria-describedby={errors.semester ? "edit-semester-error" : undefined}
+                    aria-describedby={
+                      errors.semester ? "edit-semester-error" : undefined
+                    }
                   />
                   {errors.semester && (
-                    <p id="edit-semester-error" className="mt-1 text-sm text-destructive" role="alert">
+                    <p
+                      id="edit-semester-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
                       {errors.semester.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label htmlFor="edit-type" className="block text-sm font-medium mb-2">
+                  <label
+                    htmlFor="edit-type"
+                    className="block text-sm font-medium mb-2"
+                  >
                     Tipo
                   </label>
                   <Input
                     id="edit-type"
                     {...register("type")}
                     aria-invalid={errors.type ? "true" : "false"}
-                    aria-describedby={errors.type ? "edit-type-error" : undefined}
+                    aria-describedby={
+                      errors.type ? "edit-type-error" : undefined
+                    }
                   />
                   {errors.type && (
-                    <p id="edit-type-error" className="mt-1 text-sm text-destructive" role="alert">
+                    <p
+                      id="edit-type-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
                       {errors.type.message}
                     </p>
                   )}
@@ -219,7 +276,10 @@ export function MaterialActions({ material }: MaterialActionsProps) {
               </div>
 
               {serverError && (
-                <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
+                <div
+                  className="rounded-md bg-destructive/10 p-4 border border-destructive/20"
+                  role="alert"
+                >
                   <p className="text-sm text-destructive">{serverError}</p>
                 </div>
               )}
@@ -255,8 +315,8 @@ export function MaterialActions({ material }: MaterialActionsProps) {
           <DialogHeader>
             <DialogTitle>Confirmar exclusão</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir o material &quot;{material.title}&quot;?
-              Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir o material &quot;{material.title}
+              &quot;? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -280,4 +340,3 @@ export function MaterialActions({ material }: MaterialActionsProps) {
     </div>
   );
 }
-
