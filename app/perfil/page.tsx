@@ -12,52 +12,66 @@ export default async function PerfilPage() {
     redirect("/login");
   }
 
-  // Buscar dados do usuário, estatísticas e materiais
-  const [user, materialsCount, downloadsCount, materials] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        course: true,
-      },
-    }),
-    prisma.material.count({
-      where: { uploadedById: session.user.id },
-    }),
-    prisma.download.count({
-      where: { userId: session.user.id },
-    }),
-    prisma.material.findMany({
-      where: { uploadedById: session.user.id },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        course: true,
-        discipline: true,
-        semester: true,
-        type: true,
-        downloadsCount: true,
-        createdAt: true,
-      },
-    }),
-  ]);
+  try {
+    // Buscar dados do usuário, estatísticas e materiais
+    let userCourse: string | null = null;
+    try {
+      const userData = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          course: true,
+        },
+      });
+      userCourse = userData?.course || null;
+    } catch (userError) {
+      console.error("Erro ao buscar curso do usuário:", userError);
+      // Continuar sem o curso se houver erro
+    }
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-        <ProfileContent
-          userName={session.user.name}
-          userEmail={session.user.email}
-          userRole={session.user.role}
-          userCourse={user?.course || null}
-          materialsCount={materialsCount}
-          downloadsCount={downloadsCount}
-          materials={materials}
-        />
-      </main>
-      <Footer />
-    </div>
-  );
+    const [materialsCount, downloadsCount, materials] = await Promise.all([
+      prisma.material.count({
+        where: { uploadedById: session.user.id },
+      }),
+      prisma.download.count({
+        where: { userId: session.user.id },
+      }),
+      prisma.material.findMany({
+        where: { uploadedById: session.user.id },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          course: true,
+          discipline: true,
+          semester: true,
+          type: true,
+          downloadsCount: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+          <ProfileContent
+            userName={session.user.name}
+            userEmail={session.user.email}
+            userRole={session.user.role}
+            userCourse={userCourse}
+            materialsCount={materialsCount}
+            downloadsCount={downloadsCount}
+            materials={materials}
+          />
+        </main>
+        <Footer />
+      </div>
+    );
+  } catch (error) {
+    console.error("Erro ao carregar perfil:", error);
+    // Redirecionar para login em caso de erro
+    redirect("/login");
+  }
 }
