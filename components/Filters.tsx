@@ -34,6 +34,8 @@ export function Filters({ courses, disciplines, semesters, types }: FiltersProps
       if (discipline) params.set("discipline", discipline);
       if (semester) params.set("semester", semester);
       if (type) params.set("type", type);
+      // Resetar para página 1 ao aplicar novos filtros
+      // (não incluir page, deixar o padrão assumir)
 
       router.push(`/materiais?${params.toString()}`);
     });

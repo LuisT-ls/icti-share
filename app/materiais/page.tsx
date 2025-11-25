@@ -3,7 +3,9 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Filters } from "@/components/Filters";
 import { MaterialList } from "@/components/MaterialList";
+import { Pagination } from "@/components/Pagination";
 import { Suspense } from "react";
+import type { Prisma } from "@prisma/client";
 
 interface SearchParams {
   q?: string;
@@ -11,10 +13,27 @@ interface SearchParams {
   discipline?: string;
   semester?: string;
   type?: string;
+  page?: string;
+  limit?: string;
 }
 
-async function getMaterials(searchParams: SearchParams) {
-  const where: any = {};
+interface PaginatedMaterials {
+  materials: Awaited<ReturnType<typeof prisma.material.findMany>>;
+  pagination: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+const DEFAULT_LIMIT = 12;
+const MAX_LIMIT = 50;
+
+async function getMaterials(searchParams: SearchParams): Promise<PaginatedMaterials> {
+  const where: Prisma.MaterialWhereInput = {};
 
   // Busca por texto
   if (searchParams.q) {
@@ -38,20 +57,46 @@ async function getMaterials(searchParams: SearchParams) {
     where.type = searchParams.type;
   }
 
-  const materials = await prisma.material.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      uploadedBy: {
-        select: {
-          name: true,
-          email: true,
+  // Paginação
+  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
+  const limit = Math.min(
+    MAX_LIMIT,
+    Math.max(1, parseInt(searchParams.limit || String(DEFAULT_LIMIT), 10))
+  );
+  const skip = (page - 1) * limit;
+
+  // Executar contagem e busca em paralelo para melhor performance
+  const [materials, total] = await Promise.all([
+    prisma.material.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: {
+        uploadedBy: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.material.count({ where }),
+  ]);
 
-  return materials;
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    materials,
+    pagination: {
+      total,
+      totalPages,
+      currentPage: page,
+      limit,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    },
+  };
 }
 
 async function getFilterOptions() {
@@ -92,7 +137,7 @@ async function MaterialsContent({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const [materials, filterOptions] = await Promise.all([
+  const [materialsData, filterOptions] = await Promise.all([
     getMaterials(params),
     getFilterOptions(),
   ]);
@@ -106,11 +151,24 @@ async function MaterialsContent({
         types={filterOptions.types}
       />
       <div className="mt-6">
-        <MaterialList materials={materials} />
+        <MaterialList materials={materialsData.materials} />
+        {materialsData.pagination.totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={materialsData.pagination.currentPage}
+              totalPages={materialsData.pagination.totalPages}
+              total={materialsData.pagination.total}
+              limit={materialsData.pagination.limit}
+            />
+          </div>
+        )}
       </div>
     </>
   );
 }
+
+// Revalidação a cada 60 segundos para manter dados atualizados
+export const revalidate = 60;
 
 export default async function MateriaisPage({
   searchParams,
