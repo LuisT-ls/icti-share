@@ -38,6 +38,7 @@ export async function signup(formData: FormData) {
     name: sanitizeString(formData.get("name") as string),
     email: sanitizeEmail(formData.get("email") as string),
     password: formData.get("password") as string, // Senha não é sanitizada (pode conter caracteres especiais)
+    course: (formData.get("course") as string)?.trim() || "", // Curso vem de select, apenas trim
   };
 
   const parsed = signupSchema.safeParse(rawData);
@@ -48,7 +49,7 @@ export async function signup(formData: FormData) {
     };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, email, password, course } = parsed.data;
 
   try {
     // Verificar se o email já existe
@@ -72,6 +73,7 @@ export async function signup(formData: FormData) {
         email,
         passwordHash,
         role: UserRole.USUARIO,
+        course,
       },
     });
 

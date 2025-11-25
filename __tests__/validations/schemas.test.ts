@@ -13,7 +13,9 @@ describe("Zod Validation Schemas", () => {
       const validData = {
         name: "João Silva",
         email: "joao@example.com",
-        password: "senha123",
+        password: "Senha123!",
+        confirmPassword: "Senha123!",
+        course: "Engenharia Elétrica",
       };
 
       const result = signupSchema.safeParse(validData);
@@ -24,7 +26,9 @@ describe("Zod Validation Schemas", () => {
       const invalidData = {
         name: "J",
         email: "joao@example.com",
-        password: "senha123",
+        password: "Senha123!",
+        confirmPassword: "Senha123!",
+        course: "Engenharia Elétrica",
       };
 
       const result = signupSchema.safeParse(invalidData);
@@ -38,7 +42,9 @@ describe("Zod Validation Schemas", () => {
       const invalidData = {
         name: "João Silva",
         email: "email-invalido",
-        password: "senha123",
+        password: "Senha123!",
+        confirmPassword: "Senha123!",
+        course: "Engenharia Elétrica",
       };
 
       const result = signupSchema.safeParse(invalidData);
@@ -52,13 +58,95 @@ describe("Zod Validation Schemas", () => {
       const invalidData = {
         name: "João Silva",
         email: "joao@example.com",
-        password: "12345",
+        password: "Senh1!",
+        confirmPassword: "Senh1!",
+        course: "Engenharia Elétrica",
       };
 
       const result = signupSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0].message).toContain("mínimo 6 caracteres");
+        expect(result.error.errors[0].message).toContain("mínimo 8 caracteres");
+      }
+    });
+
+    it("deve rejeitar senha sem letra maiúscula", () => {
+      const invalidData = {
+        name: "João Silva",
+        email: "joao@example.com",
+        password: "senha123!",
+        confirmPassword: "senha123!",
+        course: "Engenharia Elétrica",
+      };
+
+      const result = signupSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain("maiúscula");
+      }
+    });
+
+    it("deve rejeitar senha sem letra minúscula", () => {
+      const invalidData = {
+        name: "João Silva",
+        email: "joao@example.com",
+        password: "SENHA123!",
+        confirmPassword: "SENHA123!",
+        course: "Engenharia Elétrica",
+      };
+
+      const result = signupSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain("minúscula");
+      }
+    });
+
+    it("deve rejeitar senha sem número", () => {
+      const invalidData = {
+        name: "João Silva",
+        email: "joao@example.com",
+        password: "SenhaForte!",
+        confirmPassword: "SenhaForte!",
+        course: "Engenharia Elétrica",
+      };
+
+      const result = signupSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain("número");
+      }
+    });
+
+    it("deve rejeitar senha sem símbolo", () => {
+      const invalidData = {
+        name: "João Silva",
+        email: "joao@example.com",
+        password: "Senha1234",
+        confirmPassword: "Senha1234",
+        course: "Engenharia Elétrica",
+      };
+
+      const result = signupSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain("símbolo");
+      }
+    });
+
+    it("deve rejeitar quando senhas não coincidem", () => {
+      const invalidData = {
+        name: "João Silva",
+        email: "joao@example.com",
+        password: "Senha123!",
+        confirmPassword: "Senha456!",
+        course: "Engenharia Elétrica",
+      };
+
+      const result = signupSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain("não coincidem");
       }
     });
 
@@ -66,7 +154,9 @@ describe("Zod Validation Schemas", () => {
       const data = {
         name: "João Silva",
         email: "JOAO@EXAMPLE.COM",
-        password: "senha123",
+        password: "Senha123!",
+        confirmPassword: "Senha123!",
+        course: "Engenharia Elétrica",
       };
 
       const result = signupSchema.safeParse(data);
@@ -273,4 +363,3 @@ describe("Zod Validation Schemas", () => {
     });
   });
 });
-

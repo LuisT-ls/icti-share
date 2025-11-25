@@ -4,7 +4,7 @@ test.describe("Fluxo de Autenticação", () => {
   test("deve permitir signup → login → logout", async ({ page }) => {
     const timestamp = Date.now();
     const email = `teste${timestamp}@example.com`;
-    const password = "senha123456";
+    const password = "Senha123!";
     const name = "Usuário Teste";
 
     // 1. Acessar página de signup
@@ -15,6 +15,9 @@ test.describe("Fluxo de Autenticação", () => {
     await page.fill('input[name="name"]', name);
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', password);
+    await page.fill('input[name="confirmPassword"]', password);
+    // Selecionar curso (obrigatório)
+    await page.selectOption("select#course", "Engenharia Elétrica");
 
     // 3. Submeter formulário
     await page.click('button[type="submit"]');
@@ -23,7 +26,7 @@ test.describe("Fluxo de Autenticação", () => {
     await page.waitForURL(/\//, { timeout: 10000 });
 
     // 5. Fazer logout se estiver logado
-    const logoutButton = page.locator('text=/Sair|Logout/i');
+    const logoutButton = page.locator("text=/Sair|Logout/i");
     if (await logoutButton.isVisible()) {
       await logoutButton.click();
       await page.waitForURL(/\//);
@@ -50,7 +53,7 @@ test.describe("Fluxo de Autenticação", () => {
 
     // Aguardar mensagem de erro
     await expect(
-      page.locator('text=/Email ou senha incorretos|Dados inválidos/i')
+      page.locator("text=/Email ou senha incorretos|Dados inválidos/i")
     ).toBeVisible({ timeout: 5000 });
   });
 
@@ -61,9 +64,6 @@ test.describe("Fluxo de Autenticação", () => {
     await page.click('button[type="submit"]');
 
     // Verificar mensagens de erro
-    await expect(
-      page.locator('text=/obrigatório|mínimo/i')
-    ).toBeVisible();
+    await expect(page.locator("text=/obrigatório|mínimo/i")).toBeVisible();
   });
 });
-

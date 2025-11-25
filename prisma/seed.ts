@@ -5,8 +5,9 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 const prisma = new PrismaClient();
 
-// Senha padrão para todos os usuários de seed: "senha123"
-const DEFAULT_PASSWORD = "senha123";
+// Senha padrão para todos os usuários de seed: "Senha123!"
+// Atende aos requisitos: 8+ caracteres, maiúscula, minúscula, número e símbolo
+const DEFAULT_PASSWORD = "Senha123!";
 
 async function main() {
   console.log("🌱 Iniciando seed do banco de dados...");

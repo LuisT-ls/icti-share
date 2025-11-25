@@ -5,19 +5,51 @@ import { z } from "zod";
  * Usados tanto no cliente (React Hook Form) quanto no servidor (Server Actions)
  */
 
+// Opções de curso disponíveis
+export const COURSE_OPTIONS = [
+  "Engenharia Elétrica",
+  "Engenharia de Produção",
+  "Bacharel Interdisciplinar em Ciência, Tecnologia e Inovação",
+] as const;
+
+export type CourseOption = (typeof COURSE_OPTIONS)[number];
+
 // Schema de Signup
-export const signupSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Nome deve ter no mínimo 2 caracteres")
-    .max(100, "Nome muito longo")
-    .trim(),
-  email: z.string().email("Email inválido").toLowerCase().trim(),
-  password: z
-    .string()
-    .min(6, "Senha deve ter no mínimo 6 caracteres")
-    .max(100, "Senha muito longa"),
-});
+export const signupSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Nome deve ter no mínimo 2 caracteres")
+      .max(100, "Nome muito longo")
+      .trim(),
+    email: z.string().email("Email inválido").toLowerCase().trim(),
+    password: z
+      .string()
+      .min(8, "Senha deve ter no mínimo 8 caracteres")
+      .max(100, "Senha muito longa")
+      .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+      .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+      .regex(/[0-9]/, "Senha deve conter pelo menos um número")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
+      ),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+    course: z.enum(
+      [
+        "Engenharia Elétrica",
+        "Engenharia de Produção",
+        "Bacharel Interdisciplinar em Ciência, Tecnologia e Inovação",
+      ],
+      {
+        errorMap: () => ({ message: "Selecione um curso válido" }),
+      }
+    ),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 export type SignupFormData = z.infer<typeof signupSchema>;
 
@@ -182,3 +214,31 @@ export const editProfileSchema = z.object({
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;
+
+// Schema de Alteração de Senha
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+    newPassword: z
+      .string()
+      .min(8, "Senha deve ter no mínimo 8 caracteres")
+      .max(100, "Senha muito longa")
+      .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+      .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+      .regex(/[0-9]/, "Senha deve conter pelo menos um número")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
+      ),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "A nova senha deve ser diferente da senha atual",
+    path: ["newPassword"],
+  });
+
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;

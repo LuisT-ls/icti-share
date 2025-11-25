@@ -15,11 +15,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { signupSchema, type SignupFormData } from "@/lib/validations/schemas";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import {
+  signupSchema,
+  type SignupFormData,
+  COURSE_OPTIONS,
+} from "@/lib/validations/schemas";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -30,10 +36,13 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
   });
+
+  const password = watch("password");
 
   const onSubmit = async (data: SignupFormData) => {
     setServerError(null);
@@ -44,6 +53,7 @@ export default function SignupPage() {
       formData.append("name", data.name);
       formData.append("email", data.email);
       formData.append("password", data.password);
+      formData.append("course", data.course);
 
       const result = await signup(formData);
 
@@ -149,11 +159,10 @@ export default function SignupPage() {
                   >
                     Senha <span className="text-destructive">*</span>
                   </label>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     {...register("password")}
-                    placeholder="••••••••"
+                    placeholder="Digite sua senha"
                     aria-required="true"
                     aria-invalid={errors.password ? "true" : "false"}
                     aria-describedby={
@@ -169,9 +178,72 @@ export default function SignupPage() {
                       {errors.password.message}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Mínimo de 6 caracteres
-                  </p>
+                  <PasswordStrengthIndicator password={password || ""} />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium mb-2"
+                  >
+                    Confirmar Senha <span className="text-destructive">*</span>
+                  </label>
+                  <PasswordInput
+                    id="confirmPassword"
+                    {...register("confirmPassword")}
+                    placeholder="Digite a senha novamente"
+                    aria-required="true"
+                    aria-invalid={errors.confirmPassword ? "true" : "false"}
+                    aria-describedby={
+                      errors.confirmPassword
+                        ? "confirmPassword-error"
+                        : undefined
+                    }
+                  />
+                  {errors.confirmPassword && (
+                    <p
+                      id="confirmPassword-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="course"
+                    className="block text-sm font-medium mb-2"
+                  >
+                    Curso <span className="text-destructive">*</span>
+                  </label>
+                  <select
+                    id="course"
+                    {...register("course")}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-required="true"
+                    aria-invalid={errors.course ? "true" : "false"}
+                    aria-describedby={
+                      errors.course ? "course-error" : undefined
+                    }
+                  >
+                    <option value="">Selecione um curso</option>
+                    {COURSE_OPTIONS.map((course) => (
+                      <option key={course} value={course}>
+                        {course}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.course && (
+                    <p
+                      id="course-error"
+                      className="mt-1 text-sm text-destructive"
+                      role="alert"
+                    >
+                      {errors.course.message}
+                    </p>
+                  )}
                 </div>
 
                 {serverError && (

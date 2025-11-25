@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { EditProfileForm } from "@/components/EditProfileForm";
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { MaterialActions } from "@/components/MaterialActions";
 import { User, Mail, Shield, Upload, Download, FileText } from "lucide-react";
 import Link from "next/link";
@@ -29,6 +30,7 @@ interface ProfileContentProps {
   userName: string | null | undefined;
   userEmail: string;
   userRole: string;
+  userCourse: string | null;
   materialsCount: number;
   downloadsCount: number;
   materials: Material[];
@@ -38,6 +40,7 @@ export function ProfileContent({
   userName,
   userEmail,
   userRole,
+  userCourse,
   materialsCount,
   downloadsCount,
   materials,
@@ -86,6 +89,17 @@ export function ProfileContent({
                 <p className="text-lg">{userRole}</p>
               </div>
             </div>
+            {userCourse && (
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Curso
+                  </p>
+                  <p className="text-lg">{userCourse}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Estatísticas */}
@@ -114,6 +128,22 @@ export function ProfileContent({
           <div className="pt-4 border-t">
             <EditProfileForm defaultName={userName || ""} />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Seção de Segurança */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <Shield className="h-6 w-6" />
+            Segurança
+          </CardTitle>
+          <CardDescription>
+            Gerencie as configurações de segurança da sua conta
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
 

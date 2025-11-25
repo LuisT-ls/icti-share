@@ -16,7 +16,7 @@ export async function createTestUser(): Promise<TestUser> {
   const timestamp = Date.now();
   return {
     email: `teste${timestamp}@example.com`,
-    password: "senha123456",
+    password: "Senha123!",
     name: `Usuário Teste ${timestamp}`,
   };
 }
@@ -45,4 +45,3 @@ export async function deleteTestUser(email: string): Promise<void> {
   // Por exemplo, chamar uma API de teste ou deletar do banco
   console.log(`Limpar usuário de teste: ${email}`);
 }
-
