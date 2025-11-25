@@ -7,7 +7,15 @@ export default auth((req) => {
   const session = req.auth;
 
   // Rotas públicas
-  const publicRoutes = ["/", "/login", "/signup", "/api/auth", "/material/download"];
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/signup",
+    "/api/auth",
+    "/material/download",
+    "/materiais",
+    "/material",
+  ];
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );

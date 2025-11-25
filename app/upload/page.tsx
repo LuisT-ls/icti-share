@@ -1,6 +1,9 @@
 import { getServerSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { UploadForm } from "@/components/UploadForm";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function UploadPage() {
   const session = await getServerSession();
@@ -10,20 +13,22 @@ export default async function UploadPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6">
-      <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-lg">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Upload de Materiais
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Faça upload de materiais PDF para compartilhar com a comunidade.
-          </p>
-        </div>
-
-        <UploadForm />
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Upload de Materiais</CardTitle>
+            <CardDescription>
+              Faça upload de materiais PDF para compartilhar com a comunidade.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UploadForm />
+          </CardContent>
+        </Card>
+      </main>
+      <Footer />
     </div>
   );
 }
-

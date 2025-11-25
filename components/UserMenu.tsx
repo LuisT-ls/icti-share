@@ -2,6 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { logout } from "@/app/actions/auth";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { motion } from "framer-motion";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -9,51 +12,47 @@ export function UserMenu() {
   if (status === "loading") {
     return (
       <div className="flex items-center gap-4">
-        <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+        <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="flex items-center gap-4">
-        <a
-          href="/login"
-          className="text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          Entrar
-        </a>
-        <a
-          href="/signup"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Cadastrar
-        </a>
+      <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/login">Entrar</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link href="/signup">Cadastrar</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-gray-700">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-center gap-2"
+    >
+      <span className="text-sm text-muted-foreground hidden sm:inline">
         {session.user.name || session.user.email}
       </span>
-      <span className="text-xs text-gray-500">({session.user.role})</span>
-      <a
-        href="/perfil"
-        className="text-sm font-medium text-blue-600 hover:text-blue-700"
-      >
-        Perfil
-      </a>
+      {session.user.role === "ADMIN" && (
+        <Button asChild variant="outline" size="sm">
+          <Link href="/admin">Admin</Link>
+        </Button>
+      )}
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/perfil">Perfil</Link>
+      </Button>
       <form action={logout}>
-        <button
-          type="submit"
-          className="text-sm font-medium text-red-600 hover:text-red-700"
-        >
+        <Button type="submit" variant="ghost" size="sm">
           Sair
-        </button>
+        </Button>
       </form>
-    </div>
+    </motion.div>
   );
 }
 

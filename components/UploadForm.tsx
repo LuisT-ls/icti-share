@@ -6,6 +6,11 @@ import { z } from "zod";
 import { useState, useTransition } from "react";
 import { uploadMaterial } from "@/app/actions/upload";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Upload, FileText } from "lucide-react";
 
 const uploadFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório").max(200, "Título muito longo"),
@@ -105,80 +110,91 @@ export function UploadForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <motion.form
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
+    >
       {/* Título */}
       <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Título <span className="text-red-500">*</span>
+        <label htmlFor="title" className="block text-sm font-medium mb-2">
+          Título <span className="text-destructive">*</span>
         </label>
-        <input
+        <Input
           id="title"
           type="text"
           {...register("title")}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
           placeholder="Ex: Apostila de Cálculo I"
+          aria-required="true"
+          aria-invalid={errors.title ? "true" : "false"}
+          aria-describedby={errors.title ? "title-error" : undefined}
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+          <p id="title-error" className="mt-1 text-sm text-destructive" role="alert">
+            {errors.title.message}
+          </p>
         )}
       </div>
 
       {/* Descrição */}
       <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="description" className="block text-sm font-medium mb-2">
           Descrição
         </label>
         <textarea
           id="description"
           rows={4}
           {...register("description")}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="Descreva o conteúdo do material..."
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+          <p className="mt-1 text-sm text-destructive" role="alert">
+            {errors.description.message}
+          </p>
         )}
       </div>
 
       {/* Arquivo */}
       <div>
-        <label
-          htmlFor="file"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Arquivo PDF <span className="text-red-500">*</span>
+        <label htmlFor="file" className="block text-sm font-medium mb-2">
+          Arquivo PDF <span className="text-destructive">*</span>
         </label>
-        <input
-          id="file"
-          type="file"
-          accept="application/pdf"
-          {...register("file", {
-            onChange: (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setFilePreview(file.name);
-              } else {
-                setFilePreview(null);
-              }
-            },
-          })}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            id="file"
+            type="file"
+            accept="application/pdf"
+            {...register("file", {
+              onChange: (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setFilePreview(file.name);
+                } else {
+                  setFilePreview(null);
+                }
+              },
+            })}
+            className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+            aria-required="true"
+            aria-invalid={errors.file ? "true" : "false"}
+            aria-describedby={errors.file ? "file-error" : undefined}
+          />
+        </div>
         {filePreview && (
-          <p className="mt-2 text-sm text-gray-600">
-            Arquivo selecionado: <span className="font-medium">{filePreview}</span>
+          <p className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="font-medium">{filePreview}</span>
           </p>
         )}
         {errors.file && (
-          <p className="mt-1 text-sm text-red-600">{errors.file.message}</p>
+          <p id="file-error" className="mt-1 text-sm text-destructive" role="alert">
+            {errors.file.message}
+          </p>
         )}
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Tamanho máximo: 25 MB | Apenas arquivos PDF
         </p>
       </div>
@@ -187,107 +203,109 @@ export function UploadForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Curso */}
         <div>
-          <label
-            htmlFor="course"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="course" className="block text-sm font-medium mb-2">
             Curso
           </label>
-          <input
+          <Input
             id="course"
             type="text"
             {...register("course")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             placeholder="Ex: Engenharia de Software"
           />
           {errors.course && (
-            <p className="mt-1 text-sm text-red-600">{errors.course.message}</p>
+            <p className="mt-1 text-sm text-destructive" role="alert">
+              {errors.course.message}
+            </p>
           )}
         </div>
 
         {/* Disciplina */}
         <div>
-          <label
-            htmlFor="discipline"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="discipline" className="block text-sm font-medium mb-2">
             Disciplina
           </label>
-          <input
+          <Input
             id="discipline"
             type="text"
             {...register("discipline")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             placeholder="Ex: Cálculo I"
           />
           {errors.discipline && (
-            <p className="mt-1 text-sm text-red-600">{errors.discipline.message}</p>
+            <p className="mt-1 text-sm text-destructive" role="alert">
+              {errors.discipline.message}
+            </p>
           )}
         </div>
 
         {/* Semestre */}
         <div>
-          <label
-            htmlFor="semester"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="semester" className="block text-sm font-medium mb-2">
             Semestre
           </label>
-          <input
+          <Input
             id="semester"
             type="text"
             {...register("semester")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             placeholder="Ex: 2024.1"
           />
           {errors.semester && (
-            <p className="mt-1 text-sm text-red-600">{errors.semester.message}</p>
+            <p className="mt-1 text-sm text-destructive" role="alert">
+              {errors.semester.message}
+            </p>
           )}
         </div>
 
         {/* Tipo */}
         <div>
-          <label
-            htmlFor="type"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="type" className="block text-sm font-medium mb-2">
             Tipo
           </label>
-          <input
+          <Input
             id="type"
             type="text"
             {...register("type")}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             placeholder="Ex: Apostila, Prova, Resumo"
           />
           {errors.type && (
-            <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+            <p className="mt-1 text-sm text-destructive" role="alert">
+              {errors.type.message}
+            </p>
           )}
         </div>
       </div>
 
       {/* Mensagens de erro e sucesso */}
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="rounded-md bg-green-50 p-4">
+        <div className="rounded-md bg-green-50 p-4 border border-green-200" role="alert">
           <p className="text-sm text-green-800">{success}</p>
         </div>
       )}
 
       {/* Botão de submit */}
-      <button
+      <Button
         type="submit"
         disabled={isPending}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+        className="w-full"
+        size="lg"
       >
-        {isPending ? "Enviando..." : "Fazer Upload"}
-      </button>
-    </form>
+        {isPending ? (
+          <>
+            <Upload className="mr-2 h-4 w-4 animate-pulse" />
+            Enviando...
+          </>
+        ) : (
+          <>
+            <Upload className="mr-2 h-4 w-4" />
+            Fazer Upload
+          </>
+        )}
+      </Button>
+    </motion.form>
   );
 }
-
