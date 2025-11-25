@@ -35,16 +35,23 @@ export const signupSchema = z
         "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
       ),
     confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
-    course: z.enum(
-      [
-        "Engenharia Elétrica",
-        "Engenharia de Produção",
-        "Bacharel Interdisciplinar em Ciência, Tecnologia e Inovação",
-      ],
-      {
-        errorMap: () => ({ message: "Selecione um curso válido" }),
-      }
-    ),
+    course: z
+      .string({
+        required_error: "Selecione um curso",
+      })
+      .min(1, "Selecione um curso")
+      .refine(
+        (val) =>
+          val !== "" &&
+          [
+            "Engenharia Elétrica",
+            "Engenharia de Produção",
+            "Bacharel Interdisciplinar em Ciência, Tecnologia e Inovação",
+          ].includes(val),
+        {
+          message: "Selecione um curso válido",
+        }
+      ),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",

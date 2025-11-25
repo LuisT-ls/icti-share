@@ -235,15 +235,20 @@ export default function SignupPage() {
                   </label>
                   <select
                     id="course"
-                    {...register("course")}
+                    {...register("course", {
+                      required: "Selecione um curso",
+                    })}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-required="true"
                     aria-invalid={errors.course ? "true" : "false"}
                     aria-describedby={
                       errors.course ? "course-error" : undefined
                     }
+                    defaultValue=""
                   >
-                    <option value="">Selecione um curso</option>
+                    <option value="" disabled>
+                      Selecione um curso
+                    </option>
                     {COURSE_OPTIONS.map((course) => (
                       <option key={course} value={course}>
                         {course}
