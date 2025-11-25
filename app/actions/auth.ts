@@ -172,19 +172,32 @@ export async function login(formData: FormData) {
     });
 
     if (result?.error) {
+      console.error("Erro no signIn:", result.error);
       return {
-        error: "Email ou senha incorretos",
+        error:
+          result.error === "CredentialsSignin"
+            ? "Email ou senha incorretos"
+            : "Erro ao fazer login. Tente novamente.",
       };
     }
 
-    redirect("/");
+    if (result?.ok) {
+      redirect("/");
+    } else {
+      return {
+        error: "Erro ao fazer login. Tente novamente.",
+      };
+    }
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
     return {
-      error: "Erro ao fazer login. Tente novamente.",
+      error:
+        error instanceof Error
+          ? `Erro ao fazer login: ${error.message}`
+          : "Erro ao fazer login. Tente novamente.",
     };
   }
 }

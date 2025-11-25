@@ -55,26 +55,41 @@ export default function SignupPage() {
       formData.append("password", data.password);
       formData.append("course", data.course);
 
-      const result = await signup(formData);
+      try {
+        const result = await signup(formData);
 
-      if (result?.error) {
-        setServerError(result.error);
-        setSuccessMessage(null);
-      } else if (result?.success) {
-        // Se houver mensagem de sucesso, mostrar brevemente antes de redirecionar
-        if (result.message) {
-          setServerError(null);
-          setSuccessMessage(result.message);
-          // Mostrar mensagem de sucesso por 2 segundos antes de redirecionar
-          setTimeout(() => {
-            router.push("/login");
+        if (result?.error) {
+          setServerError(result.error);
+          setSuccessMessage(null);
+        } else if (result?.success) {
+          // Se houver mensagem de sucesso, mostrar brevemente antes de redirecionar
+          if (result.message) {
+            setServerError(null);
+            setSuccessMessage(result.message);
+            // Mostrar mensagem de sucesso por 2 segundos antes de redirecionar
+            setTimeout(() => {
+              router.push("/login");
+              router.refresh();
+            }, 2000);
+          } else {
+            // Se não houver mensagem, redirecionar imediatamente (login automático funcionou)
+            router.push("/");
             router.refresh();
-          }, 2000);
-        } else {
-          // Se não houver mensagem, redirecionar imediatamente (login automático funcionou)
-          router.push("/");
-          router.refresh();
+          }
         }
+      } catch (error) {
+        // Se houver redirect (NEXT_REDIRECT), o Next.js cuida automaticamente
+        if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+          // Cadastro bem-sucedido, redirecionamento em andamento
+          return;
+        }
+        // Outros erros
+        console.error("Erro no signup:", error);
+        setServerError(
+          error instanceof Error
+            ? error.message
+            : "Erro ao criar conta. Tente novamente."
+        );
       }
     });
   };

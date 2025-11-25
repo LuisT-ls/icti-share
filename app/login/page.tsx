@@ -51,9 +51,21 @@ function LoginForm() {
         if (result?.error) {
           setServerError(result.error);
         }
+        // Se não houver erro, o redirect será feito automaticamente
       } catch (error) {
         // Se houver redirect (NEXT_REDIRECT), o Next.js cuida automaticamente
-        // Não precisamos fazer nada aqui
+        // Isso é esperado quando o login é bem-sucedido
+        if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+          // Login bem-sucedido, redirecionamento em andamento
+          return;
+        }
+        // Outros erros
+        console.error("Erro no login:", error);
+        setServerError(
+          error instanceof Error
+            ? error.message
+            : "Erro ao fazer login. Tente novamente."
+        );
       }
     });
   };

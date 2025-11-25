@@ -47,7 +47,8 @@ if (requiredEnvVars.DATABASE_URL) {
 }
 
 export const authConfig: NextAuthConfig = {
-  adapter,
+  // Não usar adapter com JWT strategy - pode causar problemas
+  // adapter,
   session: {
     strategy: "jwt",
   },
@@ -65,37 +66,50 @@ export const authConfig: NextAuthConfig = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
+        try {
+          const parsed = loginSchema.safeParse(credentials);
 
-        if (!parsed.success) {
+          if (!parsed.success) {
+            console.error("Erro na validação de credenciais:", parsed.error);
+            return null;
+          }
+
+          const { email, password } = parsed.data;
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            console.error(`Usuário não encontrado: ${email}`);
+            return null;
+          }
+
+          if (!user.passwordHash) {
+            console.error(`Usuário sem senha: ${email}`);
+            return null;
+          }
+
+          const isValidPassword = await bcrypt.compare(
+            password,
+            user.passwordHash
+          );
+
+          if (!isValidPassword) {
+            console.error(`Senha inválida para: ${email}`);
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Erro no authorize:", error);
           return null;
         }
-
-        const { email, password } = parsed.data;
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user || !user.passwordHash) {
-          return null;
-        }
-
-        const isValidPassword = await bcrypt.compare(
-          password,
-          user.passwordHash
-        );
-
-        if (!isValidPassword) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],
