@@ -34,3 +34,4 @@ npm run prisma:studio
 ## 📚 Documentação
 
 - [Configuração de Variáveis de Ambiente](./ENV_SETUP.md) - Guia completo de configuração
+- [Guia de Deploy no Railway](./DEPLOY.md) - Passo-a-passo para deploy em produção
