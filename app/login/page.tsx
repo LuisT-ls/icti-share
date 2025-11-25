@@ -6,6 +6,7 @@ import { login } from "@/app/actions/auth";
 import { useSearchParams } from "next/navigation";
 import { useState, useTransition, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -26,6 +27,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
+  const { update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -50,15 +52,17 @@ function LoginForm() {
         // Se houver erro, exibir mensagem
         if (result?.error) {
           setServerError(result.error);
-        }
-        // Se não houver erro, o redirect será feito automaticamente
-      } catch (error) {
-        // Se houver redirect (NEXT_REDIRECT), o Next.js cuida automaticamente
-        // Isso é esperado quando o login é bem-sucedido
-        if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-          // Login bem-sucedido, redirecionamento em andamento
           return;
         }
+        // Se não houver erro, atualizar a sessão e redirecionar
+        if (result?.success) {
+          // Atualizar a sessão para refletir no nav imediatamente
+          await update();
+          // Redirecionar para a página desejada
+          router.push(callbackUrl);
+          router.refresh(); // Forçar atualização da página
+        }
+      } catch (error) {
         // Outros erros
         console.error("Erro no login:", error);
         setServerError(

@@ -194,7 +194,8 @@ export async function login(formData: FormData) {
     }
 
     if (result?.ok) {
-      redirect("/");
+      // Retornar sucesso para que o cliente possa atualizar a sessão antes do redirect
+      return { success: true };
     } else {
       return {
         error: "Erro ao fazer login. Tente novamente.",
