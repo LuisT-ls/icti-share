@@ -14,7 +14,6 @@ describe("Zod Validation Schemas", () => {
         name: "João Silva",
         email: "joao@example.com",
         password: "Senha123!",
-        confirmPassword: "Senha123!",
         course: "Engenharia Elétrica",
       };
 
@@ -131,22 +130,6 @@ describe("Zod Validation Schemas", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.errors[0].message).toContain("símbolo");
-      }
-    });
-
-    it("deve rejeitar quando senhas não coincidem", () => {
-      const invalidData = {
-        name: "João Silva",
-        email: "joao@example.com",
-        password: "Senha123!",
-        confirmPassword: "Senha456!",
-        course: "Engenharia Elétrica",
-      };
-
-      const result = signupSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.errors[0].message).toContain("não coincidem");
       }
     });
 

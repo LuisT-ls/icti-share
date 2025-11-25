@@ -34,7 +34,6 @@ export const signupSchema = z
         /[^A-Za-z0-9]/,
         "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
       ),
-    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
     course: z
       .string({
         required_error: "Selecione um curso",
@@ -52,24 +51,6 @@ export const signupSchema = z
           message: "Selecione um curso válido",
         }
       ),
-  })
-  .superRefine((data, ctx) => {
-    // Validar correspondência de senhas apenas se ambos estiverem preenchidos
-    // e tiverem pelo menos 1 caractere (já que min(1) valida isso)
-    if (
-      data.password &&
-      data.password.length > 0 &&
-      data.confirmPassword &&
-      data.confirmPassword.length > 0
-    ) {
-      if (data.password !== data.confirmPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "As senhas não coincidem",
-          path: ["confirmPassword"],
-        });
-      }
-    }
   })
   .refine((data) => data.course && data.course !== "", {
     message: "Selecione um curso",

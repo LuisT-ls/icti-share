@@ -15,7 +15,6 @@ test.describe("Fluxo de Autenticação", () => {
     await page.fill('input[name="name"]', name);
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', password);
-    await page.fill('input[name="confirmPassword"]', password);
     // Selecionar curso (obrigatório)
     await page.selectOption("select#course", "Engenharia Elétrica");
 

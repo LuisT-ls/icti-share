@@ -45,7 +45,6 @@ export default function SignupPage() {
   });
 
   const password = watch("password");
-  const confirmPassword = watch("confirmPassword");
   const course = watch("course");
   const name = watch("name");
   const email = watch("email");
@@ -57,13 +56,8 @@ export default function SignupPage() {
     email &&
     password &&
     password.length >= 8 &&
-    confirmPassword &&
     course &&
     course !== "";
-
-  // Verificar se as senhas coincidem
-  const passwordsMatch =
-    password && confirmPassword && password === confirmPassword;
 
   // Verificar se a senha atende aos requisitos
   const passwordMeetsRequirements =
@@ -80,11 +74,7 @@ export default function SignupPage() {
 
   // Formulário válido quando todos os critérios são atendidos
   const isFormValid =
-    allFieldsFilled &&
-    passwordsMatch &&
-    passwordMeetsRequirements &&
-    courseIsValid &&
-    isValid;
+    allFieldsFilled && passwordMeetsRequirements && courseIsValid && isValid;
 
   const onSubmit = async (data: SignupFormData) => {
     setServerError(null);
@@ -236,36 +226,6 @@ export default function SignupPage() {
                     </p>
                   )}
                   <PasswordStrengthIndicator password={password || ""} />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="block text-sm font-medium mb-2"
-                  >
-                    Confirmar Senha <span className="text-destructive">*</span>
-                  </label>
-                  <PasswordInput
-                    id="confirmPassword"
-                    {...register("confirmPassword")}
-                    placeholder="Digite a senha novamente"
-                    aria-required="true"
-                    aria-invalid={errors.confirmPassword ? "true" : "false"}
-                    aria-describedby={
-                      errors.confirmPassword
-                        ? "confirmPassword-error"
-                        : undefined
-                    }
-                  />
-                  {errors.confirmPassword && (
-                    <p
-                      id="confirmPassword-error"
-                      className="mt-1 text-sm text-destructive"
-                      role="alert"
-                    >
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
                 </div>
 
                 <div>
