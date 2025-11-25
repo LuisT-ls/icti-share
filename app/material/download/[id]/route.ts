@@ -136,7 +136,8 @@ export async function GET(
     });
 
     // Retornar arquivo com headers de segurança
-    const response = new NextResponse(fileBuffer, {
+    // Converter Buffer para Uint8Array para compatibilidade com NextResponse
+    const response = new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         "Content-Type": material.mimeType,
         "Content-Disposition": `attachment; filename="${encodeURIComponent(material.filename)}"`,
