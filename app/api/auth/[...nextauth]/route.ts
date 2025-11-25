@@ -13,4 +13,10 @@ if (!process.env.AUTH_URL && !process.env.NEXTAUTH_URL) {
   );
 }
 
+if (!process.env.DATABASE_URL) {
+  console.error(
+    "❌ DATABASE_URL não está configurado. NextAuth não funcionará."
+  );
+}
+
 export const { GET, POST } = handlers;

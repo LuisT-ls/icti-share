@@ -172,7 +172,7 @@ export async function login(formData: FormData) {
     });
 
     if (result?.error) {
-      console.error("Erro no signIn:", result.error, result);
+      console.error("[LOGIN] Erro no signIn:", result.error, result);
       // CredentialsSignin significa que o authorize retornou null
       if (result.error === "CredentialsSignin") {
         return {
@@ -180,8 +180,16 @@ export async function login(formData: FormData) {
             "Email ou senha incorretos. Verifique suas credenciais e tente novamente.",
         };
       }
+      // Outros erros do NextAuth
+      const errorMessage =
+        result.error === "Configuration"
+          ? "Erro de configuração do servidor. Entre em contato com o suporte."
+          : result.error === "AccessDenied"
+            ? "Acesso negado. Verifique suas credenciais."
+            : `Erro ao fazer login: ${result.error}`;
+
       return {
-        error: `Erro ao fazer login: ${result.error}`,
+        error: errorMessage,
       };
     }
 

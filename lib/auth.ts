@@ -67,6 +67,12 @@ export const authConfig: NextAuthConfig = {
       },
       async authorize(credentials) {
         try {
+          // Verificar se DATABASE_URL está configurado
+          if (!process.env.DATABASE_URL) {
+            console.error("❌ DATABASE_URL não está configurado");
+            throw new Error("DATABASE_URL não configurado");
+          }
+
           if (!credentials?.email || !credentials?.password) {
             console.error("Credenciais incompletas");
             return null;
@@ -87,23 +93,25 @@ export const authConfig: NextAuthConfig = {
           // Normalizar email (já vem normalizado do schema, mas garantir)
           const normalizedEmail = email.toLowerCase().trim();
 
-          console.log(`Tentativa de login para: ${normalizedEmail}`);
+          console.log(`[AUTH] Tentativa de login para: ${normalizedEmail}`);
 
           const user = await prisma.user.findUnique({
             where: { email: normalizedEmail },
           });
 
           if (!user) {
-            console.error(`Usuário não encontrado: ${email}`);
+            console.error(`[AUTH] Usuário não encontrado: ${normalizedEmail}`);
             return null;
           }
 
           if (!user.passwordHash) {
-            console.error(`Usuário sem senha cadastrada: ${email}`);
+            console.error(
+              `[AUTH] Usuário sem senha cadastrada: ${normalizedEmail}`
+            );
             return null;
           }
 
-          console.log(`Verificando senha para usuário: ${user.id}`);
+          console.log(`[AUTH] Verificando senha para usuário: ${user.id}`);
 
           const isValidPassword = await bcrypt.compare(
             password,
@@ -111,11 +119,11 @@ export const authConfig: NextAuthConfig = {
           );
 
           if (!isValidPassword) {
-            console.error(`Senha inválida para: ${email}`);
+            console.error(`[AUTH] Senha inválida para: ${normalizedEmail}`);
             return null;
           }
 
-          console.log(`Login bem-sucedido para: ${email}`);
+          console.log(`[AUTH] ✅ Login bem-sucedido para: ${normalizedEmail}`);
 
           return {
             id: user.id,
@@ -124,9 +132,17 @@ export const authConfig: NextAuthConfig = {
             role: user.role,
           };
         } catch (error) {
-          console.error("Erro no authorize:", error);
+          console.error("[AUTH] ❌ Erro no authorize:", error);
           if (error instanceof Error) {
-            console.error("Detalhes do erro:", error.message, error.stack);
+            console.error("[AUTH] Detalhes:", error.message);
+            console.error("[AUTH] Stack:", error.stack);
+          }
+          // Não retornar null em caso de erro de conexão - lançar erro
+          if (
+            error instanceof Error &&
+            error.message.includes("DATABASE_URL")
+          ) {
+            throw error;
           }
           return null;
         }

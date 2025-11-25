@@ -12,3 +12,9 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
+// Verificar conexão na inicialização (apenas em produção para debug)
+if (process.env.NODE_ENV === "production" && !globalForPrisma.prisma) {
+  prisma.$connect().catch((error) => {
+    console.error("❌ Erro ao conectar Prisma:", error);
+  });
+}
