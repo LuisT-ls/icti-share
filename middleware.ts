@@ -1,7 +1,33 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getSecurityHeaders } from "@/lib/security/headers";
+
+// Headers de segurança inline para reduzir tamanho do bundle
+function getSecurityHeaders(): Record<string, string> {
+  const isDev = process.env.NODE_ENV === "development";
+
+  const csp = isDev
+    ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';"
+    : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';";
+
+  return {
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "X-XSS-Protection": "1; mode=block",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy":
+      "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "Content-Security-Policy": csp,
+  };
+}
+
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  const headers = getSecurityHeaders();
+  for (const [key, value] of Object.entries(headers)) {
+    response.headers.set(key, value);
+  }
+  return response;
+}
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -23,13 +49,7 @@ export default auth((req) => {
 
   // Se for rota pública, permitir acesso
   if (isPublicRoute) {
-    const response = NextResponse.next();
-    // Aplicar headers de segurança
-    const securityHeaders = getSecurityHeaders();
-    for (const [key, value] of Object.entries(securityHeaders)) {
-      response.headers.set(key, value);
-    }
-    return response;
+    return applySecurityHeaders(NextResponse.next());
   }
 
   // Rotas protegidas
@@ -43,33 +63,15 @@ export default auth((req) => {
     // Redirecionar para login se não estiver autenticado
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    const response = NextResponse.redirect(loginUrl);
-    // Aplicar headers de segurança mesmo no redirect
-    const securityHeaders = getSecurityHeaders();
-    for (const [key, value] of Object.entries(securityHeaders)) {
-      response.headers.set(key, value);
-    }
-    return response;
+    return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   // Proteção de rotas admin
   if (pathname.startsWith("/admin") && session?.user?.role !== "ADMIN") {
-    const response = NextResponse.redirect(new URL("/", req.url));
-    // Aplicar headers de segurança
-    const securityHeaders = getSecurityHeaders();
-    for (const [key, value] of Object.entries(securityHeaders)) {
-      response.headers.set(key, value);
-    }
-    return response;
+    return applySecurityHeaders(NextResponse.redirect(new URL("/", req.url)));
   }
 
-  const response = NextResponse.next();
-  // Aplicar headers de segurança
-  const securityHeaders = getSecurityHeaders();
-  for (const [key, value] of Object.entries(securityHeaders)) {
-    response.headers.set(key, value);
-  }
-  return response;
+  return applySecurityHeaders(NextResponse.next());
 });
 
 export const config = {
@@ -83,5 +85,5 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
+  runtime: "nodejs", // Usar Node.js runtime para suportar NextAuth com Prisma
 };
-
