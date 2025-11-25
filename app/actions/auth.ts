@@ -172,12 +172,16 @@ export async function login(formData: FormData) {
     });
 
     if (result?.error) {
-      console.error("Erro no signIn:", result.error);
+      console.error("Erro no signIn:", result.error, result);
+      // CredentialsSignin significa que o authorize retornou null
+      if (result.error === "CredentialsSignin") {
+        return {
+          error:
+            "Email ou senha incorretos. Verifique suas credenciais e tente novamente.",
+        };
+      }
       return {
-        error:
-          result.error === "CredentialsSignin"
-            ? "Email ou senha incorretos"
-            : "Erro ao fazer login. Tente novamente.",
+        error: `Erro ao fazer login: ${result.error}`,
       };
     }
 

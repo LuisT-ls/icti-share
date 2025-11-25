@@ -67,17 +67,30 @@ export const authConfig: NextAuthConfig = {
       },
       async authorize(credentials) {
         try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error("Credenciais incompletas");
+            return null;
+          }
+
           const parsed = loginSchema.safeParse(credentials);
 
           if (!parsed.success) {
-            console.error("Erro na validação de credenciais:", parsed.error);
+            console.error(
+              "Erro na validação de credenciais:",
+              parsed.error.errors
+            );
             return null;
           }
 
           const { email, password } = parsed.data;
 
+          // Normalizar email (já vem normalizado do schema, mas garantir)
+          const normalizedEmail = email.toLowerCase().trim();
+
+          console.log(`Tentativa de login para: ${normalizedEmail}`);
+
           const user = await prisma.user.findUnique({
-            where: { email },
+            where: { email: normalizedEmail },
           });
 
           if (!user) {
@@ -86,9 +99,11 @@ export const authConfig: NextAuthConfig = {
           }
 
           if (!user.passwordHash) {
-            console.error(`Usuário sem senha: ${email}`);
+            console.error(`Usuário sem senha cadastrada: ${email}`);
             return null;
           }
+
+          console.log(`Verificando senha para usuário: ${user.id}`);
 
           const isValidPassword = await bcrypt.compare(
             password,
@@ -100,6 +115,8 @@ export const authConfig: NextAuthConfig = {
             return null;
           }
 
+          console.log(`Login bem-sucedido para: ${email}`);
+
           return {
             id: user.id,
             email: user.email,
@@ -108,6 +125,9 @@ export const authConfig: NextAuthConfig = {
           };
         } catch (error) {
           console.error("Erro no authorize:", error);
+          if (error instanceof Error) {
+            console.error("Detalhes do erro:", error.message, error.stack);
+          }
           return null;
         }
       },
