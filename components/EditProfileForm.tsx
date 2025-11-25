@@ -7,7 +7,10 @@ import { updateProfile } from "@/app/actions/profile";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
-import { editProfileSchema, type EditProfileFormData } from "@/lib/validations/schemas";
+import {
+  editProfileSchema,
+  type EditProfileFormData,
+} from "@/lib/validations/schemas";
 
 interface EditProfileFormProps {
   defaultName: string;
@@ -44,7 +47,7 @@ export function EditProfileForm({ defaultName }: EditProfileFormProps) {
         router.refresh();
       }, 2000);
     } else {
-      setServerError(result.error);
+      setServerError(result.error ?? null);
     }
   };
 
@@ -64,19 +67,31 @@ export function EditProfileForm({ defaultName }: EditProfileFormProps) {
           aria-describedby={errors.name ? "name-error" : undefined}
         />
         {errors.name && (
-          <p id="name-error" className="mt-1 text-sm text-destructive" role="alert">
+          <p
+            id="name-error"
+            className="mt-1 text-sm text-destructive"
+            role="alert"
+          >
             {errors.name.message}
           </p>
         )}
       </div>
       {serverError && (
-        <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
+        <div
+          className="rounded-md bg-destructive/10 p-4 border border-destructive/20"
+          role="alert"
+        >
           <p className="text-sm text-destructive">{serverError}</p>
         </div>
       )}
       {success && (
-        <div className="rounded-md bg-green-50 p-4 border border-green-200" role="alert">
-          <p className="text-sm text-green-800">Perfil atualizado com sucesso!</p>
+        <div
+          className="rounded-md bg-green-50 p-4 border border-green-200"
+          role="alert"
+        >
+          <p className="text-sm text-green-800">
+            Perfil atualizado com sucesso!
+          </p>
         </div>
       )}
       <Button type="submit" disabled={isSubmitting}>
@@ -85,4 +100,3 @@ export function EditProfileForm({ defaultName }: EditProfileFormProps) {
     </form>
   );
 }
-
