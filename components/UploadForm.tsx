@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useState, useTransition } from "react";
 import { uploadMaterial } from "@/app/actions/upload";
 import { useRouter } from "next/navigation";
@@ -11,28 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Upload, FileText } from "lucide-react";
-
-const uploadFormSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório").max(200, "Título muito longo"),
-  description: z.string().max(1000, "Descrição muito longa").optional().or(z.literal("")),
-  course: z.string().max(100).optional().or(z.literal("")),
-  discipline: z.string().max(100).optional().or(z.literal("")),
-  semester: z.string().max(50).optional().or(z.literal("")),
-  type: z.string().max(50).optional().or(z.literal("")),
-  file: z
-    .any()
-    .refine((file) => file instanceof File && file.size > 0, {
-      message: "Arquivo é obrigatório",
-    })
-    .refine((file) => file instanceof File && file.size <= 25 * 1024 * 1024, {
-      message: "Arquivo muito grande. Tamanho máximo: 25 MB",
-    })
-    .refine((file) => file instanceof File && file.type === "application/pdf", {
-      message: "Apenas arquivos PDF são permitidos",
-    }),
-});
-
-type UploadFormData = z.infer<typeof uploadFormSchema>;
+import { uploadMaterialSchema, type UploadMaterialFormData } from "@/lib/validations/schemas";
 
 export function UploadForm() {
   const router = useRouter();
@@ -47,8 +25,8 @@ export function UploadForm() {
     formState: { errors },
     watch,
     reset,
-  } = useForm<UploadFormData>({
-    resolver: zodResolver(uploadFormSchema),
+  } = useForm<UploadMaterialFormData>({
+    resolver: zodResolver(uploadMaterialSchema),
   });
 
   const selectedFile = watch("file") as FileList | undefined;
@@ -58,7 +36,7 @@ export function UploadForm() {
     setFilePreview(selectedFile[0].name);
   }
 
-  const onSubmit = async (data: UploadFormData) => {
+  const onSubmit = async (data: UploadMaterialFormData) => {
     setError(null);
     setSuccess(null);
 

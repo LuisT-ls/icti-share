@@ -1,9 +1,10 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/actions/auth";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,28 +13,43 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full" size="lg">
-      {pending ? "Entrando..." : "Entrar"}
-    </Button>
-  );
-}
+import { loginSchema, type LoginFormData } from "@/lib/validations/schemas";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
-  const [state, formAction] = useFormState(login, null);
+  const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push(callbackUrl);
-      router.refresh();
-    }
-  }, [state, router, callbackUrl]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null);
+
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+
+      try {
+        const result = await login(formData);
+        // Se houver erro, exibir mensagem
+        if (result?.error) {
+          setServerError(result.error);
+        }
+      } catch (error) {
+        // Se houver redirect (NEXT_REDIRECT), o Next.js cuida automaticamente
+        // Não precisamos fazer nada aqui
+      }
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -53,42 +69,56 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={formAction} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email
+                    Email <span className="text-destructive">*</span>
                   </label>
                   <Input
                     id="email"
-                    name="email"
                     type="email"
-                    required
+                    {...register("email")}
                     placeholder="seu@email.com"
                     aria-required="true"
+                    aria-invalid={errors.email ? "true" : "false"}
+                    aria-describedby={errors.email ? "email-error" : undefined}
                   />
+                  {errors.email && (
+                    <p id="email-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium mb-2">
-                    Senha
+                    Senha <span className="text-destructive">*</span>
                   </label>
                   <Input
                     id="password"
-                    name="password"
                     type="password"
-                    required
+                    {...register("password")}
                     placeholder="••••••••"
                     aria-required="true"
+                    aria-invalid={errors.password ? "true" : "false"}
+                    aria-describedby={errors.password ? "password-error" : undefined}
                   />
+                  {errors.password && (
+                    <p id="password-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
-                {state?.error && (
+                {serverError && (
                   <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
-                    <p className="text-sm text-destructive">{state.error}</p>
+                    <p className="text-sm text-destructive">{serverError}</p>
                   </div>
                 )}
 
-                <SubmitButton />
+                <Button type="submit" disabled={isPending} className="w-full" size="lg">
+                  {isPending ? "Entrando..." : "Entrar"}
+                </Button>
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">

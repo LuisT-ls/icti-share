@@ -1,9 +1,10 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signup } from "@/app/actions/auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,26 +12,40 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full" size="lg">
-      {pending ? "Criando conta..." : "Criar conta"}
-    </Button>
-  );
-}
+import { signupSchema, type SignupFormData } from "@/lib/validations/schemas";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [state, formAction] = useFormState(signup, null);
+  const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/");
-      router.refresh();
-    }
-  }, [state, router]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
+
+  const onSubmit = async (data: SignupFormData) => {
+    setServerError(null);
+
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+
+      const result = await signup(formData);
+
+      if (result?.error) {
+        setServerError(result.error);
+      } else if (result?.success) {
+        router.push("/");
+        router.refresh();
+      }
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -50,60 +65,79 @@ export default function SignupPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={formAction} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Nome
+                    Nome <span className="text-destructive">*</span>
                   </label>
                   <Input
                     id="name"
-                    name="name"
                     type="text"
-                    required
+                    {...register("name")}
                     placeholder="Seu nome"
                     aria-required="true"
+                    aria-invalid={errors.name ? "true" : "false"}
+                    aria-describedby={errors.name ? "name-error" : undefined}
                   />
+                  {errors.name && (
+                    <p id="name-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email
+                    Email <span className="text-destructive">*</span>
                   </label>
                   <Input
                     id="email"
-                    name="email"
                     type="email"
-                    required
+                    {...register("email")}
                     placeholder="seu@email.com"
                     aria-required="true"
+                    aria-invalid={errors.email ? "true" : "false"}
+                    aria-describedby={errors.email ? "email-error" : undefined}
                   />
+                  {errors.email && (
+                    <p id="email-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium mb-2">
-                    Senha
+                    Senha <span className="text-destructive">*</span>
                   </label>
                   <Input
                     id="password"
-                    name="password"
                     type="password"
-                    required
-                    minLength={6}
+                    {...register("password")}
                     placeholder="••••••••"
                     aria-required="true"
+                    aria-invalid={errors.password ? "true" : "false"}
+                    aria-describedby={errors.password ? "password-error" : undefined}
                   />
+                  {errors.password && (
+                    <p id="password-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.password.message}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-muted-foreground">
                     Mínimo de 6 caracteres
                   </p>
                 </div>
 
-                {state?.error && (
+                {serverError && (
                   <div className="rounded-md bg-destructive/10 p-4 border border-destructive/20" role="alert">
-                    <p className="text-sm text-destructive">{state.error}</p>
+                    <p className="text-sm text-destructive">{serverError}</p>
                   </div>
                 )}
 
-                <SubmitButton />
+                <Button type="submit" disabled={isPending} className="w-full" size="lg">
+                  {isPending ? "Criando conta..." : "Criar conta"}
+                </Button>
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">

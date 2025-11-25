@@ -3,11 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-
-const updateProfileSchema = z.object({
-  name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres").max(100),
-});
+import { editProfileSchema } from "@/lib/validations/schemas";
 
 export async function updateProfile(formData: FormData) {
   const session = await getServerSession();
@@ -20,7 +16,7 @@ export async function updateProfile(formData: FormData) {
     name: formData.get("name") as string,
   };
 
-  const parsed = updateProfileSchema.safeParse(rawData);
+    const parsed = editProfileSchema.safeParse(rawData);
 
   if (!parsed.success) {
     return {

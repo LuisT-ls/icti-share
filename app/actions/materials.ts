@@ -5,6 +5,7 @@ import { getServerSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { unlink } from "fs/promises";
 import { existsSync } from "fs";
+import { editMaterialSchema } from "@/lib/validations/schemas";
 
 export async function deleteMaterial(materialId: string) {
   const session = await getServerSession();
@@ -54,14 +55,7 @@ export async function deleteMaterial(materialId: string) {
 
 export async function updateMaterial(
   materialId: string,
-  data: {
-    title?: string;
-    description?: string;
-    course?: string;
-    discipline?: string;
-    semester?: string;
-    type?: string;
-  }
+  formData: FormData
 ) {
   const session = await getServerSession();
 
@@ -86,15 +80,34 @@ export async function updateMaterial(
       return { success: false, error: "Sem permissão para editar este material" };
     }
 
+    // Validar dados do formulário
+    const rawData = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string | null,
+      course: formData.get("course") as string | null,
+      discipline: formData.get("discipline") as string | null,
+      semester: formData.get("semester") as string | null,
+      type: formData.get("type") as string | null,
+    };
+
+    const parsed = editMaterialSchema.safeParse(rawData);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.errors[0]?.message || "Dados inválidos",
+      };
+    }
+
     await prisma.material.update({
       where: { id: materialId },
       data: {
-        title: data.title,
-        description: data.description,
-        course: data.course,
-        discipline: data.discipline,
-        semester: data.semester,
-        type: data.type,
+        title: parsed.data.title,
+        description: parsed.data.description || null,
+        course: parsed.data.course || null,
+        discipline: parsed.data.discipline || null,
+        semester: parsed.data.semester || null,
+        type: parsed.data.type || null,
       },
     });
 

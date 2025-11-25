@@ -2,23 +2,14 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
+import { uploadMaterialServerSchema } from "@/lib/validations/schemas";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB em bytes
 const ALLOWED_MIME_TYPES = ["application/pdf"];
-
-const uploadSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório").max(200, "Título muito longo"),
-  description: z.string().max(1000, "Descrição muito longa").optional(),
-  course: z.string().max(100).optional(),
-  discipline: z.string().max(100).optional(),
-  semester: z.string().max(50).optional(),
-  type: z.string().max(50).optional(),
-});
 
 type UploadResult =
   | { success: true; materialId: string }
@@ -47,7 +38,7 @@ export async function uploadMaterial(
       type: formData.get("type") as string | null,
     };
 
-    const parsed = uploadSchema.safeParse(rawData);
+    const parsed = uploadMaterialServerSchema.safeParse(rawData);
     if (!parsed.success) {
       return {
         success: false,

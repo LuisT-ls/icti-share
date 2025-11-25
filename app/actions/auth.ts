@@ -4,19 +4,8 @@ import { signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { z } from "zod";
 import { redirect } from "next/navigation";
-
-const signupSchema = z.object({
-  name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-});
-
-const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-});
+import { signupSchema, loginSchema } from "@/lib/validations/schemas";
 
 export async function signup(formData: FormData) {
   const rawData = {
