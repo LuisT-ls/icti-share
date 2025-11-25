@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { UserRole } from "@prisma/client";
 
 interface PendingMaterial {
   id: string;
@@ -55,7 +56,7 @@ interface User {
   id: string;
   name: string | null;
   email: string;
-  role: string;
+  role: UserRole;
   createdAt: Date;
   _count: {
     uploadedMaterials: number;
