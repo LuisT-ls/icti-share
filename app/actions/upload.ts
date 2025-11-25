@@ -193,10 +193,22 @@ export async function uploadMaterial(
     const buffer = Buffer.from(arrayBuffer);
     console.log("📦 Buffer lido, tamanho:", buffer.length);
 
-    // Salvar arquivo
-    console.log("💾 Salvando arquivo no disco...");
-    await writeFile(filePath, buffer);
-    console.log("✅ Arquivo salvo com sucesso");
+    // No Vercel, armazenar conteúdo em base64 no banco (solução temporária)
+    // No Railway/local, salvar no sistema de arquivos
+    let finalPath = filePath;
+    if (isVercel) {
+      console.log(
+        "🌐 Vercel detectado: armazenando arquivo em base64 no banco"
+      );
+      const base64Content = buffer.toString("base64");
+      finalPath = `base64:${base64Content}`;
+      console.log("✅ Arquivo convertido para base64 e será salvo no banco");
+    } else {
+      // Salvar arquivo no disco (Railway/local)
+      console.log("💾 Salvando arquivo no disco...");
+      await writeFile(filePath, buffer);
+      console.log("✅ Arquivo salvo com sucesso no disco");
+    }
 
     // Salvar metadados no banco
     console.log("💾 Salvando metadados no banco de dados...");
@@ -205,7 +217,7 @@ export async function uploadMaterial(
         title: parsed.data.title,
         description: parsed.data.description || null,
         filename: originalFilename,
-        path: filePath,
+        path: finalPath, // Usar finalPath (pode ser base64 no Vercel ou caminho no Railway)
         mimeType: file.type,
         size: file.size,
         uploadedById: session.user.id,

@@ -73,16 +73,43 @@ export async function GET(
       );
     }
 
-    // Verificar se o arquivo existe
-    if (!existsSync(material.path)) {
-      return NextResponse.json(
-        { error: "Arquivo não encontrado no servidor" },
-        { status: 404 }
-      );
-    }
+    // Verificar se o arquivo está armazenado em base64 (Vercel) ou no sistema de arquivos
+    let fileBuffer: Buffer;
 
-    // Ler arquivo
-    const fileBuffer = await readFile(material.path);
+    if (material.path.startsWith("base64:")) {
+      // Arquivo armazenado em base64 no banco (Vercel)
+      console.log("📦 Arquivo armazenado em base64, decodificando...");
+      try {
+        const base64Content = material.path.substring(7); // Remove prefixo "base64:"
+        fileBuffer = Buffer.from(base64Content, "base64");
+        console.log(
+          "✅ Arquivo decodificado com sucesso, tamanho:",
+          fileBuffer.length
+        );
+      } catch (error) {
+        console.error("❌ Erro ao decodificar arquivo base64:", error);
+        return NextResponse.json(
+          { error: "Erro ao processar arquivo" },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Arquivo armazenado no sistema de arquivos (Railway/local)
+      console.log(
+        "📁 Verificando arquivo no sistema de arquivos:",
+        material.path
+      );
+      if (!existsSync(material.path)) {
+        console.error("❌ Arquivo não encontrado no caminho:", material.path);
+        return NextResponse.json(
+          { error: "Arquivo não encontrado no servidor" },
+          { status: 404 }
+        );
+      }
+      console.log("📖 Lendo arquivo do disco...");
+      fileBuffer = await readFile(material.path);
+      console.log("✅ Arquivo lido com sucesso, tamanho:", fileBuffer.length);
+    }
 
     // IP e userId já obtidos acima para rate limiting
 
