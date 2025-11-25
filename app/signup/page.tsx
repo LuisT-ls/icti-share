@@ -40,7 +40,8 @@ export default function SignupPage() {
     formState: { errors, isValid },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    mode: "onChange", // Validar em tempo real
+    mode: "onTouched", // Validar apenas após o campo ser tocado
+    reValidateMode: "onChange", // Revalidar em tempo real após primeira validação
   });
 
   const password = watch("password");
@@ -246,18 +247,7 @@ export default function SignupPage() {
                   </label>
                   <PasswordInput
                     id="confirmPassword"
-                    {...register("confirmPassword", {
-                      required: "Confirmação de senha é obrigatória",
-                      validate: (value) => {
-                        if (!value || value === "") {
-                          return "Confirmação de senha é obrigatória";
-                        }
-                        if (value !== password) {
-                          return "As senhas não coincidem";
-                        }
-                        return true;
-                      },
-                    })}
+                    {...register("confirmPassword")}
                     placeholder="Digite a senha novamente"
                     aria-required="true"
                     aria-invalid={errors.confirmPassword ? "true" : "false"}
