@@ -68,7 +68,7 @@ export async function generateMetadata({
       siteName: "ICTI Share",
       images: [
         {
-          url: `${baseUrl}/og-image.png`,
+          url: `${baseUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
           alt: title,
@@ -86,7 +86,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [`${baseUrl}/og-image.png`],
+      images: [`${baseUrl}/og-image.jpg`],
     },
   };
 }

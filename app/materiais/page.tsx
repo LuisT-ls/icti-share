@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "ICTI Share",
     images: [
       {
-        url: `${baseUrl}/og-image.png`,
+        url: `${baseUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: "Materiais Acadêmicos - ICTI Share",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: "Materiais Acadêmicos - ICTI Share",
     description:
       "Explore todos os materiais acadêmicos disponíveis na plataforma.",
-    images: [`${baseUrl}/og-image.png`],
+    images: [`${baseUrl}/og-image.jpg`],
   },
 };
 

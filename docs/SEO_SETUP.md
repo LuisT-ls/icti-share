@@ -51,7 +51,7 @@ Este documento descreve as melhorias de SEO implementadas na aplicação ICTI Sh
 
 ### Opção 1: Imagem Estática (Recomendado)
 
-Crie uma imagem estática em `public/og-image.png` com as seguintes especificações:
+Crie uma imagem estática em `public/og-image.jpg` (ou `og-image.png`) com as seguintes especificações:
 
 - **Dimensões**: 1200x630 pixels
 - **Formato**: PNG ou JPG

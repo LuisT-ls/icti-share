@@ -51,7 +51,7 @@ export const metadata: Metadata = {
       "Plataforma acadêmica para compartilhamento de materiais de estudo. Acesse, compartilhe e aprenda juntos.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "ICTI Share - Plataforma de Compartilhamento de Materiais Acadêmicos",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
       "ICTI Share - Plataforma de Compartilhamento de Materiais Acadêmicos",
     description:
       "Plataforma acadêmica para compartilhamento de materiais de estudo. Acesse, compartilhe e aprenda juntos.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
     creator: "@ictishare",
   },
   robots: {

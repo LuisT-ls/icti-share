@@ -35,7 +35,7 @@ export function generateOpenGraphMetadata({
     siteName: "ICTI Share",
     images: [
       {
-        url: image || `${baseUrl}/og-image.png`,
+        url: image || `${baseUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: title,
@@ -64,7 +64,7 @@ export function generateTwitterMetadata({
     card,
     title,
     description,
-    images: [image || `${baseUrl}/og-image.png`],
+    images: [image || `${baseUrl}/og-image.jpg`],
   };
 }
 
