@@ -11,16 +11,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import {
-  FileText,
-  Download,
-  Calendar,
-  User,
-  GraduationCap,
-  BookOpen,
-  CalendarDays,
-  Tag,
-} from "lucide-react";
+import { FileText, Download, Calendar, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -54,17 +45,13 @@ export function MaterialCard({
   uploadedBy,
   variant = "default",
 }: MaterialCardProps) {
-  // Organizar metadados em grupos visuais
+  // Organizar metadados em lista minimalista
   const metadataItems = [
-    course && { label: course, icon: GraduationCap, key: "course" },
-    discipline && { label: discipline, icon: BookOpen, key: "discipline" },
-    semester && { label: semester, icon: CalendarDays, key: "semester" },
-    type && { label: type, icon: Tag, key: "type" },
-  ].filter(Boolean) as Array<{
-    label: string;
-    icon: typeof GraduationCap;
-    key: string;
-  }>;
+    course && { label: "Curso", value: course },
+    discipline && { label: "Disciplina", value: discipline },
+    semester && { label: "Semestre", value: semester },
+    type && { label: "Tipo", value: type },
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   return (
     <motion.div
@@ -100,36 +87,35 @@ export function MaterialCard({
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col gap-4">
-          {/* Metadados organizados em grid */}
+        <CardContent className="flex-1 flex flex-col gap-3">
+          {/* Metadados organizados em lista minimalista */}
           {metadataItems.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {metadataItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.key}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-muted/40 border border-border/50"
-                  >
-                    <Icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                    <span className="text-xs text-foreground font-medium truncate">
-                      {item.label}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="space-y-1.5 px-1">
+              {metadataItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 text-xs text-muted-foreground"
+                >
+                  <span className="font-medium text-foreground/70 min-w-[70px]">
+                    {item.label}:
+                  </span>
+                  <span className="text-muted-foreground truncate">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
 
           {/* Estatísticas e informações */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
               <Download className="h-3.5 w-3.5" />
               <span className="font-medium">{downloadsCount}</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
               <Calendar className="h-3.5 w-3.5" />
-              <span className="whitespace-nowrap">
+              <span>
                 {formatDistanceToNow(new Date(createdAt), {
                   addSuffix: true,
                   locale: ptBR,
