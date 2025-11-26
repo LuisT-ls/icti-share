@@ -28,7 +28,28 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npx next lint
+        run: |
+          # Debug: Verificar estrutura do projeto
+          echo "=== Debug Info ==="
+          echo "Diretório atual: $(pwd)"
+          echo "Conteúdo do diretório:"
+          ls -la | head -20
+          echo ""
+          echo "Verificando arquivos de configuração:"
+          test -f .eslintrc.json && echo "✓ .eslintrc.json encontrado" || echo "✗ .eslintrc.json NÃO encontrado"
+          test -f next.config.js && echo "✓ next.config.js encontrado" || echo "✗ next.config.js NÃO encontrado"
+          test -f package.json && echo "✓ package.json encontrado" || echo "✗ package.json NÃO encontrado"
+          echo ""
+          echo "Verificando script de lint no package.json:"
+          grep -A 1 '"lint"' package.json || echo "Script lint não encontrado"
+          echo ""
+          echo "=== Executando lint ==="
+          # Executar usando o script do package.json
+          # O problema pode estar relacionado à forma como o Next.js interpreta argumentos
+          npm run lint 2>&1 || {
+            echo "Erro ao executar npm run lint, tentando npx next lint diretamente..."
+            npx next lint
+          }
 
       - name: Run tests
         run: npm run test:coverage
@@ -45,9 +66,12 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: always()
+        continue-on-error: true
         with:
           files: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+          verbose: true
 
   e2e:
     runs-on: ubuntu-latest
