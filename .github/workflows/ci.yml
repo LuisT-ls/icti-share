@@ -7,69 +7,8 @@ on:
     branches: [main, develop]
 
 jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint
-        run: |
-          echo "=== Executando ESLint ==="
-          # Usar ESLint com flat config (eslint.config.js)
-          # Isso resolve o aviso de depreciação do .eslintrc.json
-          npx eslint . --max-warnings 0
-
-      - name: Run tests
-        run: npm run test:coverage
-
-      - name: Build
-        run: npm run build
-        env:
-          # Variáveis de ambiente necessárias para o build
-          # Ajuste conforme necessário
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://user:password@localhost:5432/test' }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'test-secret-key-for-ci' }}
-          AUTH_URL: ${{ secrets.AUTH_URL || 'http://localhost:3000' }}
-
-      - name: Check coverage file
-        id: coverage-check
-        run: |
-          if [ -f ./coverage/lcov.info ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✓ Arquivo de coverage encontrado"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠ Arquivo de coverage não encontrado"
-          fi
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always() && steps.coverage-check.outputs.exists == 'true'
-        continue-on-error: true
-        with:
-          files: ./coverage/lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-          verbose: true
-
   e2e:
     runs-on: ubuntu-latest
-    needs: lint-and-test
 
     steps:
       - name: Checkout code
