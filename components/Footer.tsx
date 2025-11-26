@@ -45,12 +45,6 @@ export function Footer() {
               >
                 Enviar Material
               </Link>
-              <Link
-                href="/login"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-              >
-                Entrar
-              </Link>
             </nav>
           </div>
 
@@ -63,7 +57,7 @@ export function Footer() {
                 className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
               >
                 <Mail className="h-4 w-4" />
-                <span>contato@icti.edu.br</span>
+                <span>contato@icti.br</span>
               </a>
             </div>
           </div>
@@ -77,7 +71,7 @@ export function Footer() {
               reservados.
             </p>
             <p className="text-xs">
-              Desenvolvido com ❤️ para a comunidade acadêmica
+              Desenvolvido com ❤️ para a comunidade acadêmica - ICTI - Camaçari
             </p>
           </div>
         </div>
