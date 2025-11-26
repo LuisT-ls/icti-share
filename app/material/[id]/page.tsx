@@ -131,7 +131,7 @@ export default async function MaterialDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl">
         <Card className="border-border/50 shadow-xl">
           <CardHeader className="pb-6">
             <div className="flex items-start justify-between gap-4">
@@ -151,7 +151,7 @@ export default async function MaterialDetailPage({
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-6 sm:space-y-8">
             {/* Metadados */}
             <div className="grid md:grid-cols-2 gap-4">
               {material.course && (
@@ -254,27 +254,33 @@ export default async function MaterialDetailPage({
             </div>
 
             {/* Botão de Download */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border/50">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-border/50">
               <Button
                 asChild
                 size="lg"
-                className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 active:scale-[0.98] sm:hover:scale-105"
               >
                 <Link
                   href={`/material/download/${material.id}`}
                   prefetch={false}
+                  className="flex items-center justify-center"
                 >
-                  <Download className="mr-2 h-5 w-5" />
-                  Baixar Material
+                  <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span>Baixar Material</span>
                 </Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-12 text-base font-semibold border-2 hover:bg-accent transition-all duration-200 hover:scale-105"
+                className="w-full sm:w-auto h-11 sm:h-12 text-sm sm:text-base font-semibold border-2 hover:bg-accent transition-all duration-200 active:scale-[0.98] sm:hover:scale-105"
               >
-                <Link href="/materiais">Voltar</Link>
+                <Link
+                  href="/materiais"
+                  className="flex items-center justify-center"
+                >
+                  Voltar
+                </Link>
               </Button>
             </div>
           </CardContent>
