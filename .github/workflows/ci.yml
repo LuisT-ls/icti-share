@@ -29,16 +29,10 @@ jobs:
 
       - name: Run ESLint
         run: |
-          # O Next.js está interpretando "lint" como um diretório (bug conhecido)
-          # Vamos usar ESLint diretamente com a configuração do Next.js
           echo "=== Executando ESLint ==="
-          # Usar ESLint diretamente com a configuração do Next.js
-          # Isso evita o bug do Next.js 16.0.0 que interpreta "lint" como diretório
-          # ESLint 9 suporta .eslintrc.json via ESLINT_USE_FLAT_CONFIG=false
-          ESLINT_USE_FLAT_CONFIG=false npx eslint . \
-            --ext .js,.jsx,.ts,.tsx \
-            --config .eslintrc.json \
-            --max-warnings 0
+          # Usar ESLint com flat config (eslint.config.js)
+          # Isso resolve o aviso de depreciação do .eslintrc.json
+          npx eslint . --max-warnings 0
 
       - name: Run tests
         run: npm run test:coverage
@@ -52,9 +46,20 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'test-secret-key-for-ci' }}
           AUTH_URL: ${{ secrets.AUTH_URL || 'http://localhost:3000' }}
 
+      - name: Check coverage file
+        id: coverage-check
+        run: |
+          if [ -f ./coverage/lcov.info ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✓ Arquivo de coverage encontrado"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠ Arquivo de coverage não encontrado"
+          fi
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: always()
+        if: always() && steps.coverage-check.outputs.exists == 'true'
         continue-on-error: true
         with:
           files: ./coverage/lcov.info
