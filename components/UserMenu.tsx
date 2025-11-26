@@ -1,9 +1,7 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { logout } from "@/app/actions/auth";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -18,8 +16,7 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
 export function UserMenu() {
-  const { data: session, status, update } = useSession();
-  const router = useRouter();
+  const { data: session, status } = useSession();
 
   if (status === "loading") {
     return (
@@ -142,12 +139,12 @@ export function UserMenu() {
           <DropdownMenuItem
             onSelect={async (e) => {
               e.preventDefault();
-              await logout();
-              // Atualizar a sessão no cliente para refletir o logout imediatamente
-              await update();
-              // Redirecionar para a home
-              router.push("/");
-              router.refresh();
+              // Usar signOut do next-auth/react diretamente no cliente com redirect automático
+              // Isso garante que a sessão seja atualizada e a página seja redirecionada corretamente
+              await signOut({
+                redirect: true,
+                callbackUrl: "/",
+              });
             }}
             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
           >
