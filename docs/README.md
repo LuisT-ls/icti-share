@@ -671,6 +671,7 @@ lib/
 - **[TESTING.md](./TESTING.md)** - Guia de testes
 - **[SEED.md](./SEED.md)** - População do banco de dados
 - **[SECURITY.md](./SECURITY.md)** - Implementações de segurança
+- **[GOOGLE_INDEXACAO.md](./GOOGLE_INDEXACAO.md)** - Guia completo para indexar o site no Google
 
 ### Documentos Técnicos
 
