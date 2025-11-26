@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { logout } from "@/app/actions/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -17,7 +18,8 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
 export function UserMenu() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
 
   if (status === "loading") {
     return (
@@ -141,6 +143,11 @@ export function UserMenu() {
             onSelect={async (e) => {
               e.preventDefault();
               await logout();
+              // Atualizar a sessão no cliente para refletir o logout imediatamente
+              await update();
+              // Redirecionar para a home
+              router.push("/");
+              router.refresh();
             }}
             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
           >

@@ -60,7 +60,14 @@ function LoginForm() {
           await update();
           // Redirecionar para a página desejada
           router.push(callbackUrl);
-          router.refresh(); // Forçar atualização da página
+          // Forçar atualização da página para garantir que o nav seja atualizado
+          router.refresh();
+        } else if (!result?.error) {
+          // Se não há erro nem sucesso explícito, ainda assim tentar atualizar e redirecionar
+          // (caso o resultado seja undefined ou não tenha as propriedades esperadas)
+          await update();
+          router.push(callbackUrl);
+          router.refresh();
         }
       } catch (error) {
         // Outros erros

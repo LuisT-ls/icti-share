@@ -189,6 +189,7 @@ export async function login(formData: FormData) {
       redirect: false,
     });
 
+    // Se houver erro, retornar mensagem de erro
     if (result?.error) {
       console.error("[LOGIN] Erro no signIn:", result.error, result);
       // CredentialsSignin significa que o authorize retornou null
@@ -211,14 +212,9 @@ export async function login(formData: FormData) {
       };
     }
 
-    if (result?.ok) {
-      // Retornar sucesso para que o cliente possa atualizar a sessão antes do redirect
-      return { success: true };
-    } else {
-      return {
-        error: "Erro ao fazer login. Tente novamente.",
-      };
-    }
+    // Se não houver erro, considerar como sucesso
+    // No NextAuth v5, quando redirect: false e não há erro, o login foi bem-sucedido
+    return { success: true };
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
@@ -234,5 +230,5 @@ export async function login(formData: FormData) {
 }
 
 export async function logout() {
-  await signOut({ redirectTo: "/" });
+  await signOut({ redirect: false });
 }
