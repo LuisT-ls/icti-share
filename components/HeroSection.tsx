@@ -27,7 +27,7 @@ export function HeroSection({ hasSession }: HeroSectionProps) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-accent/50 text-sm font-medium text-foreground"
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Plataforma Acadêmica</span>

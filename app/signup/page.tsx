@@ -21,6 +21,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { ChevronDown } from "lucide-react";
 import {
   signupSchema,
   type SignupFormData,
@@ -144,7 +145,7 @@ export default function SignupPage() {
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <svg
-                    className="h-6 w-6 text-primary"
+                    className="h-6 w-6 text-accent-light"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -265,41 +266,51 @@ export default function SignupPage() {
                   >
                     Curso <span className="text-destructive">*</span>
                   </label>
-                  <select
-                    id="course"
-                    {...register("course", {
-                      required: "Selecione um curso",
-                      validate: (value) => {
-                        if (!value || value === "") {
-                          return "Selecione um curso";
-                        }
-                        if (
-                          !COURSE_OPTIONS.includes(
-                            value as (typeof COURSE_OPTIONS)[number]
-                          )
-                        ) {
-                          return "Selecione um curso válido";
-                        }
-                        return true;
-                      },
-                    })}
-                    className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-required="true"
-                    aria-invalid={errors.course ? "true" : "false"}
-                    aria-describedby={
-                      errors.course ? "course-error" : undefined
-                    }
-                    defaultValue=""
-                  >
-                    <option value="" disabled>
-                      Selecione um curso
-                    </option>
-                    {COURSE_OPTIONS.map((course) => (
-                      <option key={course} value={course}>
-                        {course}
+                  <div className="relative">
+                    <select
+                      id="course"
+                      {...register("course", {
+                        required: "Selecione um curso",
+                        validate: (value) => {
+                          if (!value || value === "") {
+                            return "Selecione um curso";
+                          }
+                          if (
+                            !COURSE_OPTIONS.includes(
+                              value as (typeof COURSE_OPTIONS)[number]
+                            )
+                          ) {
+                            return "Selecione um curso válido";
+                          }
+                          return true;
+                        },
+                      })}
+                      className={`flex h-11 w-full rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer [&>option]:bg-card [&>option]:text-foreground ${
+                        !course || course === ""
+                          ? "text-muted-foreground"
+                          : "text-foreground"
+                      }`}
+                      style={{
+                        colorScheme: "dark",
+                      }}
+                      aria-required="true"
+                      aria-invalid={errors.course ? "true" : "false"}
+                      aria-describedby={
+                        errors.course ? "course-error" : undefined
+                      }
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Selecione um curso
                       </option>
-                    ))}
-                  </select>
+                      {COURSE_OPTIONS.map((course) => (
+                        <option key={course} value={course}>
+                          {course}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  </div>
                   {errors.course && (
                     <p
                       id="course-error"
@@ -360,7 +371,7 @@ export default function SignupPage() {
                 Já tem uma conta?{" "}
                 <Link
                   href="/login"
-                  className="text-primary hover:underline font-semibold transition-colors"
+                  className="text-accent-light hover:underline font-semibold transition-colors"
                 >
                   Entrar
                 </Link>

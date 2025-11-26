@@ -18,7 +18,7 @@ export function FeaturesSection() {
           className="text-center space-y-5 p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-300"
         >
           <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-            <Search className="h-7 w-7 text-primary" />
+            <Search className="h-7 w-7 text-accent-light" />
           </div>
           <h3 className="text-xl font-bold">Busca Avançada</h3>
           <p className="text-muted-foreground leading-relaxed">
@@ -31,7 +31,7 @@ export function FeaturesSection() {
           className="text-center space-y-5 p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-300"
         >
           <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-            <Upload className="h-7 w-7 text-primary" />
+            <Upload className="h-7 w-7 text-accent-light" />
           </div>
           <h3 className="text-xl font-bold">Compartilhe</h3>
           <p className="text-muted-foreground leading-relaxed">
@@ -44,7 +44,7 @@ export function FeaturesSection() {
           className="text-center space-y-5 p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-lg transition-all duration-300"
         >
           <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-            <BookOpen className="h-7 w-7 text-primary" />
+            <BookOpen className="h-7 w-7 text-accent-light" />
           </div>
           <h3 className="text-xl font-bold">Acesso Livre</h3>
           <p className="text-muted-foreground leading-relaxed">

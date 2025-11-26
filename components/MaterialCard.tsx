@@ -66,7 +66,7 @@ export function MaterialCard({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <CardTitle className="line-clamp-2 text-lg font-semibold leading-tight group-hover:text-primary transition-colors duration-200">
+              <CardTitle className="line-clamp-2 text-lg font-semibold leading-tight group-hover:text-accent-light transition-colors duration-200">
                 <Link
                   href={`/material/${id}`}
                   className="hover:underline decoration-2 underline-offset-2"

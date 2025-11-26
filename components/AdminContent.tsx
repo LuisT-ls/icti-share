@@ -191,7 +191,7 @@ export function AdminContent({
                       <TableCell className="font-medium">
                         <a
                           href={`/material/${material.id}`}
-                          className="hover:text-primary transition-colors"
+                          className="hover:text-accent-light transition-colors"
                         >
                           {material.title}
                         </a>
@@ -250,7 +250,7 @@ export function AdminContent({
                       <TableCell className="font-medium">
                         <a
                           href={`/material/${material.id}`}
-                          className="hover:text-primary transition-colors"
+                          className="hover:text-accent-light transition-colors"
                         >
                           {material.title}
                         </a>

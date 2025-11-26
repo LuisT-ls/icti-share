@@ -184,7 +184,7 @@ export function ProfileContent({
                       <h3 className="font-semibold text-lg mb-2">
                         <Link
                           href={`/material/${material.id}`}
-                          className="hover:text-primary transition-colors"
+                          className="hover:text-accent-light transition-colors"
                         >
                           {material.title}
                         </Link>

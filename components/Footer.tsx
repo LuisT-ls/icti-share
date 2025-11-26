@@ -19,7 +19,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-lg bg-primary/10">
-                <FileText className="h-5 w-5 text-primary" />
+                <FileText className="h-5 w-5 text-accent-light" />
               </div>
               <span className="text-lg font-bold">ICTI Share</span>
             </div>
@@ -35,13 +35,13 @@ export function Footer() {
             <nav className="flex flex-col gap-3">
               <Link
                 href="/materiais"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                className="text-sm text-muted-foreground hover:text-accent-light transition-colors duration-200"
               >
                 Materiais
               </Link>
               <Link
                 href="/upload"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                className="text-sm text-muted-foreground hover:text-accent-light transition-colors duration-200"
               >
                 Enviar Material
               </Link>
@@ -54,7 +54,7 @@ export function Footer() {
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <a
                 href="mailto:contato@icti.edu.br"
-                className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+                className="flex items-center gap-2 hover:text-accent-light transition-colors duration-200"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -63,7 +63,7 @@ export function Footer() {
               </a>
               <a
                 href="https://github.com/LuisT-ls/icti-share"
-                className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+                className="flex items-center gap-2 hover:text-accent-light transition-colors duration-200"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Repositório no GitHub"

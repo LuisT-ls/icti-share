@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { UserMenu } from "./UserMenu";
 import { FileText } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   return (
@@ -29,7 +30,11 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="flex items-center" aria-label="Navegação principal">
+        <nav
+          className="flex items-center gap-2"
+          aria-label="Navegação principal"
+        >
+          <ThemeToggle />
           <UserMenu />
         </nav>
       </div>

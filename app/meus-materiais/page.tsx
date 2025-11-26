@@ -66,7 +66,7 @@ export default async function MeusMateriaisPage() {
                         <h3 className="font-semibold text-lg mb-2">
                           <a
                             href={`/material/${material.id}`}
-                            className="hover:text-primary transition-colors"
+                            className="hover:text-accent-light transition-colors"
                           >
                             {material.title}
                           </a>

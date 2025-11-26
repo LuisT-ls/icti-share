@@ -99,7 +99,7 @@ function LoginForm() {
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <svg
-                    className="h-6 w-6 text-primary"
+                    className="h-6 w-6 text-accent-light"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -217,7 +217,7 @@ function LoginForm() {
                 Não tem uma conta?{" "}
                 <Link
                   href="/signup"
-                  className="text-primary hover:underline font-semibold transition-colors"
+                  className="text-accent-light hover:underline font-semibold transition-colors"
                 >
                   Cadastre-se
                 </Link>
