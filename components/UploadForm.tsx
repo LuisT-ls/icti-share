@@ -229,7 +229,7 @@ export function UploadForm() {
             id="course"
             type="text"
             {...register("course")}
-            placeholder="Ex: Engenharia de Software"
+            placeholder="Ex: Engenharia de Produção"
           />
           {errors.course && (
             <p className="mt-1 text-sm text-destructive" role="alert">

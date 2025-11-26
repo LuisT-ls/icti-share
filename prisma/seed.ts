@@ -78,7 +78,7 @@ async function main() {
       title: "Apostila de Cálculo Diferencial e Integral I",
       description:
         "Material completo sobre limites, derivadas e integrais. Inclui exemplos práticos e exercícios resolvidos.",
-      course: "Engenharia de Software",
+      course: "Engenharia de Produção",
       discipline: "Cálculo I",
       semester: "2024.1",
       type: "Apostila",
@@ -88,7 +88,7 @@ async function main() {
     {
       title: "Prova de Álgebra Linear - 2024.1",
       description: "Prova aplicada no primeiro semestre de 2024 com gabarito.",
-      course: "Engenharia de Software",
+      course: "Engenharia de Produção",
       discipline: "Álgebra Linear",
       semester: "2024.1",
       type: "Prova",
@@ -110,7 +110,7 @@ async function main() {
       title: "Slides de Arquitetura de Computadores",
       description:
         "Apresentações em PDF sobre processadores, memória e organização de computadores.",
-      course: "Engenharia de Software",
+      course: "Engenharia de Produção",
       discipline: "Arquitetura de Computadores",
       semester: "2023.2",
       type: "Slides",
@@ -121,7 +121,7 @@ async function main() {
       title: "Lista de Exercícios - Programação Orientada a Objetos",
       description:
         "Exercícios práticos sobre classes, herança, polimorfismo e encapsulamento em Java.",
-      course: "Engenharia de Software",
+      course: "Engenharia de Produção",
       discipline: "Programação Orientada a Objetos",
       semester: "2024.1",
       type: "Lista de Exercícios",
@@ -140,10 +140,10 @@ async function main() {
       downloadsCount: 56,
     },
     {
-      title: "Prova de Engenharia de Software - 2024.1",
+      title: "Prova de Engenharia de Produção - 2024.1",
       description: "Avaliação sobre metodologias ágeis, requisitos e testes.",
-      course: "Engenharia de Software",
-      discipline: "Engenharia de Software",
+      course: "Engenharia de Produção",
+      discipline: "Engenharia de Produção",
       semester: "2024.1",
       type: "Prova",
       uploadedBy: admin.id,
@@ -153,7 +153,7 @@ async function main() {
       title: "Resumo de Redes de Computadores",
       description:
         "Resumo sobre protocolos TCP/IP, camadas OSI, roteamento e segurança em redes.",
-      course: "Engenharia de Software",
+      course: "Engenharia de Produção",
       discipline: "Redes de Computadores",
       semester: "2024.1",
       type: "Resumo",

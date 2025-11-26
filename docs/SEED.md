@@ -14,7 +14,7 @@ Este documento descreve como popular o banco de dados com dados de exemplo.
 
 Materiais de exemplo com metadados variados:
 
-- ✅ Cursos: Engenharia de Software, Ciência da Computação
+- ✅ Cursos: Engenharia de Produção, Ciência da Computação
 - ✅ Disciplinas: Cálculo I, Álgebra Linear, Estruturas de Dados, etc.
 - ✅ Semestres: 2024.1, 2023.2
 - ✅ Tipos: Apostila, Prova, Resumo, Slides, Lista de Exercícios, Material de Aula
