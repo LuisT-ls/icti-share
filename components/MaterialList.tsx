@@ -24,7 +24,10 @@ interface MaterialListProps {
   variant?: "default" | "compact";
 }
 
-export function MaterialList({ materials, variant = "default" }: MaterialListProps) {
+export function MaterialList({
+  materials,
+  variant = "default",
+}: MaterialListProps) {
   if (materials.length === 0) {
     return (
       <motion.div
@@ -38,13 +41,13 @@ export function MaterialList({ materials, variant = "default" }: MaterialListPro
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
       {materials.map((material, index) => (
         <motion.div
           key={material.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
+          transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
         >
           <MaterialCard {...material} variant={variant} />
         </motion.div>
@@ -52,4 +55,3 @@ export function MaterialList({ materials, variant = "default" }: MaterialListPro
     </div>
   );
 }
-

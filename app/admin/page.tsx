@@ -81,7 +81,7 @@ export default async function AdminPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <AdminContent
           totalMaterials={totalMaterials}
           pendingMaterials={pendingMaterials}

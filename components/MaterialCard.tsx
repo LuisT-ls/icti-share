@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
-import { FileText, Download, Calendar } from "lucide-react";
+import { FileText, Download, Calendar, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -48,41 +55,55 @@ export function MaterialCard({
     .join(" • ");
 
   return (
-    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-      <Card className="h-full transition-shadow hover:shadow-lg">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="line-clamp-2 text-lg">
+    <motion.div
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="h-full"
+    >
+      <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 border-border/50 group overflow-hidden">
+        {/* Gradient accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="line-clamp-2 text-lg font-semibold leading-tight group-hover:text-primary transition-colors duration-200">
                 <Link
                   href={`/material/${id}`}
-                  className="hover:text-primary transition-colors"
+                  className="hover:underline decoration-2 underline-offset-2"
                   aria-label={`Ver detalhes de ${title}`}
                 >
                   {title}
                 </Link>
               </CardTitle>
               {description && variant === "default" && (
-                <CardDescription className="mt-2 line-clamp-2">
+                <CardDescription className="mt-2.5 line-clamp-2 text-sm leading-relaxed">
                   {description}
                 </CardDescription>
               )}
             </div>
-            <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-2" />
+            <div className="flex-shrink-0 p-2 rounded-lg bg-primary/5 group-hover:bg-primary/10 transition-colors duration-200">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex-1 flex flex-col gap-3">
           {metadata && (
-            <p className="text-sm text-muted-foreground mb-3">{metadata}</p>
-          )}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Download className="h-3 w-3" />
-              <span>{downloadsCount} downloads</span>
+            <div className="px-1">
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                {metadata}
+              </p>
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
+          )}
+
+          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
+              <Download className="h-3.5 w-3.5" />
+              <span className="font-medium">{downloadsCount}</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
+              <Calendar className="h-3.5 w-3.5" />
               <span>
                 {formatDistanceToNow(new Date(createdAt), {
                   addSuffix: true,
@@ -91,15 +112,23 @@ export function MaterialCard({
               </span>
             </div>
           </div>
+
           {uploadedBy && variant === "default" && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Por: {uploadedBy.name || uploadedBy.email}
-            </p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-border/50">
+              <User className="h-3.5 w-3.5" />
+              <span className="truncate">
+                {uploadedBy.name || uploadedBy.email}
+              </span>
+            </div>
           )}
         </CardContent>
 
-        <CardFooter className="flex gap-2">
-          <Button asChild variant="default" className="flex-1">
+        <CardFooter className="pt-4 border-t border-border/50">
+          <Button
+            asChild
+            variant="default"
+            className="flex-1 font-medium transition-all duration-200 hover:scale-105"
+          >
             <Link href={`/material/${id}`}>Ver Detalhes</Link>
           </Button>
         </CardFooter>
@@ -107,4 +136,3 @@ export function MaterialCard({
     </motion.div>
   );
 }
-

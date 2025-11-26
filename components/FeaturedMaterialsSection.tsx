@@ -34,27 +34,33 @@ export function FeaturedMaterialsSection({
   }
 
   return (
-    <section className="container mx-auto px-4 py-12 bg-muted/30">
+    <section className="container mx-auto px-4 py-16 md:py-20 bg-gradient-to-b from-background to-muted/20">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="space-y-6"
+        className="space-y-8"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold flex items-center gap-2">
-              <BookOpen className="h-8 w-8" />
-              Materiais em Destaque
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h2 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <BookOpen className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+              </div>
+              <span className="text-gradient">Materiais em Destaque</span>
             </h2>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground text-base md:text-lg">
               Os materiais mais populares da plataforma
             </p>
           </div>
-          <Button asChild variant="ghost">
-            <Link href="/materiais">
+          <Button
+            asChild
+            variant="outline"
+            className="border-2 hover:bg-accent transition-all duration-200 hover:scale-105"
+          >
+            <Link href="/materiais" className="flex items-center gap-2">
               Ver todos
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>

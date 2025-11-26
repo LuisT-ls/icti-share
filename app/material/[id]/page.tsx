@@ -2,9 +2,24 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, Calendar, User, BookOpen, GraduationCap, CalendarDays, Tag } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Calendar,
+  User,
+  BookOpen,
+  GraduationCap,
+  CalendarDays,
+  Tag,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatBytes } from "@/lib/utils";
@@ -36,94 +51,146 @@ export default async function MaterialDetailPage({
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-3xl mb-2">{material.title}</CardTitle>
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+        <Card className="border-border/50 shadow-xl">
+          <CardHeader className="pb-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 space-y-3">
+                <CardTitle className="text-3xl md:text-4xl font-bold leading-tight">
+                  {material.title}
+                </CardTitle>
                 {material.description && (
-                  <CardDescription className="text-base mt-4">
+                  <CardDescription className="text-base md:text-lg leading-relaxed">
                     {material.description}
                   </CardDescription>
                 )}
               </div>
-              <FileText className="h-8 w-8 text-muted-foreground flex-shrink-0 ml-4" />
+              <div className="flex-shrink-0 p-3 rounded-xl bg-primary/10">
+                <FileText className="h-8 w-8 text-primary" />
+              </div>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             {/* Metadados */}
             <div className="grid md:grid-cols-2 gap-4">
               {material.course && (
-                <div className="flex items-center gap-2 text-sm">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Curso:</span>
-                  <span>{material.course}</span>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <GraduationCap className="h-5 w-5 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Curso
+                    </span>
+                    <p className="text-sm font-medium mt-0.5">
+                      {material.course}
+                    </p>
+                  </div>
                 </div>
               )}
               {material.discipline && (
-                <div className="flex items-center gap-2 text-sm">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Disciplina:</span>
-                  <span>{material.discipline}</span>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Disciplina
+                    </span>
+                    <p className="text-sm font-medium mt-0.5">
+                      {material.discipline}
+                    </p>
+                  </div>
                 </div>
               )}
               {material.semester && (
-                <div className="flex items-center gap-2 text-sm">
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Semestre:</span>
-                  <span>{material.semester}</span>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <CalendarDays className="h-5 w-5 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Semestre
+                    </span>
+                    <p className="text-sm font-medium mt-0.5">
+                      {material.semester}
+                    </p>
+                  </div>
                 </div>
               )}
               {material.type && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Tipo:</span>
-                  <span>{material.type}</span>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Tag className="h-5 w-5 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Tipo
+                    </span>
+                    <p className="text-sm font-medium mt-0.5">
+                      {material.type}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Informações adicionais */}
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Download className="h-4 w-4" />
-                <span>{material.downloadsCount} downloads</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  Publicado{" "}
-                  {formatDistanceToNow(new Date(material.createdAt), {
-                    addSuffix: true,
-                    locale: ptBR,
-                  })}
+            <div className="border-t border-border/50 pt-6 space-y-3">
+              <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
+                <Download className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  <span className="text-muted-foreground">Downloads: </span>
+                  <span className="text-foreground">
+                    {material.downloadsCount}
+                  </span>
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <FileText className="h-4 w-4" />
-                <span>{formatBytes(material.size)}</span>
+              <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  <span className="text-muted-foreground">Publicado </span>
+                  <span className="text-foreground">
+                    {formatDistanceToNow(new Date(material.createdAt), {
+                      addSuffix: true,
+                      locale: ptBR,
+                    })}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  <span className="text-muted-foreground">Tamanho: </span>
+                  <span className="text-foreground">
+                    {formatBytes(material.size)}
+                  </span>
+                </span>
               </div>
               {material.uploadedBy && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  <span>
-                    Por: {material.uploadedBy.name || material.uploadedBy.email}
+                <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    <span className="text-muted-foreground">Por: </span>
+                    <span className="text-foreground">
+                      {material.uploadedBy.name || material.uploadedBy.email}
+                    </span>
                   </span>
                 </div>
               )}
             </div>
 
             {/* Botão de Download */}
-            <div className="flex gap-4 pt-4 border-t">
-              <Button asChild size="lg" className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border/50">
+              <Button
+                asChild
+                size="lg"
+                className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              >
                 <Link href={`/material/download/${material.id}`}>
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="mr-2 h-5 w-5" />
                   Baixar Material
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-12 text-base font-semibold border-2 hover:bg-accent transition-all duration-200 hover:scale-105"
+              >
                 <Link href="/materiais">Voltar</Link>
               </Button>
             </div>
@@ -134,4 +201,3 @@ export default async function MaterialDetailPage({
     </div>
   );
 }
-

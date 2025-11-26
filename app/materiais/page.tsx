@@ -200,17 +200,25 @@ export default async function MateriaisPage({
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Materiais</h1>
-          <p className="text-muted-foreground">
-            Explore todos os materiais disponíveis na plataforma
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 lg:py-16">
+        {/* Hero Section */}
+        <div className="mb-10 md:mb-12 space-y-3">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+            <span className="text-gradient">Materiais</span>
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
+            Explore todos os materiais disponíveis na plataforma. Encontre o que
+            você precisa para seus estudos.
           </p>
         </div>
+
         <Suspense
           fallback={
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Carregando materiais...</p>
+            <div className="text-center py-16 md:py-24">
+              <div className="inline-flex items-center gap-3 text-muted-foreground">
+                <span className="h-5 w-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <p className="text-lg">Carregando materiais...</p>
+              </div>
             </div>
           }
         >
