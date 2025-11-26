@@ -82,7 +82,7 @@ export function MaterialCard({
               )}
             </div>
             <div className="flex-shrink-0 p-2 rounded-lg bg-primary/5 group-hover:bg-primary/10 transition-colors duration-200">
-              <FileText className="h-5 w-5 text-primary" />
+              <FileText className="h-5 w-5 text-accent-light" />
             </div>
           </div>
         </CardHeader>

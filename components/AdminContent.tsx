@@ -108,7 +108,7 @@ export function AdminContent({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <FileText className="h-8 w-8 text-primary" />
+              <FileText className="h-8 w-8 text-accent-light" />
               <div>
                 <p className="text-2xl font-bold">{totalMaterials}</p>
                 <p className="text-sm text-muted-foreground">
@@ -138,7 +138,7 @@ export function AdminContent({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <Download className="h-8 w-8 text-primary" />
+              <Download className="h-8 w-8 text-accent-light" />
               <div>
                 <p className="text-2xl font-bold">{totalDownloads}</p>
                 <p className="text-sm text-muted-foreground">Total Downloads</p>
@@ -149,7 +149,7 @@ export function AdminContent({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" />
+              <Users className="h-8 w-8 text-accent-light" />
               <div>
                 <p className="text-2xl font-bold">{totalUsers}</p>
                 <p className="text-sm text-muted-foreground">Usuários</p>
@@ -223,7 +223,7 @@ export function AdminContent({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
+            <TrendingUp className="h-5 w-5 text-accent-light" />
             Top 10 Materiais Mais Baixados
           </CardTitle>
           <CardDescription>
@@ -261,7 +261,7 @@ export function AdminContent({
                           "N/A"}
                       </TableCell>
                       <TableCell>
-                        <span className="font-semibold text-primary">
+                        <span className="font-semibold text-accent-light">
                           {material.downloadsCount}
                         </span>
                       </TableCell>
@@ -293,7 +293,7 @@ export function AdminContent({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
+            <Users className="h-5 w-5 text-accent-light" />
             Usuários
           </CardTitle>
           <CardDescription>

@@ -105,7 +105,7 @@ export function ProfileContent({
           {/* Estatísticas */}
           <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-              <Upload className="h-8 w-8 text-primary" />
+              <Upload className="h-8 w-8 text-accent-light" />
               <div>
                 <p className="text-2xl font-bold">{materialsCount}</p>
                 <p className="text-sm text-muted-foreground">
@@ -114,7 +114,7 @@ export function ProfileContent({
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-              <Download className="h-8 w-8 text-primary" />
+              <Download className="h-8 w-8 text-accent-light" />
               <div>
                 <p className="text-2xl font-bold">{downloadsCount}</p>
                 <p className="text-sm text-muted-foreground">
