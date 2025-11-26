@@ -11,7 +11,16 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import { FileText, Download, Calendar, User } from "lucide-react";
+import {
+  FileText,
+  Download,
+  Calendar,
+  User,
+  GraduationCap,
+  BookOpen,
+  CalendarDays,
+  Tag,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -45,14 +54,17 @@ export function MaterialCard({
   uploadedBy,
   variant = "default",
 }: MaterialCardProps) {
-  const metadata = [
-    course && `Curso: ${course}`,
-    discipline && `Disciplina: ${discipline}`,
-    semester && `Semestre: ${semester}`,
-    type && `Tipo: ${type}`,
-  ]
-    .filter(Boolean)
-    .join(" • ");
+  // Organizar metadados em grupos visuais
+  const metadataItems = [
+    course && { label: course, icon: GraduationCap, key: "course" },
+    discipline && { label: discipline, icon: BookOpen, key: "discipline" },
+    semester && { label: semester, icon: CalendarDays, key: "semester" },
+    type && { label: type, icon: Tag, key: "type" },
+  ].filter(Boolean) as Array<{
+    label: string;
+    icon: typeof GraduationCap;
+    key: string;
+  }>;
 
   return (
     <motion.div
@@ -88,23 +100,36 @@ export function MaterialCard({
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col gap-3">
-          {metadata && (
-            <div className="px-1">
-              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                {metadata}
-              </p>
+        <CardContent className="flex-1 flex flex-col gap-4">
+          {/* Metadados organizados em grid */}
+          {metadataItems.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {metadataItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.key}
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-muted/40 border border-border/50"
+                  >
+                    <Icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                    <span className="text-xs text-foreground font-medium truncate">
+                      {item.label}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+          {/* Estatísticas e informações */}
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
               <Download className="h-3.5 w-3.5" />
               <span className="font-medium">{downloadsCount}</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
               <Calendar className="h-3.5 w-3.5" />
-              <span>
+              <span className="whitespace-nowrap">
                 {formatDistanceToNow(new Date(createdAt), {
                   addSuffix: true,
                   locale: ptBR,
