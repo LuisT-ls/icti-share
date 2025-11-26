@@ -29,27 +29,16 @@ jobs:
 
       - name: Run ESLint
         run: |
-          # Debug: Verificar estrutura do projeto
-          echo "=== Debug Info ==="
-          echo "Diretório atual: $(pwd)"
-          echo "Conteúdo do diretório:"
-          ls -la | head -20
-          echo ""
-          echo "Verificando arquivos de configuração:"
-          test -f .eslintrc.json && echo "✓ .eslintrc.json encontrado" || echo "✗ .eslintrc.json NÃO encontrado"
-          test -f next.config.js && echo "✓ next.config.js encontrado" || echo "✗ next.config.js NÃO encontrado"
-          test -f package.json && echo "✓ package.json encontrado" || echo "✗ package.json NÃO encontrado"
-          echo ""
-          echo "Verificando script de lint no package.json:"
-          grep -A 1 '"lint"' package.json || echo "Script lint não encontrado"
-          echo ""
-          echo "=== Executando lint ==="
-          # Executar usando o script do package.json
-          # O problema pode estar relacionado à forma como o Next.js interpreta argumentos
-          npm run lint 2>&1 || {
-            echo "Erro ao executar npm run lint, tentando npx next lint diretamente..."
-            npx next lint
-          }
+          # O Next.js está interpretando "lint" como um diretório (bug conhecido)
+          # Vamos usar ESLint diretamente com a configuração do Next.js
+          echo "=== Executando ESLint ==="
+          # Usar ESLint diretamente com a configuração do Next.js
+          # Isso evita o bug do Next.js 16.0.0 que interpreta "lint" como diretório
+          # ESLint 9 suporta .eslintrc.json via ESLINT_USE_FLAT_CONFIG=false
+          ESLINT_USE_FLAT_CONFIG=false npx eslint . \
+            --ext .js,.jsx,.ts,.tsx \
+            --config .eslintrc.json \
+            --max-warnings 0
 
       - name: Run tests
         run: npm run test:coverage
