@@ -261,7 +261,7 @@ export function AdminContent({
                           "N/A"}
                       </TableCell>
                       <TableCell>
-                        <span className="font-semibold text-accent-light">
+                        <span className="font-semibold text-foreground">
                           {material.downloadsCount}
                         </span>
                       </TableCell>

@@ -45,7 +45,7 @@ export function FeaturedMaterialsSection({
           <div className="space-y-2">
             <h2 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
-                <BookOpen className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+                <BookOpen className="h-6 w-6 md:h-7 md:w-7 text-accent-light" />
               </div>
               <span className="text-gradient">Materiais em Destaque</span>
             </h2>

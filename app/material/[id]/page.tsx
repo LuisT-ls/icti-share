@@ -146,7 +146,7 @@ export default async function MaterialDetailPage({
                 )}
               </div>
               <div className="flex-shrink-0 p-3 rounded-xl bg-primary/10">
-                <FileText className="h-8 w-8 text-primary" />
+                <FileText className="h-8 w-8 text-accent-light" />
               </div>
             </div>
           </CardHeader>
@@ -156,7 +156,7 @@ export default async function MaterialDetailPage({
             <div className="grid md:grid-cols-2 gap-4">
               {material.course && (
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <GraduationCap className="h-5 w-5 text-primary flex-shrink-0" />
+                  <GraduationCap className="h-5 w-5 text-accent-light flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       Curso
@@ -169,7 +169,7 @@ export default async function MaterialDetailPage({
               )}
               {material.discipline && (
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
+                  <BookOpen className="h-5 w-5 text-accent-light flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       Disciplina
@@ -182,7 +182,7 @@ export default async function MaterialDetailPage({
               )}
               {material.semester && (
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <CalendarDays className="h-5 w-5 text-primary flex-shrink-0" />
+                  <CalendarDays className="h-5 w-5 text-accent-light flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       Semestre
@@ -195,7 +195,7 @@ export default async function MaterialDetailPage({
               )}
               {material.type && (
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <Tag className="h-5 w-5 text-primary flex-shrink-0" />
+                  <Tag className="h-5 w-5 text-accent-light flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       Tipo
@@ -211,7 +211,7 @@ export default async function MaterialDetailPage({
             {/* Informações adicionais */}
             <div className="border-t border-border/50 pt-6 space-y-3">
               <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
-                <Download className="h-4 w-4 text-primary" />
+                <Download className="h-4 w-4 text-accent-light" />
                 <span className="text-sm font-medium">
                   <span className="text-muted-foreground">Downloads: </span>
                   <span className="text-foreground">
@@ -220,7 +220,7 @@ export default async function MaterialDetailPage({
                 </span>
               </div>
               <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
-                <Calendar className="h-4 w-4 text-primary" />
+                <Calendar className="h-4 w-4 text-accent-light" />
                 <span className="text-sm font-medium">
                   <span className="text-muted-foreground">Publicado </span>
                   <span className="text-foreground">
@@ -232,7 +232,7 @@ export default async function MaterialDetailPage({
                 </span>
               </div>
               <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
-                <FileText className="h-4 w-4 text-primary" />
+                <FileText className="h-4 w-4 text-accent-light" />
                 <span className="text-sm font-medium">
                   <span className="text-muted-foreground">Tamanho: </span>
                   <span className="text-foreground">
@@ -242,7 +242,7 @@ export default async function MaterialDetailPage({
               </div>
               {material.uploadedBy && (
                 <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-muted/30">
-                  <User className="h-4 w-4 text-primary" />
+                  <User className="h-4 w-4 text-accent-light" />
                   <span className="text-sm font-medium">
                     <span className="text-muted-foreground">Por: </span>
                     <span className="text-foreground">

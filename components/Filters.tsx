@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 
 interface FiltersProps {
   courses?: string[];
@@ -68,7 +68,7 @@ export function Filters({
       <Card className="border-border/50 shadow-lg">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <Search className="h-5 w-5 text-primary" />
+            <Search className="h-5 w-5 text-accent-light" />
             Filtros de Busca
           </CardTitle>
         </CardHeader>
@@ -99,20 +99,26 @@ export function Filters({
                 >
                   Curso
                 </label>
-                <select
-                  id="course"
-                  value={course}
-                  onChange={(e) => setCourse(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
-                  aria-label="Filtrar por curso"
-                >
-                  <option value="">Todos</option>
-                  {courses.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="course"
+                    value={course}
+                    onChange={(e) => setCourse(e.target.value)}
+                    className="flex h-11 w-full rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm text-foreground ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 appearance-none cursor-pointer [&>option]:bg-card [&>option]:text-foreground"
+                    style={{
+                      colorScheme: "dark",
+                    }}
+                    aria-label="Filtrar por curso"
+                  >
+                    <option value="">Todos</option>
+                    {courses.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
             )}
 
@@ -124,20 +130,26 @@ export function Filters({
                 >
                   Disciplina
                 </label>
-                <select
-                  id="discipline"
-                  value={discipline}
-                  onChange={(e) => setDiscipline(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
-                  aria-label="Filtrar por disciplina"
-                >
-                  <option value="">Todas</option>
-                  {disciplines.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="discipline"
+                    value={discipline}
+                    onChange={(e) => setDiscipline(e.target.value)}
+                    className="flex h-11 w-full rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm text-foreground ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 appearance-none cursor-pointer [&>option]:bg-card [&>option]:text-foreground"
+                    style={{
+                      colorScheme: "dark",
+                    }}
+                    aria-label="Filtrar por disciplina"
+                  >
+                    <option value="">Todas</option>
+                    {disciplines.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
             )}
 
@@ -149,20 +161,26 @@ export function Filters({
                 >
                   Semestre
                 </label>
-                <select
-                  id="semester"
-                  value={semester}
-                  onChange={(e) => setSemester(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
-                  aria-label="Filtrar por semestre"
-                >
-                  <option value="">Todos</option>
-                  {semesters.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="semester"
+                    value={semester}
+                    onChange={(e) => setSemester(e.target.value)}
+                    className="flex h-11 w-full rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm text-foreground ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 appearance-none cursor-pointer [&>option]:bg-card [&>option]:text-foreground"
+                    style={{
+                      colorScheme: "dark",
+                    }}
+                    aria-label="Filtrar por semestre"
+                  >
+                    <option value="">Todos</option>
+                    {semesters.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
             )}
 
@@ -174,20 +192,26 @@ export function Filters({
                 >
                   Tipo
                 </label>
-                <select
-                  id="type"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
-                  aria-label="Filtrar por tipo"
-                >
-                  <option value="">Todos</option>
-                  {types.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="type"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="flex h-11 w-full rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm text-foreground ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 appearance-none cursor-pointer [&>option]:bg-card [&>option]:text-foreground"
+                    style={{
+                      colorScheme: "dark",
+                    }}
+                    aria-label="Filtrar por tipo"
+                  >
+                    <option value="">Todos</option>
+                    {types.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
             )}
           </div>
