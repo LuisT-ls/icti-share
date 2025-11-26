@@ -139,12 +139,14 @@ export function UserMenu() {
           <DropdownMenuItem
             onSelect={async (e) => {
               e.preventDefault();
-              // Usar signOut do next-auth/react diretamente no cliente com redirect automático
-              // Isso garante que a sessão seja atualizada e a página seja redirecionada corretamente
+              // Fazer logout sem redirecionamento automático
               await signOut({
-                redirect: true,
-                callbackUrl: "/",
+                redirect: false,
               });
+              // Usar window.location para forçar atualização completa da página
+              // Isso garante que o nav seja atualizado corretamente após o logout
+              // O reload completo garante que o SessionProvider seja atualizado
+              window.location.href = "/";
             }}
             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
           >
