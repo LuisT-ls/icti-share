@@ -16,7 +16,7 @@ Materiais de exemplo com metadados variados:
 
 - ✅ Cursos: Engenharia de Produção, Ciência da Computação
 - ✅ Disciplinas: Cálculo I, Álgebra Linear, Estruturas de Dados, etc.
-- ✅ Semestres: 2024.1, 2023.2
+- ✅ Semestres: 2025.2, 2023.2
 - ✅ Tipos: Apostila, Prova, Resumo, Slides, Lista de Exercícios, Material de Aula
 - ✅ Downloads: 28 a 89 downloads por material
 

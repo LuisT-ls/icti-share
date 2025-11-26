@@ -16,7 +16,7 @@ describe("MaterialCard", () => {
     description: "Material completo sobre cálculo diferencial",
     course: "Engenharia",
     discipline: "Cálculo I",
-    semester: "2024.1",
+    semester: "2025.2",
     type: "Apostila",
     downloadsCount: 42,
     createdAt: new Date("2024-01-15"),
@@ -104,4 +104,3 @@ describe("MaterialCard", () => {
     expect(screen.getByText(/Por: joao@example.com/)).toBeInTheDocument();
   });
 });
-

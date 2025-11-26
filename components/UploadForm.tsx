@@ -268,7 +268,7 @@ export function UploadForm() {
             id="semester"
             type="text"
             {...register("semester")}
-            placeholder="Ex: 2024.1"
+            placeholder="Ex: 2025.2"
           />
           {errors.semester && (
             <p className="mt-1 text-sm text-destructive" role="alert">
