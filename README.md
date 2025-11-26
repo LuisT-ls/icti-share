@@ -58,6 +58,8 @@ O **ICTI Share** é uma plataforma web moderna para compartilhamento de materiai
 - **[Framer Motion](https://www.framer.com/motion/)** - Animações
 - **[Lucide React](https://lucide.dev/)** - Ícones
 - **[date-fns](https://date-fns.org/)** - Manipulação de datas
+- **[React Hook Form](https://react-hook-form.com/)** - Gerenciamento de formulários
+- **[@hookform/resolvers](https://github.com/react-hook-form/resolvers)** - Resolvers para validação (Zod)
 
 ### Testes
 
@@ -98,6 +100,7 @@ O **ICTI Share** é uma plataforma web moderna para compartilhamento de materiai
 - Sistema de roles (VISITANTE, USUARIO, ADMIN)
 - Histórico de uploads e downloads
 - Edição de perfil
+- Alteração de senha com indicador de força
 
 ### 🛡️ Administração
 
@@ -110,11 +113,19 @@ O **ICTI Share** é uma plataforma web moderna para compartilhamento de materiai
 ### 🔒 Segurança
 
 - Rate limiting (upload, download, auth)
-- Validação de arquivos (tipo, tamanho, MIME)
+- Validação de arquivos (tipo, tamanho, MIME, magic bytes)
 - Sanitização de inputs
 - Headers de segurança (CSP, HSTS, etc.)
 - Proteção CSRF (NextAuth)
 - Hash de senhas com bcrypt
+- Validação de força de senha
+
+### 🔍 SEO
+
+- Sitemap dinâmico (`/sitemap.xml`)
+- Robots.txt configurável (`/robots.txt`)
+- Metadata otimizada (Open Graph, Twitter Cards)
+- Structured Data (JSON-LD)
 
 ---
 
@@ -122,7 +133,7 @@ O **ICTI Share** é uma plataforma web moderna para compartilhamento de materiai
 
 ### Pré-requisitos
 
-- **Node.js** 18+ e npm/pnpm
+- **Node.js** 20.9.0+ e npm 10.0.0+
 - **PostgreSQL** 15+ (local ou remoto)
 - **Git**
 
@@ -144,11 +155,13 @@ pnpm install
 ### Passo 3: Configurar Variáveis de Ambiente
 
 1. Copie o arquivo de exemplo:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Configure as variáveis no `.env`:
+
    ```env
    # Banco de Dados
    DATABASE_URL="postgresql://usuario:senha@localhost:5432/icti_share?schema=public"
@@ -165,7 +178,7 @@ pnpm install
    NODE_ENV="development"
    ```
 
-   **📝 Nota:** Para instruções detalhadas, consulte [ENV_SETUP.md](./ENV_SETUP.md)
+   **📝 Nota:** Para instruções detalhadas, consulte [ENV_SETUP.md](./docs/ENV_SETUP.md)
 
 ### Passo 4: Configurar Banco de Dados
 
@@ -235,7 +248,7 @@ Após executar o seed, você terá:
 - **10 materiais** de exemplo com metadados variados
 - **~500 downloads** históricos
 
-Para mais detalhes, consulte [SEED.md](./SEED.md)
+Para mais detalhes, consulte [SEED.md](./docs/SEED.md)
 
 ---
 
@@ -255,6 +268,7 @@ npm run test:coverage
 ```
 
 **Testes implementados:**
+
 - ✅ Validação de schemas Zod
 - ✅ Componentes React (MaterialCard, UploadForm)
 
@@ -272,11 +286,12 @@ npm run test:e2e:headed
 ```
 
 **Testes implementados:**
+
 - ✅ Fluxo de autenticação (signup → login → logout)
 - ✅ Fluxo de upload e download
 - ✅ Filtragem de materiais
 
-**📝 Nota:** Para detalhes completos, consulte [TESTING.md](./TESTING.md)
+**📝 Nota:** Para detalhes completos, consulte [TESTING.md](./docs/TESTING.md)
 
 ---
 
@@ -306,24 +321,36 @@ icti-share/
 │   ├── perfil/                  # Perfil do usuário
 │   ├── layout.tsx               # Layout raiz
 │   ├── page.tsx                 # Home page
-│   └── providers.tsx            # Providers (Client Component)
+│   ├── providers.tsx            # Providers (Client Component)
+│   ├── robots.ts                # Robots.txt
+│   └── sitemap.ts               # Sitemap.xml
 │
 ├── components/                   # Componentes React
 │   ├── ui/                      # Componentes shadcn/ui
+│   │   ├── avatar.tsx
 │   │   ├── button.tsx
 │   │   ├── card.tsx
 │   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
 │   │   ├── input.tsx
+│   │   ├── password-input.tsx
 │   │   └── table.tsx
+│   ├── AdminContent.tsx         # Conteúdo do painel admin
 │   ├── AdminMaterialActions.tsx  # Ações admin para materiais
+│   ├── ChangePasswordForm.tsx   # Formulário de alteração de senha
 │   ├── EditProfileForm.tsx      # Formulário de edição de perfil
+│   ├── FeaturedMaterialsSection.tsx  # Seção de materiais em destaque
+│   ├── FeaturesSection.tsx      # Seção de funcionalidades
 │   ├── Filters.tsx              # Filtros de busca
-│   ├── Header.tsx               # Cabeçalho
 │   ├── Footer.tsx               # Rodapé
+│   ├── Header.tsx               # Cabeçalho
+│   ├── HeroSection.tsx          # Seção hero da home
 │   ├── MaterialActions.tsx      # Ações de materiais (editar/deletar)
 │   ├── MaterialCard.tsx          # Card de material
 │   ├── MaterialList.tsx          # Lista de materiais
 │   ├── Pagination.tsx           # Paginação
+│   ├── PasswordStrengthIndicator.tsx  # Indicador de força de senha
+│   ├── ProfileContent.tsx       # Conteúdo da página de perfil
 │   ├── UploadForm.tsx           # Formulário de upload
 │   ├── UserMenu.tsx             # Menu do usuário
 │   └── UserRoleEditor.tsx       # Editor de role (admin)
@@ -331,6 +358,7 @@ icti-share/
 ├── lib/                          # Bibliotecas e utilitários
 │   ├── auth.ts                  # Configuração NextAuth
 │   ├── prisma.ts                # Cliente Prisma singleton
+│   ├── seo.ts                   # Utilitários de SEO
 │   ├── session.ts               # Helper de sessão
 │   ├── utils.ts                 # Utilitários gerais
 │   ├── security/                # Módulos de segurança
@@ -387,6 +415,7 @@ icti-share/
 - Melhor performance
 
 **Exemplo:**
+
 ```typescript
 // app/materiais/page.tsx (Server Component)
 import { prisma } from "@/lib/prisma";
@@ -405,6 +434,7 @@ export default async function MateriaisPage() {
 - Necessários para formulários, modais, etc.
 
 **Exemplo:**
+
 ```typescript
 // components/UploadForm.tsx (Client Component)
 "use client";
@@ -425,6 +455,7 @@ export function UploadForm() {
 - Validação com Zod
 
 **Exemplo:**
+
 ```typescript
 // app/actions/upload.ts
 "use server";
@@ -579,6 +610,8 @@ lib/
 - [ ] Exibe informações do usuário
 - [ ] Estatísticas: materiais enviados, downloads realizados
 - [ ] Formulário de edição funcional
+- [ ] Formulário de alteração de senha
+- [ ] Indicador de força de senha
 - [ ] Validação de campos
 - [ ] Atualização em tempo real
 - [ ] Protegido por autenticação
@@ -657,18 +690,35 @@ lib/
 
 ### Documentos Principais
 
-- **[ENV_SETUP.md](./ENV_SETUP.md)** - Configuração de variáveis de ambiente
-- **[DEPLOY.md](./DEPLOY.md)** - Guia completo de deploy no Railway
-- **[AUTH_SETUP.md](./AUTH_SETUP.md)** - Configuração de autenticação
-- **[TESTING.md](./TESTING.md)** - Guia de testes
-- **[SEED.md](./SEED.md)** - População do banco de dados
+- **[ENV_SETUP.md](./docs/ENV_SETUP.md)** - Configuração de variáveis de ambiente
+- **[DEPLOY.md](./docs/DEPLOY.md)** - Guia completo de deploy no Railway
+- **[AUTH_SETUP.md](./docs/AUTH_SETUP.md)** - Configuração de autenticação
+- **[TESTING.md](./docs/TESTING.md)** - Guia de testes
+- **[SEED.md](./docs/SEED.md)** - População do banco de dados
 - **[SECURITY.md](./SECURITY.md)** - Implementações de segurança
 
 ### Documentos Técnicos
 
-- **[SECURITY_IMPLEMENTATION.md](./SECURITY_IMPLEMENTATION.md)** - Detalhes de segurança
-- **[CI_CD.md](./CI_CD.md)** - Configuração de CI/CD
-- **[SETUP_CI.md](./SETUP_CI.md)** - Setup de CI
+- **[SECURITY_IMPLEMENTATION.md](./docs/SECURITY_IMPLEMENTATION.md)** - Detalhes de segurança
+- **[CI_CD.md](./docs/CI_CD.md)** - Configuração de CI/CD
+- **[SETUP_CI.md](./docs/SETUP_CI.md)** - Setup de CI
+- **[SEO_SETUP.md](./docs/SEO_SETUP.md)** - Configuração de SEO
+- **[CRIAR_TABELAS.md](./docs/CRIAR_TABELAS.md)** - Criação manual de tabelas
+- **[PR_TEMPLATES.md](./docs/PR_TEMPLATES.md)** - Templates de Pull Request
+
+### Documentos de Troubleshooting
+
+- **[DEBUG_LOGIN.md](./docs/DEBUG_LOGIN.md)** - Debug de problemas de login
+- **[RAILWAY_SETUP.md](./docs/RAILWAY_SETUP.md)** - Setup no Railway
+- **[RAILWAY_DATABASE_URL_FIX.md](./docs/RAILWAY_DATABASE_URL_FIX.md)** - Correção de DATABASE_URL
+- **[RAILWAY_QUICK_FIX.md](./docs/RAILWAY_QUICK_FIX.md)** - Correções rápidas Railway
+- **[VERCEL_AUTH_FIX.md](./docs/VERCEL_AUTH_FIX.md)** - Correção de autenticação Vercel
+- **[VERCEL_LOGIN_FIX.md](./docs/VERCEL_LOGIN_FIX.md)** - Correção de login Vercel
+- **[VERCEL_MIGRATIONS.md](./docs/VERCEL_MIGRATIONS.md)** - Migrações no Vercel
+
+### Outros Documentos
+
+- **[SUGESTOES_MELHORIAS.md](./docs/SUGESTOES_MELHORIAS.md)** - Sugestões de melhorias futuras
 
 ---
 
@@ -717,4 +767,4 @@ Este projeto está sob a licença especificada no arquivo [LICENSE](./LICENSE).
 
 ---
 
-**Última atualização:** 2024-11-24
+**Última atualização:** 2025-11-26
