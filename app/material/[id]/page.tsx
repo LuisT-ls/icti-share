@@ -260,7 +260,10 @@ export default async function MaterialDetailPage({
                 size="lg"
                 className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
-                <Link href={`/material/download/${material.id}`}>
+                <Link
+                  href={`/material/download/${material.id}`}
+                  prefetch={false}
+                >
                   <Download className="mr-2 h-5 w-5" />
                   Baixar Material
                 </Link>

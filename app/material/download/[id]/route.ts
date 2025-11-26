@@ -132,29 +132,54 @@ export async function GET(
       console.log("✅ Arquivo lido com sucesso, tamanho:", fileBuffer.length);
     }
 
-    // IP e userId já obtidos acima para rate limiting
+    // Verificar se é uma requisição de download real (não prefetch do Next.js)
+    // O Next.js faz prefetch com header específico, vamos ignorar essas requisições
+    const purposeHeader = request.headers.get("purpose") || "";
+    const secPurposeHeader = request.headers.get("sec-purpose") || "";
+    const isPrefetch =
+      purposeHeader === "prefetch" || secPurposeHeader === "prefetch";
 
-    // Incrementar contador de downloads e criar registro de download
-    await prisma.$transaction(async (tx) => {
-      // Incrementar contador
-      await tx.material.update({
-        where: { id: material.id },
-        data: {
-          downloadsCount: {
-            increment: 1,
+    // Verificar se o arquivo foi lido com sucesso
+    const fileIsValid = fileBuffer && fileBuffer.length > 0;
+
+    // IMPORTANTE: Incrementar contador APENAS quando:
+    // 1. O arquivo foi lido com sucesso
+    // 2. NÃO é uma requisição de prefetch
+    // 3. O arquivo será realmente enviado ao navegador
+    // Isso garante que o contador só aumenta quando o download realmente é iniciado pelo navegador
+
+    if (!isPrefetch && fileIsValid) {
+      // Incrementar contador de downloads e criar registro de download
+      // Isso acontece APENAS quando confirmamos que é um download real
+      await prisma.$transaction(async (tx) => {
+        // Incrementar contador
+        await tx.material.update({
+          where: { id: material.id },
+          data: {
+            downloadsCount: {
+              increment: 1,
+            },
           },
-        },
+        });
+
+        // Criar registro de download
+        await tx.download.create({
+          data: {
+            materialId: material.id,
+            userId: userId || null,
+            ip: ip || null,
+          },
+        });
       });
 
-      // Criar registro de download
-      await tx.download.create({
-        data: {
-          materialId: material.id,
-          userId: userId || null,
-          ip: ip || null,
-        },
-      });
-    });
+      console.log(
+        `📥 Download registrado para material ${material.id} - Usuário: ${userId || "anônimo"}, IP: ${ip || "desconhecido"}`
+      );
+    } else if (isPrefetch) {
+      console.log(
+        `⚠️ Requisição de prefetch ignorada para material ${material.id}`
+      );
+    }
 
     // Retornar arquivo com headers de segurança
     // Converter Buffer para Uint8Array para compatibilidade com NextResponse
