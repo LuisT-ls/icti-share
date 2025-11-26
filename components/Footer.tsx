@@ -48,16 +48,28 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Contact Section */}
+          {/* Contact & Social Section */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Contato</h3>
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <a
                 href="mailto:contato@icti.edu.br"
                 className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Mail className="h-4 w-4" />
                 <span>contato@icti.br</span>
+              </a>
+              <a
+                href="https://github.com/LuisT-ls/icti-share"
+                className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Repositório no GitHub"
+              >
+                <Github className="h-4 w-4" />
+                <span>Repositório GitHub</span>
               </a>
             </div>
           </div>
