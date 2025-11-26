@@ -90,23 +90,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Páginas dinâmicas de materiais
   const materialPages: MetadataRoute.Sitemap = materials
+    .filter((material) => {
+      const url = `${baseUrl}/material/${material.id}`;
+      const isValid = isValidUrl(url);
+      if (!isValid) {
+        console.warn(`URL inválida ignorada no sitemap: ${url}`);
+      }
+      return isValid;
+    })
     .map((material) => {
       const url = `${baseUrl}/material/${material.id}`;
-
-      // Validação básica da URL
-      if (!isValidUrl(url)) {
-        console.warn(`URL inválida ignorada no sitemap: ${url}`);
-        return null;
-      }
-
       return {
         url,
         lastModified: material.updatedAt || new Date(),
         changeFrequency: "weekly" as const, // Materiais mudam menos frequentemente
         priority: 0.7, // Prioridade média - conteúdo importante mas não crítico
       };
-    })
-    .filter((page): page is MetadataRoute.Sitemap[0] => page !== null);
+    });
 
   // Combinar todas as páginas
   const allPages = [...staticPages, ...materialPages];
