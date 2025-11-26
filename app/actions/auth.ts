@@ -9,31 +9,13 @@ import { headers } from "next/headers";
 import { signupSchema, loginSchema } from "@/lib/validations/schemas";
 import {
   checkRateLimit,
-  getRateLimitIdentifier,
+  getAuthRateLimitIdentifier,
   RATE_LIMIT_CONFIGS,
 } from "@/lib/security/rate-limit";
 import { sanitizeString, sanitizeEmail } from "@/lib/security/sanitize";
 
 export async function signup(formData: FormData) {
-  // Rate limiting
-  const headersList = await headers();
-  const ip =
-    headersList.get("x-forwarded-for")?.split(",")[0] ||
-    headersList.get("x-real-ip") ||
-    null;
-
-  const identifier = getRateLimitIdentifier(ip, null);
-  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
-
-  if (!rateLimitResult.success) {
-    return {
-      error:
-        rateLimitResult.error ||
-        "Muitas tentativas. Tente novamente mais tarde.",
-    };
-  }
-
-  // Sanitizar e validar dados
+  // Sanitizar e validar dados primeiro para obter o email
   const rawData = {
     name: sanitizeString(formData.get("name") as string),
     email: sanitizeEmail(formData.get("email") as string),
@@ -49,7 +31,35 @@ export async function signup(formData: FormData) {
     };
   }
 
-  const { name, email, password, course } = parsed.data;
+  const { email } = parsed.data;
+
+  // Rate limiting - usar email como identificador (mais confiável que IP)
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headersList.get("x-real-ip")?.trim() ||
+    headersList.get("cf-connecting-ip")?.trim() ||
+    null;
+
+  const identifier = getAuthRateLimitIdentifier(ip, email);
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
+
+  if (!rateLimitResult.success) {
+    console.warn("[RATE LIMIT] Signup bloqueado:", {
+      identifier,
+      ip,
+      email,
+      remaining: rateLimitResult.remaining,
+      resetTime: new Date(rateLimitResult.resetTime).toISOString(),
+    });
+    return {
+      error:
+        rateLimitResult.error ||
+        "Muitas tentativas. Tente novamente mais tarde.",
+    };
+  }
+
+  const { name, password, course } = parsed.data;
 
   try {
     // Verificar se o email já existe
@@ -130,25 +140,7 @@ export async function signup(formData: FormData) {
 }
 
 export async function login(formData: FormData) {
-  // Rate limiting
-  const headersList = await headers();
-  const ip =
-    headersList.get("x-forwarded-for")?.split(",")[0] ||
-    headersList.get("x-real-ip") ||
-    null;
-
-  const identifier = getRateLimitIdentifier(ip, null);
-  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
-
-  if (!rateLimitResult.success) {
-    return {
-      error:
-        rateLimitResult.error ||
-        "Muitas tentativas. Tente novamente mais tarde.",
-    };
-  }
-
-  // Sanitizar e validar dados
+  // Sanitizar e validar dados primeiro para obter o email
   const rawData = {
     email: sanitizeEmail(formData.get("email") as string),
     password: formData.get("password") as string, // Senha não é sanitizada
@@ -163,6 +155,32 @@ export async function login(formData: FormData) {
   }
 
   const { email, password } = parsed.data;
+
+  // Rate limiting - usar email como identificador (mais confiável que IP)
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headersList.get("x-real-ip")?.trim() ||
+    headersList.get("cf-connecting-ip")?.trim() ||
+    null;
+
+  const identifier = getAuthRateLimitIdentifier(ip, email);
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
+
+  if (!rateLimitResult.success) {
+    console.warn("[RATE LIMIT] Login bloqueado:", {
+      identifier,
+      ip,
+      email,
+      remaining: rateLimitResult.remaining,
+      resetTime: new Date(rateLimitResult.resetTime).toISOString(),
+    });
+    return {
+      error:
+        rateLimitResult.error ||
+        "Muitas tentativas. Tente novamente mais tarde.",
+    };
+  }
 
   try {
     const result = await signIn("credentials", {

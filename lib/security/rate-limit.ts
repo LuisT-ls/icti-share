@@ -37,6 +37,22 @@ function cleanupExpiredEntries(): void {
 }
 
 /**
+ * Limpa todas as entradas do rate limit store
+ * Útil para casos de emergência ou reset manual
+ */
+export function clearRateLimitStore(): void {
+  rateLimitStore.clear();
+}
+
+/**
+ * Limpa entradas expiradas do rate limit store
+ * Pode ser chamada manualmente se necessário
+ */
+export function cleanupRateLimitStore(): void {
+  cleanupExpiredEntries();
+}
+
+/**
  * Verifica e aplica rate limiting
  */
 export function checkRateLimit(
@@ -46,15 +62,20 @@ export function checkRateLimit(
   const { windowMs, maxRequests } = options;
   const now = Date.now();
 
-  // Limpar entradas expiradas periodicamente
-  if (Math.random() < 0.1) {
-    // 10% de chance de limpar (para não fazer sempre)
+  // Limpar entradas expiradas periodicamente (aumentado para 20% para limpeza mais frequente)
+  if (Math.random() < 0.2) {
     cleanupExpiredEntries();
   }
 
   const entry = rateLimitStore.get(identifier);
 
+  // Se não houver entrada ou se a entrada expirou, criar nova
   if (!entry || entry.resetTime < now) {
+    // Se a entrada expirou, removê-la antes de criar nova
+    if (entry && entry.resetTime < now) {
+      rateLimitStore.delete(identifier);
+    }
+
     // Nova janela de tempo
     const newEntry: RateLimitEntry = {
       count: 1,
@@ -69,7 +90,7 @@ export function checkRateLimit(
     };
   }
 
-  // Entrada existente
+  // Entrada existente e ainda válida
   if (entry.count >= maxRequests) {
     return {
       success: false,
@@ -105,6 +126,28 @@ export function getRateLimitIdentifier(
 }
 
 /**
+ * Obtém o identificador para rate limiting de autenticação
+ * Usa email como fallback quando IP não está disponível para evitar
+ * que todos os usuários compartilhem o mesmo limite
+ */
+export function getAuthRateLimitIdentifier(
+  ip: string | null,
+  email: string | null
+): string {
+  // Se tivermos email, usar email (mais específico e único)
+  if (email) {
+    return `auth:email:${email.toLowerCase().trim()}`;
+  }
+  // Se não tiver email mas tiver IP, usar IP
+  if (ip && ip !== "unknown") {
+    return `auth:ip:${ip}`;
+  }
+  // Fallback: usar timestamp + random para evitar colisões
+  // Isso só acontece em casos muito raros onde nem IP nem email estão disponíveis
+  return `auth:fallback:${Date.now()}-${Math.random().toString(36).substring(7)}`;
+}
+
+/**
  * Configurações pré-definidas de rate limiting
  */
 export const RATE_LIMIT_CONFIGS = {
@@ -129,4 +172,3 @@ export const RATE_LIMIT_CONFIGS = {
     maxRequests: 100,
   },
 } as const;
-
