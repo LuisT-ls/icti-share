@@ -4,7 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MaterialList } from "@/components/MaterialList";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MaterialActions } from "@/components/MaterialActions";
 
 export default async function MeusMateriaisPage() {
@@ -55,7 +61,7 @@ export default async function MeusMateriaisPage() {
               <div className="space-y-4">
                 {materials.map((material) => (
                   <div key={material.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg mb-2">
                           <a
@@ -73,7 +79,9 @@ export default async function MeusMateriaisPage() {
                         <div className="flex gap-4 text-xs text-muted-foreground">
                           <span>{material.downloadsCount} downloads</span>
                           <span>
-                            {new Date(material.createdAt).toLocaleDateString("pt-BR")}
+                            {new Date(material.createdAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
                           </span>
                         </div>
                       </div>
