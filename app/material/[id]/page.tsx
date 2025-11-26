@@ -24,6 +24,72 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatBytes } from "@/lib/utils";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { generateMaterialStructuredData, getBaseUrl } from "@/lib/seo";
+
+const baseUrl = getBaseUrl();
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const material = await prisma.material.findUnique({
+    where: { id },
+    include: {
+      uploadedBy: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!material) {
+    return {
+      title: "Material não encontrado",
+    };
+  }
+
+  const title = `${material.title} - ICTI Share`;
+  const description =
+    material.description ||
+    `Material acadêmico: ${material.title}. ${material.course ? `Curso: ${material.course}.` : ""} ${material.discipline ? `Disciplina: ${material.discipline}.` : ""}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/material/${id}`,
+      siteName: "ICTI Share",
+      images: [
+        {
+          url: `${baseUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      locale: "pt_BR",
+      type: "article",
+      publishedTime: material.createdAt.toISOString(),
+      modifiedTime: material.updatedAt.toISOString(),
+      authors: material.uploadedBy?.name
+        ? [material.uploadedBy.name]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${baseUrl}/og-image.png`],
+    },
+  };
+}
 
 export default async function MaterialDetailPage({
   params,
@@ -48,8 +114,22 @@ export default async function MaterialDetailPage({
     notFound();
   }
 
+  // Structured Data (JSON-LD) para SEO
+  const jsonLd = generateMaterialStructuredData({
+    title: material.title,
+    description:
+      material.description || `Material acadêmico: ${material.title}`,
+    url: `${baseUrl}/material/${material.id}`,
+    author: material.uploadedBy?.name || "ICTI Share",
+    datePublished: material.createdAt.toISOString(),
+  });
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <Card className="border-border/50 shadow-xl">

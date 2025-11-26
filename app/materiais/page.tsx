@@ -6,6 +6,43 @@ import { MaterialList } from "@/components/MaterialList";
 import { Pagination } from "@/components/Pagination";
 import { Suspense } from "react";
 import type { Prisma } from "@prisma/client";
+import type { Metadata } from "next";
+
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.AUTH_URL ||
+  process.env.NEXTAUTH_URL ||
+  "https://icti-share.vercel.app";
+
+export const metadata: Metadata = {
+  title: "Materiais Acadêmicos",
+  description:
+    "Explore todos os materiais acadêmicos disponíveis na plataforma. Encontre apostilas, notas de aula, resumos e muito mais organizados por curso, disciplina e semestre.",
+  openGraph: {
+    title: "Materiais Acadêmicos - ICTI Share",
+    description:
+      "Explore todos os materiais acadêmicos disponíveis na plataforma. Encontre apostilas, notas de aula, resumos e muito mais.",
+    url: `${baseUrl}/materiais`,
+    siteName: "ICTI Share",
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Materiais Acadêmicos - ICTI Share",
+      },
+    ],
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Materiais Acadêmicos - ICTI Share",
+    description:
+      "Explore todos os materiais acadêmicos disponíveis na plataforma.",
+    images: [`${baseUrl}/og-image.png`],
+  },
+};
 
 // Constante para status aprovado (usando valor literal compatível com Prisma)
 const MATERIAL_STATUS_APPROVED = "APPROVED" as const;
@@ -197,8 +234,26 @@ export default async function MateriaisPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // Structured Data (JSON-LD) para SEO
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Materiais Acadêmicos",
+    description:
+      "Explore todos os materiais acadêmicos disponíveis na plataforma ICTI Share",
+    url: `${baseUrl}/materiais`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: [],
+    },
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12 lg:py-16">
         {/* Hero Section */}
