@@ -139,46 +139,92 @@ export async function GET(
     const isPrefetch =
       purposeHeader === "prefetch" || secPurposeHeader === "prefetch";
 
+    // Ignorar requisições HEAD (alguns navegadores fazem HEAD antes de GET)
+    const isHeadRequest = request.method === "HEAD";
+
     // Verificar se o arquivo foi lido com sucesso
     const fileIsValid = fileBuffer && fileBuffer.length > 0;
 
     // IMPORTANTE: Incrementar contador APENAS quando:
     // 1. O arquivo foi lido com sucesso
     // 2. NÃO é uma requisição de prefetch
-    // 3. O arquivo será realmente enviado ao navegador
+    // 3. NÃO é uma requisição HEAD
+    // 4. NÃO houve download recente (últimos 10 segundos) do mesmo material pelo mesmo usuário/IP
     // Isso garante que o contador só aumenta quando o download realmente é iniciado pelo navegador
 
-    if (!isPrefetch && fileIsValid) {
-      // Incrementar contador de downloads e criar registro de download
-      // Isso acontece APENAS quando confirmamos que é um download real
-      await prisma.$transaction(async (tx) => {
-        // Incrementar contador
-        await tx.material.update({
-          where: { id: material.id },
-          data: {
-            downloadsCount: {
-              increment: 1,
+    if (!isPrefetch && !isHeadRequest && fileIsValid) {
+      // Verificar se já houve um download recente (últimos 10 segundos) do mesmo material
+      // pelo mesmo usuário ou IP para evitar contagem duplicada
+      const tenSecondsAgo = new Date(Date.now() - 10000); // 10 segundos atrás
+
+      // Construir condições para verificar download recente
+      // Só verificamos se temos userId ou IP para evitar bloquear downloads legítimos
+      let recentDownload = null;
+
+      if (userId || ip) {
+        const whereConditions: any = {
+          materialId: material.id,
+          createdAt: {
+            gte: tenSecondsAgo,
+          },
+        };
+
+        // Se houver userId, verificar por userId (mais preciso)
+        if (userId) {
+          whereConditions.userId = userId;
+        } else if (ip) {
+          // Se não houver userId mas houver IP, verificar por IP
+          whereConditions.ip = ip;
+          whereConditions.userId = null; // Garantir que é usuário anônimo
+        }
+
+        recentDownload = await prisma.download.findFirst({
+          where: whereConditions,
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+      }
+
+      // Se não houver download recente, incrementar contador
+      if (!recentDownload) {
+        // Incrementar contador de downloads e criar registro de download
+        // Isso acontece APENAS quando confirmamos que é um download real e único
+        await prisma.$transaction(async (tx) => {
+          // Incrementar contador
+          await tx.material.update({
+            where: { id: material.id },
+            data: {
+              downloadsCount: {
+                increment: 1,
+              },
             },
-          },
+          });
+
+          // Criar registro de download
+          await tx.download.create({
+            data: {
+              materialId: material.id,
+              userId: userId || null,
+              ip: ip || null,
+            },
+          });
         });
 
-        // Criar registro de download
-        await tx.download.create({
-          data: {
-            materialId: material.id,
-            userId: userId || null,
-            ip: ip || null,
-          },
-        });
-      });
-
-      console.log(
-        `📥 Download registrado para material ${material.id} - Usuário: ${userId || "anônimo"}, IP: ${ip || "desconhecido"}`
-      );
+        console.log(
+          `📥 Download registrado para material ${material.id} - Usuário: ${userId || "anônimo"}, IP: ${ip || "desconhecido"}, Método: ${request.method}`
+        );
+      } else {
+        console.log(
+          `⚠️ Download duplicado ignorado para material ${material.id} - Download recente detectado (últimos 10s) - Usuário: ${userId || "anônimo"}, IP: ${ip || "desconhecido"}`
+        );
+      }
     } else if (isPrefetch) {
       console.log(
         `⚠️ Requisição de prefetch ignorada para material ${material.id}`
       );
+    } else if (isHeadRequest) {
+      console.log(`⚠️ Requisição HEAD ignorada para material ${material.id}`);
     }
 
     // Retornar arquivo com headers de segurança
