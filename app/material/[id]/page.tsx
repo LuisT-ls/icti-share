@@ -28,6 +28,11 @@ import type { Metadata } from "next";
 import { generateMaterialStructuredData, getBaseUrl } from "@/lib/seo";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { PDFViewerWrapper } from "@/components/PDFViewerWrapper";
+import { RatingStars } from "@/components/RatingStars";
+import { CommentSection } from "@/components/CommentSection";
+import { getComments } from "@/app/actions/comments";
+import { getRatingStats, getUserRating } from "@/app/actions/ratings";
+import { getServerSession } from "@/lib/session";
 
 const baseUrl = getBaseUrl();
 
@@ -115,6 +120,26 @@ export default async function MaterialDetailPage({
   if (!material) {
     notFound();
   }
+
+  // Buscar comentários e avaliações
+  const session = await getServerSession();
+  const [commentsResult, ratingStatsResult, userRatingResult] =
+    await Promise.all([
+      getComments(id),
+      getRatingStats(id),
+      session?.user?.id
+        ? getUserRating(id)
+        : Promise.resolve({ success: true, rating: null }),
+    ]);
+
+  const comments =
+    commentsResult.success && commentsResult.comments
+      ? commentsResult.comments
+      : [];
+  const ratingStats = ratingStatsResult.success
+    ? ratingStatsResult.stats
+    : { average: 0, total: 0, distribution: [] };
+  const userRating = userRatingResult.success ? userRatingResult.rating : null;
 
   // Structured Data (JSON-LD) para SEO
   const jsonLd = generateMaterialStructuredData({
@@ -266,6 +291,21 @@ export default async function MaterialDetailPage({
               </div>
             )}
 
+            {/* Sistema de Avaliação */}
+            <div className="pt-6 border-t border-border/50">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Avaliar Material</h3>
+                <RatingStars
+                  materialId={material.id}
+                  initialRating={userRating?.value || null}
+                  averageRating={ratingStats.average}
+                  totalRatings={ratingStats.total}
+                  showStats={true}
+                  interactive={!!session}
+                />
+              </div>
+            </div>
+
             {/* Compartilhamento Social */}
             <div className="pt-6 border-t border-border/50">
               <SocialShareButtons
@@ -307,6 +347,11 @@ export default async function MaterialDetailPage({
             </div>
           </CardContent>
         </Card>
+
+        {/* Seção de Comentários */}
+        <div className="mt-8">
+          <CommentSection materialId={material.id} initialComments={comments} />
+        </div>
       </main>
       <Footer />
     </div>

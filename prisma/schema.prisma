@@ -22,6 +22,12 @@ enum MaterialStatus {
   REJECTED
 }
 
+enum CommentStatus {
+  APPROVED
+  PENDING
+  DELETED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -39,6 +45,8 @@ model User {
   accounts          Account[]
   sessions          Session[]
   passwordResetTokens PasswordResetToken[]
+  comments          Comment[]
+  ratings           Rating[]
 
   @@index([email])
   @@index([role])
@@ -67,6 +75,8 @@ model Material {
 
   // Relacionamentos
   downloads Download[]
+  comments  Comment[]
+  ratings   Rating[]
 
   @@index([uploadedById])
   @@index([course])
@@ -148,4 +158,43 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expires])
   @@map("password_reset_tokens")
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  materialId  String
+  material    Material      @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String        @db.Text
+  parentId    String?       // Para threading (respostas)
+  parent      Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[]     @relation("CommentReplies")
+  status      CommentStatus @default(APPROVED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([materialId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  materialId String
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value      Int      // 1 a 5
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([materialId, userId]) // Um usuário só pode avaliar um material uma vez
+  @@index([materialId])
+  @@index([userId])
+  @@index([value])
+  @@map("ratings")
 }

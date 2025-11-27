@@ -326,7 +326,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 14. ✅ Sistema de versões (10-12h)
 15. ✅ Backup automático (6-8h)
-16. ✅ PWA (Service Worker) (8-10h)
 
 **Total:** 24-30 horas
 
@@ -341,17 +340,12 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
    - **Impacto:** Alto
    - **Esforço:** Médio
 
-2. **Busca Full-Text** 🔴
-   - **Por quê:** Melhora qualidade dos resultados
-   - **Impacto:** Alto
-   - **Esforço:** Baixo
-
-3. **Sistema de Notificações** 🟡
+2. **Sistema de Notificações** 🟡
    - **Por quê:** Aumenta engajamento e comunicação
    - **Impacto:** Médio
    - **Esforço:** Médio
 
-4. **Comentários e Avaliações** 🟡
+3. **Comentários e Avaliações** 🟡
    - **Por quê:** Aumenta interação e qualidade
    - **Impacto:** Médio
    - **Esforço:** Alto
@@ -447,10 +441,9 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 A aplicação **ICTI Share** está bem estruturada e pronta para produção com as funcionalidades essenciais. As recomendações apresentadas visam:
 
 1. **Completar funcionalidades essenciais** (recuperação de senha)
-2. **Melhorar experiência do usuário** (preview PDF, busca melhor)
-3. **Aumentar engajamento** (notificações, comentários, favoritos)
-4. **Melhorar análise e moderação** (export, gráficos, relatórios)
-5. **Otimizar performance e escalabilidade** (cache, cloud storage)
+2. **Aumentar engajamento** (notificações, comentários, favoritos)
+3. **Melhorar análise e moderação** (export, gráficos, relatórios)
+4. **Otimizar performance e escalabilidade** (cache, cloud storage)
 
 **Prioridade imediata:** Implementar as 3 funcionalidades de prioridade ALTA (recuperação de senha, preview PDF, busca full-text) antes de adicionar features mais complexas.
 
