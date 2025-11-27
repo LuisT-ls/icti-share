@@ -63,7 +63,8 @@ export async function GET(
     }
 
     // Retornar PDF com headers apropriados para visualização
-    return new NextResponse(fileBuffer, {
+    // Converter Buffer para Uint8Array para compatibilidade com NextResponse
+    return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
