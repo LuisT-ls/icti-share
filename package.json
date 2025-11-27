@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/copy-pdf-worker.js",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
@@ -18,7 +19,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && node scripts/copy-pdf-worker.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:generate": "prisma generate",

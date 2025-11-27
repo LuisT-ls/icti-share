@@ -6,9 +6,9 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Configurar worker do pdf.js
+// Configurar worker do pdf.js usando arquivo local
 if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 }
 
 interface PDFPreviewProps {
