@@ -55,6 +55,15 @@ export function CommentSection({
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState("");
+
+  // Sincronizar com initialComments quando mudarem (após refresh)
+  useEffect(() => {
+    console.log("[CommentSection] initialComments atualizados:", {
+      count: initialComments.length,
+      commentIds: initialComments.map((c) => c.id),
+    });
+    setComments(initialComments);
+  }, [initialComments]);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -109,11 +118,38 @@ export function CommentSection({
       if (result.success) {
         const successResult = result as { success: true; comment: any };
         if (successResult.comment) {
-          console.log(
-            "[CommentSection] Comentário criado com sucesso, limpando formulário e atualizando página"
-          );
+          console.log("[CommentSection] Comentário criado com sucesso:", {
+            commentId: successResult.comment.id,
+            materialId: successResult.comment.materialId,
+            content: successResult.comment.content?.substring(0, 50),
+            hasUser: !!successResult.comment.user,
+          });
+
+          // Limpar formulário
           setNewComment("");
+
+          // Atualizar estado local imediatamente para feedback visual
+          const newCommentWithUser = {
+            ...successResult.comment,
+            replies: [],
+          };
+          setComments((prev) => {
+            const updated = [newCommentWithUser, ...prev];
+            console.log(
+              "[CommentSection] Estado local atualizado, total de comentários:",
+              updated.length
+            );
+            return updated;
+          });
+
+          console.log(
+            "[CommentSection] Chamando router.refresh() para sincronizar com servidor..."
+          );
+
+          // Atualizar página para garantir sincronização com servidor
           router.refresh();
+
+          console.log("[CommentSection] router.refresh() chamado");
         } else {
           console.error(
             "[CommentSection] Comentário não retornado mesmo com success=true"
@@ -153,9 +189,36 @@ export function CommentSection({
     const result = await createComment(formData);
 
     if (result.success) {
+      const successResult = result as { success: true; comment: any };
+      if (successResult.comment) {
+        console.log("[CommentSection] Resposta criada com sucesso:", {
+          replyId: successResult.comment.id,
+          parentId: successResult.comment.parentId,
+        });
+
+        // Atualizar estado local
+        setComments((prev) =>
+          prev.map((comment) =>
+            comment.id === parentId
+              ? {
+                  ...comment,
+                  replies: [...(comment.replies || []), successResult.comment],
+                }
+              : comment
+          )
+        );
+      }
+
       setReplyContent("");
       setReplyingTo(null);
       router.refresh();
+    } else {
+      const errorResult = result as { success: false; error: string };
+      console.error(
+        "[CommentSection] Erro ao criar resposta:",
+        errorResult.error
+      );
+      alert(errorResult.error || "Erro ao criar resposta. Tente novamente.");
     }
 
     setIsSubmitting(false);
