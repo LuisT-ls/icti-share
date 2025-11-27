@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -16,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { AdminMaterialActions } from "@/components/AdminMaterialActions";
 import { UserRoleEditor } from "@/components/UserRoleEditor";
 import {
@@ -25,6 +28,7 @@ import {
   Shield,
   Clock,
   TrendingUp,
+  RefreshCw,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -89,6 +93,19 @@ export function AdminContent({
   topMaterials,
   currentUserId,
 }: AdminContentProps) {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Revalidar a página atual para buscar dados atualizados
+    router.refresh();
+    // Pequeno delay para melhorar feedback visual
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -96,11 +113,28 @@ export function AdminContent({
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      <div>
-        <h1 className="text-4xl font-bold mb-2">Painel Administrativo</h1>
-        <p className="text-muted-foreground">
-          Gerencie materiais, usuários e modere a plataforma
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Painel Administrativo</h1>
+          <p className="text-muted-foreground">
+            Gerencie materiais, usuários e modere a plataforma
+          </p>
+        </div>
+        <Button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          aria-label="Atualizar dados"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+          />
+          <span className="hidden sm:inline">
+            {isRefreshing ? "Atualizando..." : "Atualizar"}
+          </span>
+        </Button>
       </div>
 
       {/* Estatísticas */}
