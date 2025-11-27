@@ -50,21 +50,60 @@ export async function createComment(formData: FormData) {
       parentId: formData.get("parentId") as string | undefined,
     };
 
-    console.log("[createComment] Dados extraídos:", {
-      materialId: rawData.materialId,
-      contentLength: rawData.content?.length,
-      contentPreview: rawData.content?.substring(0, 100),
-      hasParentId: !!rawData.parentId,
-      parentId: rawData.parentId,
+    console.log("[createComment] Dados extraídos (tipos e valores):", {
+      materialId: {
+        value: rawData.materialId,
+        type: typeof rawData.materialId,
+        isString: typeof rawData.materialId === "string",
+        length: rawData.materialId?.length,
+        isEmpty: !rawData.materialId || rawData.materialId.trim().length === 0,
+      },
+      content: {
+        value: rawData.content,
+        type: typeof rawData.content,
+        isString: typeof rawData.content === "string",
+        length: rawData.content?.length,
+        isEmpty: !rawData.content || rawData.content.trim().length === 0,
+        preview: rawData.content?.substring(0, 100),
+      },
+      parentId: {
+        value: rawData.parentId,
+        type: typeof rawData.parentId,
+        isString: typeof rawData.parentId === "string",
+        isUndefined: rawData.parentId === undefined,
+        isEmpty: rawData.parentId === "",
+      },
     });
 
     console.log("[createComment] Validando dados com Zod...");
-    const parsed = createCommentSchema.parse(rawData);
-    console.log("[createComment] Dados validados com sucesso:", {
-      materialId: parsed.materialId,
-      contentLength: parsed.content.length,
-      hasParentId: !!parsed.parentId,
-    });
+    let parsed;
+    try {
+      parsed = createCommentSchema.parse(rawData);
+      console.log("[createComment] Dados validados com sucesso:", {
+        materialId: parsed.materialId,
+        contentLength: parsed.content.length,
+        hasParentId: !!parsed.parentId,
+      });
+    } catch (zodError) {
+      if (zodError instanceof z.ZodError) {
+        console.error("[createComment] ERRO de validação Zod:", {
+          errors: zodError.errors,
+          issues: zodError.issues.map((issue) => ({
+            path: issue.path,
+            message: issue.message,
+            code: issue.code,
+            received: issue.received,
+            expected: issue.expected,
+          })),
+          formData: {
+            materialId: rawData.materialId,
+            content: rawData.content,
+            parentId: rawData.parentId,
+          },
+        });
+      }
+      throw zodError;
+    }
 
     // Verificar se o material existe
     console.log("[createComment] Verificando se material existe...", {
@@ -214,13 +253,28 @@ export async function createComment(formData: FormData) {
     console.error("[createComment] ERRO ao criar comentário:", error);
 
     if (error instanceof z.ZodError) {
-      console.error("[createComment] Erro de validação Zod:", {
-        errors: error.errors,
-        issues: error.issues,
+      const errorDetails = error.errors.map((err) => ({
+        path: err.path.join("."),
+        message: err.message,
+        code: err.code,
+        received: err.received,
+        expected: err.expected,
+      }));
+
+      console.error("[createComment] Erro de validação Zod detalhado:", {
+        errorCount: error.errors.length,
+        errors: errorDetails,
+        allIssues: error.issues,
       });
+
+      const firstError = error.errors[0];
+      const errorMessage = firstError
+        ? `Campo "${firstError.path.join(".")}": ${firstError.message}`
+        : "Dados inválidos. Verifique os campos.";
+
       return {
         success: false,
-        error: "Dados inválidos. Verifique os campos.",
+        error: errorMessage,
       };
     }
 
