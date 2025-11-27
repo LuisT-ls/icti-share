@@ -64,6 +64,12 @@ export async function GET(
 
     // Retornar PDF com headers apropriados para visualização
     // Converter Buffer para Uint8Array para compatibilidade com NextResponse
+    // Nota: Remover CSP restritivo para permitir carregamento do PDF
+    const securityHeaders = getSecurityHeaders();
+    // Remover CSP da resposta para não interferir com o carregamento do PDF
+    const { "Content-Security-Policy": _, ...headersWithoutCSP } =
+      securityHeaders;
+
     return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
@@ -71,7 +77,7 @@ export async function GET(
         "Content-Length": String(fileBuffer.length),
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
         "Accept-Ranges": "bytes",
-        ...getSecurityHeaders(),
+        ...headersWithoutCSP,
       },
     });
   } catch (error) {

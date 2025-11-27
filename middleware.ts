@@ -6,8 +6,9 @@ import type { NextRequest } from "next/server";
 function getSecurityHeaders(): Record<string, string> {
   // Next.js requer 'unsafe-inline' e 'unsafe-eval' para scripts em desenvolvimento e produção
   // devido ao hot reload e ao sistema de chunks dinâmicos
+  // Adicionar cdnjs.cloudflare.com para pdf.js worker
   const csp =
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://vercel.live wss://*.vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self';";
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://vercel.live wss://*.vercel.live https://cdnjs.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';";
 
   return {
     "X-Frame-Options": "DENY",
@@ -39,6 +40,7 @@ export default auth((req) => {
       "/login",
       "/signup",
       "/api/auth",
+      "/api/material",
       "/material/download",
       "/materiais",
       "/material",

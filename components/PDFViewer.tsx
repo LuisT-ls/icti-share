@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
 import { Button } from "./ui/button";
 import {
   ChevronLeft,
@@ -152,9 +158,14 @@ export function PDFViewer({
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 py-4 border-b border-border/50 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold truncate flex-1 mr-4">
-              {title}
-            </DialogTitle>
+            <div className="flex-1 mr-4 min-w-0">
+              <DialogTitle className="text-lg font-semibold truncate">
+                {title}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Visualizador de PDF com controles de navegação, zoom e rotação
+              </DialogDescription>
+            </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" asChild>
                 <a href={downloadUrl} download>
