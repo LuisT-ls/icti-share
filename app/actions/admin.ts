@@ -6,6 +6,9 @@ import { MaterialStatus, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { unlink } from "fs/promises";
 import { existsSync } from "fs";
+import { createAuditLog } from "@/lib/audit";
+import { AuditAction } from "@prisma/client";
+import { headers } from "next/headers";
 
 /**
  * Verifica se o usuário atual é ADMIN
@@ -13,7 +16,9 @@ import { existsSync } from "fs";
 async function requireAdmin() {
   const session = await auth();
   if (!session?.user?.id || session.user.role !== "ADMIN") {
-    throw new Error("Acesso negado. Apenas administradores podem realizar esta ação.");
+    throw new Error(
+      "Acesso negado. Apenas administradores podem realizar esta ação."
+    );
   }
   return session;
 }
@@ -23,10 +28,11 @@ async function requireAdmin() {
  */
 export async function approveMaterial(materialId: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const material = await prisma.material.findUnique({
       where: { id: materialId },
+      include: { uploadedBy: true },
     });
 
     if (!material) {
@@ -41,6 +47,24 @@ export async function approveMaterial(materialId: string) {
       data: { status: MaterialStatus.APPROVED },
     });
 
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.MATERIAL_APPROVE,
+      userId: session.user.id,
+      entityType: "Material",
+      entityId: materialId,
+      description: `Material aprovado: ${material.title}`,
+      metadata: {
+        uploadedBy: material.uploadedBy.email,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
+    });
+
     revalidatePath("/admin");
     revalidatePath("/materiais");
 
@@ -51,7 +75,8 @@ export async function approveMaterial(materialId: string) {
     console.error("Erro ao aprovar material:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao aprovar material",
+      error:
+        error instanceof Error ? error.message : "Erro ao aprovar material",
     };
   }
 }
@@ -61,10 +86,11 @@ export async function approveMaterial(materialId: string) {
  */
 export async function rejectMaterial(materialId: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const material = await prisma.material.findUnique({
       where: { id: materialId },
+      include: { uploadedBy: true },
     });
 
     if (!material) {
@@ -79,6 +105,24 @@ export async function rejectMaterial(materialId: string) {
       data: { status: MaterialStatus.REJECTED },
     });
 
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.MATERIAL_REJECT,
+      userId: session.user.id,
+      entityType: "Material",
+      entityId: materialId,
+      description: `Material rejeitado: ${material.title}`,
+      metadata: {
+        uploadedBy: material.uploadedBy.email,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
+    });
+
     revalidatePath("/admin");
     revalidatePath("/materiais");
 
@@ -89,7 +133,8 @@ export async function rejectMaterial(materialId: string) {
     console.error("Erro ao rejeitar material:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao rejeitar material",
+      error:
+        error instanceof Error ? error.message : "Erro ao rejeitar material",
     };
   }
 }
@@ -99,10 +144,11 @@ export async function rejectMaterial(materialId: string) {
  */
 export async function removeMaterial(materialId: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const material = await prisma.material.findUnique({
       where: { id: materialId },
+      include: { uploadedBy: true },
     });
 
     if (!material) {
@@ -127,6 +173,25 @@ export async function removeMaterial(materialId: string) {
       where: { id: materialId },
     });
 
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.MATERIAL_DELETE,
+      userId: session.user.id,
+      entityType: "Material",
+      entityId: materialId,
+      description: `Material removido por admin: ${material.title}`,
+      metadata: {
+        uploadedBy: material.uploadedBy.email,
+        filename: material.filename,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
+    });
+
     revalidatePath("/admin");
     revalidatePath("/materiais");
 
@@ -137,7 +202,8 @@ export async function removeMaterial(materialId: string) {
     console.error("Erro ao remover material:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao remover material",
+      error:
+        error instanceof Error ? error.message : "Erro ao remover material",
     };
   }
 }
@@ -168,9 +234,30 @@ export async function updateUserRole(userId: string, newRole: UserRole) {
       };
     }
 
+    const oldRole = user.role;
     await prisma.user.update({
       where: { id: userId },
       data: { role: newRole },
+    });
+
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.USER_ROLE_CHANGE,
+      userId: session.user.id,
+      entityType: "User",
+      entityId: userId,
+      description: `Role do usuário alterado de ${oldRole} para ${newRole}`,
+      metadata: {
+        targetUserEmail: user.email,
+        oldRole,
+        newRole,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
     });
 
     revalidatePath("/admin");
@@ -182,7 +269,10 @@ export async function updateUserRole(userId: string, newRole: UserRole) {
     console.error("Erro ao atualizar role do usuário:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Erro ao atualizar role do usuário",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Erro ao atualizar role do usuário",
     };
   }
 }
@@ -317,4 +407,3 @@ export async function getAdminStats() {
     };
   }
 }
-

@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AdminMaterialActions } from "@/components/AdminMaterialActions";
 import { UserRoleEditor } from "@/components/UserRoleEditor";
+import { AuditLogsViewer } from "@/components/AuditLogsViewer";
 import {
   Users,
   FileText,
@@ -29,6 +30,7 @@ import {
   Clock,
   TrendingUp,
   RefreshCw,
+  FileSearch,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -389,6 +391,9 @@ export function AdminContent({
           </div>
         </CardContent>
       </Card>
+
+      {/* Logs de Auditoria */}
+      <AuditLogsViewer />
     </motion.div>
   );
 }

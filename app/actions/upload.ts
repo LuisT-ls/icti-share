@@ -15,6 +15,8 @@ import {
 } from "@/lib/security/rate-limit";
 import { sanitizeString, sanitizeFilename } from "@/lib/security/sanitize";
 import { validateFile } from "@/lib/security/file-validation";
+import { createAuditLog } from "@/lib/audit";
+import { AuditAction } from "@prisma/client";
 
 type UploadResult =
   | { success: true; materialId: string }
@@ -229,6 +231,29 @@ export async function uploadMaterial(
     });
 
     console.log("✅ Upload concluído com sucesso! Material ID:", material.id);
+
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.MATERIAL_UPLOAD,
+      userId: session.user.id,
+      entityType: "Material",
+      entityId: material.id,
+      description: `Upload de material: ${parsed.data.title}`,
+      metadata: {
+        filename: originalFilename,
+        size: file.size,
+        mimeType: file.type,
+        course: parsed.data.course,
+        discipline: parsed.data.discipline,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
+    });
+
     return {
       success: true,
       materialId: material.id,

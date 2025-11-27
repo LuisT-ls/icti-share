@@ -7,6 +7,9 @@ import { unlink } from "fs/promises";
 import { existsSync } from "fs";
 import { editMaterialSchema } from "@/lib/validations/schemas";
 import { sanitizeString } from "@/lib/security/sanitize";
+import { createAuditLog } from "@/lib/audit";
+import { AuditAction } from "@prisma/client";
+import { headers } from "next/headers";
 
 export async function deleteMaterial(materialId: string) {
   const session = await getServerSession();
@@ -50,6 +53,25 @@ export async function deleteMaterial(materialId: string) {
     // Deletar do banco (cascade deleta downloads)
     await prisma.material.delete({
       where: { id: materialId },
+    });
+
+    // Log de auditoria
+    const headersList = await headers();
+    await createAuditLog({
+      action: AuditAction.MATERIAL_DELETE,
+      userId: session.user.id,
+      entityType: "Material",
+      entityId: materialId,
+      description: `Material deletado: ${material.title}`,
+      metadata: {
+        filename: material.filename,
+        uploadedBy: material.uploadedBy.email,
+      },
+      ipAddress:
+        headersList.get("x-forwarded-for")?.split(",")[0] ||
+        headersList.get("x-real-ip") ||
+        undefined,
+      userAgent: headersList.get("user-agent") || undefined,
     });
 
     revalidatePath("/meus-materiais");

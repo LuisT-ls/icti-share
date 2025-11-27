@@ -25,28 +25,16 @@ const updateCommentSchema = z.object({
  * Criar um comentário
  */
 export async function createComment(formData: FormData) {
-  console.log("[createComment] Iniciando criação de comentário");
-
   try {
-    console.log("[createComment] Verificando autenticação...");
     const session = await auth();
 
-    console.log("[createComment] Resultado da autenticação:", {
-      hasSession: !!session,
-      hasUserId: !!session?.user?.id,
-      userId: session?.user?.id,
-      userRole: session?.user?.role,
-    });
-
     if (!session?.user?.id) {
-      console.error("[createComment] Usuário não autenticado");
       return {
         success: false,
         error: "Você precisa estar autenticado para comentar",
       };
     }
 
-    console.log("[createComment] Extraindo dados do FormData...");
     const parentIdRaw = formData.get("parentId");
     const rawData = {
       materialId: formData.get("materialId") as string,
@@ -56,89 +44,46 @@ export async function createComment(formData: FormData) {
         parentIdRaw && parentIdRaw !== "" ? (parentIdRaw as string) : undefined,
     };
 
-    console.log("[createComment] Dados extraídos (tipos e valores):", {
-      materialId: {
-        value: rawData.materialId,
-        type: typeof rawData.materialId,
-        isString: typeof rawData.materialId === "string",
-        length: rawData.materialId?.length,
-        isEmpty: !rawData.materialId || rawData.materialId.trim().length === 0,
-      },
-      content: {
-        value: rawData.content,
-        type: typeof rawData.content,
-        isString: typeof rawData.content === "string",
-        length: rawData.content?.length,
-        isEmpty: !rawData.content || rawData.content.trim().length === 0,
-        preview: rawData.content?.substring(0, 100),
-      },
-      parentId: {
-        value: rawData.parentId,
-        type: typeof rawData.parentId,
-        isString: typeof rawData.parentId === "string",
-        isUndefined: rawData.parentId === undefined,
-        isEmpty: rawData.parentId === "",
-      },
-    });
-
-    console.log("[createComment] Validando dados com Zod...");
     let parsed;
     try {
       parsed = createCommentSchema.parse(rawData);
-      console.log("[createComment] Dados validados com sucesso:", {
-        materialId: parsed.materialId,
-        contentLength: parsed.content.length,
-        hasParentId: !!parsed.parentId,
-      });
     } catch (zodError) {
       if (zodError instanceof z.ZodError) {
-        console.error("[createComment] ERRO de validação Zod:", {
-          errors: zodError.errors,
-          issues: zodError.issues.map((issue) => {
-            const baseIssue = {
-              path: issue.path,
-              message: issue.message,
-              code: issue.code,
-            };
-            // Adicionar received e expected apenas se existirem
-            if ("received" in issue) {
-              (baseIssue as any).received = issue.received;
-            }
-            if ("expected" in issue) {
-              (baseIssue as any).expected = issue.expected;
-            }
-            return baseIssue;
-          }),
-          formData: {
-            materialId: rawData.materialId,
-            content: rawData.content,
-            parentId: rawData.parentId,
-          },
+        const errorDetails = zodError.errors.map((err) => {
+          const baseErr = {
+            path: err.path.join("."),
+            message: err.message,
+            code: err.code,
+          };
+          // Adicionar received e expected apenas se existirem
+          if ("received" in err) {
+            (baseErr as any).received = err.received;
+          }
+          if ("expected" in err) {
+            (baseErr as any).expected = err.expected;
+          }
+          return baseErr;
         });
+
+        const firstError = zodError.errors[0];
+        const errorMessage = firstError
+          ? `Campo "${firstError.path.join(".")}": ${firstError.message}`
+          : "Dados inválidos. Verifique os campos.";
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
       }
       throw zodError;
     }
 
     // Verificar se o material existe
-    console.log("[createComment] Verificando se material existe...", {
-      materialId: parsed.materialId,
-    });
-
     const material = await prisma.material.findUnique({
       where: { id: parsed.materialId },
     });
 
-    console.log("[createComment] Resultado da busca do material:", {
-      found: !!material,
-      materialId: material?.id,
-      materialTitle: material?.title,
-    });
-
     if (!material) {
-      console.error(
-        "[createComment] Material não encontrado:",
-        parsed.materialId
-      );
       return {
         success: false,
         error: "Material não encontrado",
@@ -147,25 +92,11 @@ export async function createComment(formData: FormData) {
 
     // Se for resposta, verificar se o comentário pai existe
     if (parsed.parentId) {
-      console.log("[createComment] Verificando comentário pai...", {
-        parentId: parsed.parentId,
-      });
-
       const parentComment = await prisma.comment.findUnique({
         where: { id: parsed.parentId },
       });
 
-      console.log("[createComment] Resultado da busca do comentário pai:", {
-        found: !!parentComment,
-        parentMaterialId: parentComment?.materialId,
-        currentMaterialId: parsed.materialId,
-        matches: parentComment?.materialId === parsed.materialId,
-      });
-
       if (!parentComment || parentComment.materialId !== parsed.materialId) {
-        console.error(
-          "[createComment] Comentário pai inválido ou não encontrado"
-        );
         return {
           success: false,
           error: "Comentário pai não encontrado",
@@ -174,25 +105,9 @@ export async function createComment(formData: FormData) {
     }
 
     // Sanitizar conteúdo
-    console.log("[createComment] Sanitizando conteúdo...", {
-      originalLength: parsed.content.length,
-    });
-
     const sanitizedContent = sanitizeString(parsed.content);
 
-    console.log("[createComment] Conteúdo sanitizado:", {
-      sanitizedLength: sanitizedContent.length,
-      sanitizedPreview: sanitizedContent.substring(0, 100),
-    });
-
     // Criar comentário
-    console.log("[createComment] Criando comentário no banco de dados...", {
-      materialId: parsed.materialId,
-      userId: session.user.id,
-      contentLength: sanitizedContent.length,
-      hasParentId: !!parsed.parentId,
-    });
-
     let comment;
     try {
       comment = await prisma.comment.create({
@@ -213,15 +128,6 @@ export async function createComment(formData: FormData) {
           },
         },
       });
-
-      console.log("[createComment] Comentário criado no banco com sucesso:", {
-        commentId: comment.id,
-        materialId: comment.materialId,
-        userId: comment.userId,
-        contentLength: comment.content.length,
-        hasParentId: !!comment.parentId,
-        userEmail: comment.user.email,
-      });
     } catch (dbError) {
       console.error(
         "[createComment] ERRO ao criar no banco de dados:",
@@ -237,10 +143,8 @@ export async function createComment(formData: FormData) {
       throw dbError;
     }
 
-    console.log("[createComment] Revalidando página...");
     try {
       revalidatePath(`/material/${parsed.materialId}`);
-      console.log("[createComment] Página revalidada com sucesso");
     } catch (revalidateError) {
       console.error(
         "[createComment] Erro ao revalidar página:",
@@ -249,20 +153,10 @@ export async function createComment(formData: FormData) {
       // Continuar mesmo se revalidate falhar
     }
 
-    console.log("[createComment] Preparando resposta de sucesso...");
-    const response = {
+    return {
       success: true,
       comment,
     };
-
-    console.log("[createComment] Resposta preparada:", {
-      success: response.success,
-      hasComment: !!response.comment,
-      commentId: response.comment?.id,
-      commentKeys: response.comment ? Object.keys(response.comment) : [],
-    });
-
-    return response;
   } catch (error) {
     console.error("[createComment] ERRO ao criar comentário:", error);
 

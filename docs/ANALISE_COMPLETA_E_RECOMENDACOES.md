@@ -89,7 +89,7 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 - Notificações quando material é aprovado/rejeitado
 - Notificações de novos materiais (opcional, por preferências)
-- Notificações de comentários (se implementar sistema de comentários)
+- Notificações de comentários
 - Badge de contador no header
 
 **Implementação:**
@@ -101,31 +101,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 - Implementar polling ou WebSocket (opcional)
 
 **Estimativa:** 8-10 horas
-
----
-
-#### 5. **Sistema de Comentários e Avaliações**
-
-**Status:** Não implementado
-
-**Impacto:** Médio - Aumenta interação e qualidade dos materiais
-
-**Funcionalidades:**
-
-- Comentários em materiais
-- Sistema de avaliação (estrelas 1-5)
-- Respostas a comentários (threading)
-- Moderação de comentários (admin)
-
-**Implementação:**
-
-- Criar tabelas `Comment` e `Rating` no Prisma
-- Criar Server Actions para CRUD de comentários
-- Criar componente `CommentSection.tsx`
-- Criar componente `RatingStars.tsx`
-- Adicionar seção na página `/material/[id]`
-
-**Estimativa:** 10-12 horas
 
 ---
 
@@ -284,8 +259,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 ### Fase 1: Essenciais (2-3 semanas)
 
 1. ✅ Recuperação de senha (4-6h)
-2. ✅ Preview de PDF (6-8h)
-3. ✅ Busca full-text (4-6h)
 
 **Total:** 14-20 horas
 
@@ -295,7 +268,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 4. ✅ Sistema de notificações (8-10h)
 5. ✅ Sistema de favoritos (4-6h)
-6. ✅ Comentários e avaliações (10-12h)
 
 **Total:** 22-28 horas
 
@@ -315,8 +287,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 10. ✅ Tags avançado (6-8h)
 11. ✅ Histórico de atividades (6-8h)
-12. ✅ Cache e performance (8-10h)
-13. ✅ Compartilhamento social (4-6h)
 
 **Total:** 24-32 horas
 
@@ -344,11 +314,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
    - **Por quê:** Aumenta engajamento e comunicação
    - **Impacto:** Médio
    - **Esforço:** Médio
-
-3. **Comentários e Avaliações** 🟡
-   - **Por quê:** Aumenta interação e qualidade
-   - **Impacto:** Médio
-   - **Esforço:** Alto
 
 ---
 

@@ -58,10 +58,6 @@ export function CommentSection({
 
   // Sincronizar com initialComments quando mudarem (após refresh)
   useEffect(() => {
-    console.log("[CommentSection] initialComments atualizados:", {
-      count: initialComments.length,
-      commentIds: initialComments.map((c) => c.id),
-    });
     setComments(initialComments);
   }, [initialComments]);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -73,58 +69,22 @@ export function CommentSection({
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("[CommentSection] handleSubmitComment chamado", {
-      newCommentLength: newComment.length,
-      newCommentTrimmed: newComment.trim().length,
-      isSubmitting,
-      materialId,
-    });
-
     if (!newComment.trim() || isSubmitting) {
-      console.log("[CommentSection] Validação falhou ou já está submetendo", {
-        hasContent: !!newComment.trim(),
-        isSubmitting,
-      });
       return;
     }
 
     setIsSubmitting(true);
-    console.log("[CommentSection] Criando FormData...");
 
     const formData = new FormData();
     formData.append("materialId", materialId);
     formData.append("content", newComment);
 
-    console.log("[CommentSection] FormData criado, chamando createComment...", {
-      materialId,
-      contentLength: newComment.length,
-      contentPreview: newComment.substring(0, 50),
-    });
-
     try {
       const result = await createComment(formData);
-
-      console.log("[CommentSection] Resultado recebido:", {
-        success: result.success,
-        hasComment: result.success
-          ? !!(result as { success: true; comment: any }).comment
-          : false,
-        error: result.success
-          ? undefined
-          : (result as { success: false; error: string }).error,
-        resultKeys: Object.keys(result),
-      });
 
       if (result.success) {
         const successResult = result as { success: true; comment: any };
         if (successResult.comment) {
-          console.log("[CommentSection] Comentário criado com sucesso:", {
-            commentId: successResult.comment.id,
-            materialId: successResult.comment.materialId,
-            content: successResult.comment.content?.substring(0, 50),
-            hasUser: !!successResult.comment.user,
-          });
-
           // Limpar formulário
           setNewComment("");
 
@@ -133,47 +93,24 @@ export function CommentSection({
             ...successResult.comment,
             replies: [],
           };
-          setComments((prev) => {
-            const updated = [newCommentWithUser, ...prev];
-            console.log(
-              "[CommentSection] Estado local atualizado, total de comentários:",
-              updated.length
-            );
-            return updated;
-          });
-
-          console.log(
-            "[CommentSection] Chamando router.refresh() para sincronizar com servidor..."
-          );
+          setComments((prev) => [newCommentWithUser, ...prev]);
 
           // Atualizar página para garantir sincronização com servidor
           router.refresh();
-
-          console.log("[CommentSection] router.refresh() chamado");
         } else {
-          console.error(
-            "[CommentSection] Comentário não retornado mesmo com success=true"
-          );
           alert("Erro ao criar comentário. Tente novamente.");
         }
       } else {
         const errorResult = result as { success: false; error: string };
-        console.error(
-          "[CommentSection] Erro ao criar comentário:",
-          errorResult.error
-        );
         alert(
           errorResult.error || "Erro ao criar comentário. Tente novamente."
         );
       }
     } catch (error) {
       console.error("[CommentSection] Exceção ao criar comentário:", error);
-      alert(
-        "Erro inesperado ao criar comentário. Verifique o console para mais detalhes."
-      );
+      alert("Erro inesperado ao criar comentário. Tente novamente.");
     } finally {
       setIsSubmitting(false);
-      console.log("[CommentSection] Finalizado, isSubmitting = false");
     }
   };
 

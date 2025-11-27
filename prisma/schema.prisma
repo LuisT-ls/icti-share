@@ -28,6 +28,27 @@ enum CommentStatus {
   DELETED
 }
 
+enum AuditAction {
+  MATERIAL_UPLOAD
+  MATERIAL_DELETE
+  MATERIAL_APPROVE
+  MATERIAL_REJECT
+  MATERIAL_UPDATE
+  USER_CREATE
+  USER_UPDATE
+  USER_DELETE
+  USER_ROLE_CHANGE
+  COMMENT_CREATE
+  COMMENT_DELETE
+  COMMENT_MODERATE
+  RATING_CREATE
+  RATING_UPDATE
+  LOGIN
+  LOGOUT
+  PASSWORD_RESET
+  ADMIN_ACTION
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -47,6 +68,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   comments          Comment[]
   ratings           Rating[]
+  auditLogs         AuditLog[]
 
   @@index([email])
   @@index([role])
@@ -197,4 +219,24 @@ model Rating {
   @@index([userId])
   @@index([value])
   @@map("ratings")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  action      AuditAction
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  entityType  String?     // Tipo de entidade afetada (Material, User, Comment, etc)
+  entityId    String?     // ID da entidade afetada
+  description String      @db.Text
+  metadata    Json?       // Dados adicionais em JSON
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
