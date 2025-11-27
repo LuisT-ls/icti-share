@@ -245,23 +245,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 ---
 
-#### 13. **Cache e Otimização de Performance**
-
-**Status:** Parcialmente implementado (revalidate em algumas páginas)
-
-**Impacto:** Baixo - Melhora performance e experiência
-
-**Melhorias:**
-
-- Cache de queries frequentes (Redis opcional)
-- Image optimization (Next.js Image)
-- Lazy loading de componentes pesados
-- Service Worker para cache offline (PWA)
-
-**Estimativa:** 8-10 horas
-
----
-
 #### 14. **Sistema de Backup Automático**
 
 **Status:** Scripts manuais existem, mas não automatizados
