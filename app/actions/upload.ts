@@ -232,8 +232,7 @@ export async function uploadMaterial(
 
     console.log("✅ Upload concluído com sucesso! Material ID:", material.id);
 
-    // Log de auditoria
-    const headersList = await headers();
+    // Log de auditoria (reutilizar headersList já obtido anteriormente)
     await createAuditLog({
       action: AuditAction.MATERIAL_UPLOAD,
       userId: session.user.id,
