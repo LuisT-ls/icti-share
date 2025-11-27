@@ -35,10 +35,6 @@ export async function GET(
       );
     }
 
-    // Detectar ambiente
-    const isVercel = !!process.env.VERCEL;
-    let fileBuffer: Buffer;
-
     // Verificar se o arquivo está armazenado em base64 (Vercel) ou no sistema de arquivos
     let fileBuffer: Buffer;
 
