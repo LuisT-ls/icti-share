@@ -97,23 +97,38 @@ export function CommentSection({
 
       console.log("[CommentSection] Resultado recebido:", {
         success: result.success,
-        hasComment: !!result.comment,
-        error: result.error,
+        hasComment: result.success
+          ? !!(result as { success: true; comment: any }).comment
+          : false,
+        error: result.success
+          ? undefined
+          : (result as { success: false; error: string }).error,
         resultKeys: Object.keys(result),
       });
 
-      if (result.success && result.comment) {
-        console.log(
-          "[CommentSection] Comentário criado com sucesso, limpando formulário e atualizando página"
-        );
-        setNewComment("");
-        router.refresh();
+      if (result.success) {
+        const successResult = result as { success: true; comment: any };
+        if (successResult.comment) {
+          console.log(
+            "[CommentSection] Comentário criado com sucesso, limpando formulário e atualizando página"
+          );
+          setNewComment("");
+          router.refresh();
+        } else {
+          console.error(
+            "[CommentSection] Comentário não retornado mesmo com success=true"
+          );
+          alert("Erro ao criar comentário. Tente novamente.");
+        }
       } else {
+        const errorResult = result as { success: false; error: string };
         console.error(
           "[CommentSection] Erro ao criar comentário:",
-          result.error
+          errorResult.error
         );
-        alert(result.error || "Erro ao criar comentário. Tente novamente.");
+        alert(
+          errorResult.error || "Erro ao criar comentário. Tente novamente."
+        );
       }
     } catch (error) {
       console.error("[CommentSection] Exceção ao criar comentário:", error);
