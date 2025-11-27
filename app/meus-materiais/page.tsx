@@ -52,7 +52,7 @@ export default async function MeusMateriaisPage() {
                 </p>
                 <a
                   href="/upload"
-                  className="text-primary hover:underline font-medium"
+                  className="text-primary/90 hover:text-primary hover:underline font-medium"
                 >
                   Fazer primeiro upload
                 </a>

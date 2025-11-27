@@ -237,23 +237,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 ---
 
-#### 15. **Logs de Auditoria**
-
-**Status:** Logs básicos no console
-
-**Impacto:** Baixo - Melhora segurança e debugging
-
-**Melhorias:**
-
-- Tabela `AuditLog` no Prisma
-- Log de todas as ações críticas
-- Interface de visualização no admin
-- Export de logs
-
-**Estimativa:** 6-8 horas
-
----
-
 ## 📋 Plano de Implementação Recomendado
 
 ### Fase 1: Essenciais (2-3 semanas)
@@ -277,7 +260,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 7. ✅ Export CSV e gráficos (8-10h)
 8. ✅ Sistema de relatórios (6-8h)
-9. ✅ Logs de auditoria (6-8h)
 
 **Total:** 20-26 horas
 
