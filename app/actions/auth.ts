@@ -13,6 +13,12 @@ import {
   RATE_LIMIT_CONFIGS,
 } from "@/lib/security/rate-limit";
 import { sanitizeString, sanitizeEmail } from "@/lib/security/sanitize";
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "@/lib/validations/schemas";
+import { sendPasswordResetEmail } from "@/lib/email";
+import { randomBytes } from "crypto";
 
 export async function signup(formData: FormData) {
   // Sanitizar e validar dados primeiro para obter o email
@@ -231,4 +237,208 @@ export async function login(formData: FormData) {
 
 export async function logout() {
   await signOut({ redirect: false });
+}
+
+/**
+ * Solicita recuperação de senha
+ * Envia email com token de reset
+ */
+export async function requestPasswordReset(formData: FormData) {
+  const rawData = {
+    email: sanitizeEmail(formData.get("email") as string),
+  };
+
+  const parsed = forgotPasswordSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message || "Dados inválidos",
+    };
+  }
+
+  const { email } = parsed.data;
+
+  // Rate limiting
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headersList.get("x-real-ip")?.trim() ||
+    headersList.get("cf-connecting-ip")?.trim() ||
+    null;
+
+  const identifier = getAuthRateLimitIdentifier(ip, email);
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH);
+
+  if (!rateLimitResult.success) {
+    // Por segurança, não revelar se o email existe ou não
+    // Sempre retornar sucesso para evitar enumeração de emails
+    return {
+      success: true,
+      message:
+        "Se o email estiver cadastrado, você receberá um link para redefinir sua senha.",
+    };
+  }
+
+  try {
+    // Buscar usuário
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Por segurança, sempre retornar sucesso mesmo se o email não existir
+    // Isso evita enumeração de emails
+    if (!user || !user.passwordHash) {
+      // Usuário não existe ou não tem senha (OAuth only)
+      return {
+        success: true,
+        message:
+          "Se o email estiver cadastrado, você receberá um link para redefinir sua senha.",
+      };
+    }
+
+    // Gerar token seguro
+    const token = randomBytes(32).toString("hex");
+
+    // Expira em 1 hora
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 1);
+
+    // Deletar tokens antigos do usuário
+    await prisma.passwordResetToken.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    // Criar novo token
+    await prisma.passwordResetToken.create({
+      data: {
+        token,
+        userId: user.id,
+        expires,
+      },
+    });
+
+    // Enviar email
+    const emailResult = await sendPasswordResetEmail({
+      email: user.email,
+      token,
+      name: user.name,
+    });
+
+    if (!emailResult.success) {
+      // Se falhar ao enviar email, deletar o token criado
+      await prisma.passwordResetToken.deleteMany({
+        where: {
+          userId: user.id,
+          token,
+        },
+      });
+
+      console.error("Erro ao enviar email de recuperação:", emailResult.error);
+      return {
+        success: false,
+        error: "Erro ao enviar email. Tente novamente mais tarde.",
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        "Se o email estiver cadastrado, você receberá um link para redefinir sua senha.",
+    };
+  } catch (error) {
+    console.error("Erro ao solicitar recuperação de senha:", error);
+    // Por segurança, sempre retornar sucesso
+    return {
+      success: true,
+      message:
+        "Se o email estiver cadastrado, você receberá um link para redefinir sua senha.",
+    };
+  }
+}
+
+/**
+ * Reseta a senha usando o token
+ */
+export async function resetPassword(formData: FormData) {
+  const rawData = {
+    token: formData.get("token") as string,
+    password: formData.get("password") as string,
+    confirmPassword: formData.get("confirmPassword") as string,
+  };
+
+  const parsed = resetPasswordSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message || "Dados inválidos",
+    };
+  }
+
+  const { token, password } = parsed.data;
+
+  try {
+    // Buscar token válido
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { token },
+      include: { user: true },
+    });
+
+    if (!resetToken) {
+      return {
+        success: false,
+        error: "Token inválido ou expirado.",
+      };
+    }
+
+    // Verificar se o token expirou
+    if (resetToken.expires < new Date()) {
+      // Deletar token expirado
+      await prisma.passwordResetToken.delete({
+        where: { id: resetToken.id },
+      });
+
+      return {
+        success: false,
+        error: "Token expirado. Solicite um novo link de recuperação.",
+      };
+    }
+
+    // Verificar se o usuário ainda existe e tem senha
+    if (!resetToken.user.passwordHash) {
+      return {
+        success: false,
+        error: "Este usuário não pode redefinir senha.",
+      };
+    }
+
+    // Hash da nova senha
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Atualizar senha e deletar token em uma transação
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { passwordHash },
+      }),
+      // Deletar todos os tokens de reset do usuário (por segurança)
+      prisma.passwordResetToken.deleteMany({
+        where: { userId: resetToken.userId },
+      }),
+    ]);
+
+    return {
+      success: true,
+      message: "Senha redefinida com sucesso! Você já pode fazer login.",
+    };
+  } catch (error) {
+    console.error("Erro ao resetar senha:", error);
+    return {
+      success: false,
+      error: "Erro ao redefinir senha. Tente novamente.",
+    };
+  }
 }

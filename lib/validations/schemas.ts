@@ -248,3 +248,34 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+
+// Schema de Solicitação de Recuperação de Senha
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Email inválido").toLowerCase().trim(),
+});
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+// Schema de Reset de Senha
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Token é obrigatório"),
+    password: z
+      .string()
+      .min(8, "Senha deve ter no mínimo 8 caracteres")
+      .max(100, "Senha muito longa")
+      .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+      .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+      .regex(/[0-9]/, "Senha deve conter pelo menos um número")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Senha deve conter pelo menos um símbolo (!@#$%^&*()_+-=[]{}|;:,.<>?)"
+      ),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

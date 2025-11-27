@@ -212,7 +212,13 @@ function LoginForm() {
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="flex justify-center pt-6 border-t border-border/50">
+            <CardFooter className="flex flex-col gap-3 pt-6 border-t border-border/50">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-muted-foreground hover:text-accent-light transition-colors text-center"
+              >
+                Esqueceu sua senha?
+              </Link>
               <p className="text-sm text-muted-foreground">
                 Não tem uma conta?{" "}
                 <Link

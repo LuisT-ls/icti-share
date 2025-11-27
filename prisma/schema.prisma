@@ -38,6 +38,7 @@ model User {
   downloads         Download[]
   accounts          Account[]
   sessions          Session[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([role])
@@ -133,4 +134,18 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires   DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([userId])
+  @@index([expires])
+  @@map("password_reset_tokens")
 }
