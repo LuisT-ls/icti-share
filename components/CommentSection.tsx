@@ -63,21 +63,67 @@ export function CommentSection({
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || isSubmitting) return;
+
+    console.log("[CommentSection] handleSubmitComment chamado", {
+      newCommentLength: newComment.length,
+      newCommentTrimmed: newComment.trim().length,
+      isSubmitting,
+      materialId,
+    });
+
+    if (!newComment.trim() || isSubmitting) {
+      console.log("[CommentSection] Validação falhou ou já está submetendo", {
+        hasContent: !!newComment.trim(),
+        isSubmitting,
+      });
+      return;
+    }
 
     setIsSubmitting(true);
+    console.log("[CommentSection] Criando FormData...");
+
     const formData = new FormData();
     formData.append("materialId", materialId);
     formData.append("content", newComment);
 
-    const result = await createComment(formData);
+    console.log("[CommentSection] FormData criado, chamando createComment...", {
+      materialId,
+      contentLength: newComment.length,
+      contentPreview: newComment.substring(0, 50),
+    });
 
-    if (result.success && result.comment) {
-      setNewComment("");
-      router.refresh();
+    try {
+      const result = await createComment(formData);
+
+      console.log("[CommentSection] Resultado recebido:", {
+        success: result.success,
+        hasComment: !!result.comment,
+        error: result.error,
+        resultKeys: Object.keys(result),
+      });
+
+      if (result.success && result.comment) {
+        console.log(
+          "[CommentSection] Comentário criado com sucesso, limpando formulário e atualizando página"
+        );
+        setNewComment("");
+        router.refresh();
+      } else {
+        console.error(
+          "[CommentSection] Erro ao criar comentário:",
+          result.error
+        );
+        alert(result.error || "Erro ao criar comentário. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("[CommentSection] Exceção ao criar comentário:", error);
+      alert(
+        "Erro inesperado ao criar comentário. Verifique o console para mais detalhes."
+      );
+    } finally {
+      setIsSubmitting(false);
+      console.log("[CommentSection] Finalizado, isSubmitting = false");
     }
-
-    setIsSubmitting(false);
   };
 
   const handleSubmitReply = async (parentId: string) => {

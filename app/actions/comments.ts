@@ -22,29 +22,70 @@ const updateCommentSchema = z.object({
  * Criar um comentário
  */
 export async function createComment(formData: FormData) {
+  console.log("[createComment] Iniciando criação de comentário");
+
   try {
+    console.log("[createComment] Verificando autenticação...");
     const session = await auth();
+
+    console.log("[createComment] Resultado da autenticação:", {
+      hasSession: !!session,
+      hasUserId: !!session?.user?.id,
+      userId: session?.user?.id,
+      userRole: session?.user?.role,
+    });
+
     if (!session?.user?.id) {
+      console.error("[createComment] Usuário não autenticado");
       return {
         success: false,
         error: "Você precisa estar autenticado para comentar",
       };
     }
 
+    console.log("[createComment] Extraindo dados do FormData...");
     const rawData = {
       materialId: formData.get("materialId") as string,
       content: formData.get("content") as string,
       parentId: formData.get("parentId") as string | undefined,
     };
 
+    console.log("[createComment] Dados extraídos:", {
+      materialId: rawData.materialId,
+      contentLength: rawData.content?.length,
+      contentPreview: rawData.content?.substring(0, 100),
+      hasParentId: !!rawData.parentId,
+      parentId: rawData.parentId,
+    });
+
+    console.log("[createComment] Validando dados com Zod...");
     const parsed = createCommentSchema.parse(rawData);
+    console.log("[createComment] Dados validados com sucesso:", {
+      materialId: parsed.materialId,
+      contentLength: parsed.content.length,
+      hasParentId: !!parsed.parentId,
+    });
 
     // Verificar se o material existe
+    console.log("[createComment] Verificando se material existe...", {
+      materialId: parsed.materialId,
+    });
+
     const material = await prisma.material.findUnique({
       where: { id: parsed.materialId },
     });
 
+    console.log("[createComment] Resultado da busca do material:", {
+      found: !!material,
+      materialId: material?.id,
+      materialTitle: material?.title,
+    });
+
     if (!material) {
+      console.error(
+        "[createComment] Material não encontrado:",
+        parsed.materialId
+      );
       return {
         success: false,
         error: "Material não encontrado",
@@ -53,11 +94,25 @@ export async function createComment(formData: FormData) {
 
     // Se for resposta, verificar se o comentário pai existe
     if (parsed.parentId) {
+      console.log("[createComment] Verificando comentário pai...", {
+        parentId: parsed.parentId,
+      });
+
       const parentComment = await prisma.comment.findUnique({
         where: { id: parsed.parentId },
       });
 
+      console.log("[createComment] Resultado da busca do comentário pai:", {
+        found: !!parentComment,
+        parentMaterialId: parentComment?.materialId,
+        currentMaterialId: parsed.materialId,
+        matches: parentComment?.materialId === parsed.materialId,
+      });
+
       if (!parentComment || parentComment.materialId !== parsed.materialId) {
+        console.error(
+          "[createComment] Comentário pai inválido ou não encontrado"
+        );
         return {
           success: false,
           error: "Comentário pai não encontrado",
@@ -66,42 +121,122 @@ export async function createComment(formData: FormData) {
     }
 
     // Sanitizar conteúdo
-    const sanitizedContent = sanitizeString(parsed.content);
-
-    // Criar comentário
-    const comment = await prisma.comment.create({
-      data: {
-        materialId: parsed.materialId,
-        userId: session.user.id,
-        content: sanitizedContent,
-        parentId: parsed.parentId || null,
-        status: session.user.role === "ADMIN" ? "APPROVED" : "APPROVED", // Por enquanto todos aprovados
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+    console.log("[createComment] Sanitizando conteúdo...", {
+      originalLength: parsed.content.length,
     });
 
-    revalidatePath(`/material/${parsed.materialId}`);
+    const sanitizedContent = sanitizeString(parsed.content);
 
-    return {
+    console.log("[createComment] Conteúdo sanitizado:", {
+      sanitizedLength: sanitizedContent.length,
+      sanitizedPreview: sanitizedContent.substring(0, 100),
+    });
+
+    // Criar comentário
+    console.log("[createComment] Criando comentário no banco de dados...", {
+      materialId: parsed.materialId,
+      userId: session.user.id,
+      contentLength: sanitizedContent.length,
+      hasParentId: !!parsed.parentId,
+    });
+
+    let comment;
+    try {
+      comment = await prisma.comment.create({
+        data: {
+          materialId: parsed.materialId,
+          userId: session.user.id,
+          content: sanitizedContent,
+          parentId: parsed.parentId || null,
+          status: session.user.role === "ADMIN" ? "APPROVED" : "APPROVED", // Por enquanto todos aprovados
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      console.log("[createComment] Comentário criado no banco com sucesso:", {
+        commentId: comment.id,
+        materialId: comment.materialId,
+        userId: comment.userId,
+        contentLength: comment.content.length,
+        hasParentId: !!comment.parentId,
+        userEmail: comment.user.email,
+      });
+    } catch (dbError) {
+      console.error(
+        "[createComment] ERRO ao criar no banco de dados:",
+        dbError
+      );
+      if (dbError instanceof Error) {
+        console.error("[createComment] Detalhes do erro do Prisma:", {
+          name: dbError.name,
+          message: dbError.message,
+          stack: dbError.stack?.substring(0, 500),
+        });
+      }
+      throw dbError;
+    }
+
+    console.log("[createComment] Revalidando página...");
+    try {
+      revalidatePath(`/material/${parsed.materialId}`);
+      console.log("[createComment] Página revalidada com sucesso");
+    } catch (revalidateError) {
+      console.error(
+        "[createComment] Erro ao revalidar página:",
+        revalidateError
+      );
+      // Continuar mesmo se revalidate falhar
+    }
+
+    console.log("[createComment] Preparando resposta de sucesso...");
+    const response = {
       success: true,
       comment,
     };
+
+    console.log("[createComment] Resposta preparada:", {
+      success: response.success,
+      hasComment: !!response.comment,
+      commentId: response.comment?.id,
+      commentKeys: response.comment ? Object.keys(response.comment) : [],
+    });
+
+    return response;
   } catch (error) {
-    console.error("Erro ao criar comentário:", error);
+    console.error("[createComment] ERRO ao criar comentário:", error);
+
     if (error instanceof z.ZodError) {
+      console.error("[createComment] Erro de validação Zod:", {
+        errors: error.errors,
+        issues: error.issues,
+      });
       return {
         success: false,
         error: "Dados inválidos. Verifique os campos.",
       };
     }
+
+    if (error instanceof Error) {
+      console.error("[createComment] Detalhes do erro:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    } else {
+      console.error("[createComment] Erro desconhecido:", {
+        errorType: typeof error,
+        errorValue: error,
+      });
+    }
+
     return {
       success: false,
       error: "Erro ao criar comentário. Tente novamente.",
