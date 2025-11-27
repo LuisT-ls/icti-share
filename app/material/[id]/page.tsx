@@ -27,6 +27,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { generateMaterialStructuredData, getBaseUrl } from "@/lib/seo";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
+import { PDFPreview } from "@/components/PDFPreview";
+import { PDFViewerWrapper } from "@/components/PDFViewerWrapper";
 
 const baseUrl = getBaseUrl();
 
@@ -253,6 +255,17 @@ export default async function MaterialDetailPage({
                 </div>
               )}
             </div>
+
+            {/* Preview do PDF */}
+            {material.mimeType === "application/pdf" && (
+              <div className="pt-6 border-t border-border/50">
+                <PDFViewerWrapper
+                  materialId={material.id}
+                  title={material.title}
+                  downloadUrl={`/material/download/${material.id}`}
+                />
+              </div>
+            )}
 
             {/* Compartilhamento Social */}
             <div className="pt-6 border-t border-border/50">
