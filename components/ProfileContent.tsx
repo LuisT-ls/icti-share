@@ -166,7 +166,7 @@ export function ProfileContent({
               </p>
               <Link
                 href="/upload"
-                className="text-primary/90 hover:text-primary hover:underline font-medium inline-flex items-center gap-2"
+                className="text-white dark:text-gray-100 hover:text-primary hover:underline font-medium inline-flex items-center gap-2 transition-colors"
               >
                 <Upload className="h-4 w-4" />
                 Fazer primeiro upload
