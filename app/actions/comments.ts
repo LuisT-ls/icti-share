@@ -88,13 +88,21 @@ export async function createComment(formData: FormData) {
       if (zodError instanceof z.ZodError) {
         console.error("[createComment] ERRO de validação Zod:", {
           errors: zodError.errors,
-          issues: zodError.issues.map((issue) => ({
-            path: issue.path,
-            message: issue.message,
-            code: issue.code,
-            received: issue.received,
-            expected: issue.expected,
-          })),
+          issues: zodError.issues.map((issue) => {
+            const baseIssue = {
+              path: issue.path,
+              message: issue.message,
+              code: issue.code,
+            };
+            // Adicionar received e expected apenas se existirem
+            if ("received" in issue) {
+              (baseIssue as any).received = issue.received;
+            }
+            if ("expected" in issue) {
+              (baseIssue as any).expected = issue.expected;
+            }
+            return baseIssue;
+          }),
           formData: {
             materialId: rawData.materialId,
             content: rawData.content,
@@ -253,13 +261,21 @@ export async function createComment(formData: FormData) {
     console.error("[createComment] ERRO ao criar comentário:", error);
 
     if (error instanceof z.ZodError) {
-      const errorDetails = error.errors.map((err) => ({
-        path: err.path.join("."),
-        message: err.message,
-        code: err.code,
-        received: err.received,
-        expected: err.expected,
-      }));
+      const errorDetails = error.errors.map((err) => {
+        const baseErr = {
+          path: err.path.join("."),
+          message: err.message,
+          code: err.code,
+        };
+        // Adicionar received e expected apenas se existirem
+        if ("received" in err) {
+          (baseErr as any).received = err.received;
+        }
+        if ("expected" in err) {
+          (baseErr as any).expected = err.expected;
+        }
+        return baseErr;
+      });
 
       console.error("[createComment] Erro de validação Zod detalhado:", {
         errorCount: error.errors.length,
