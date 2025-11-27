@@ -99,3 +99,6 @@ export default async function AdminPage() {
     </div>
   );
 }
+
+// Revalidação a cada 30 segundos para manter dados atualizados no admin
+export const revalidate = 30;

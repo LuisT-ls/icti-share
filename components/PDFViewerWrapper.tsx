@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { PDFPreview } from "./PDFPreview";
-import { PDFViewer } from "./PDFViewer";
+import { Loader2 } from "lucide-react";
+
+// Lazy load do PDFViewer (componente pesado)
+const PDFViewer = lazy(() =>
+  import("./PDFViewer").then((mod) => ({ default: mod.PDFViewer }))
+);
 
 interface PDFViewerWrapperProps {
   materialId: string;
@@ -29,13 +34,21 @@ export function PDFViewerWrapper({
           onViewFull={() => setIsViewerOpen(true)}
         />
       </div>
-      <PDFViewer
-        materialId={materialId}
-        title={title}
-        open={isViewerOpen}
-        onOpenChange={setIsViewerOpen}
-        downloadUrl={downloadUrl}
-      />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }
+      >
+        <PDFViewer
+          materialId={materialId}
+          title={title}
+          open={isViewerOpen}
+          onOpenChange={setIsViewerOpen}
+          downloadUrl={downloadUrl}
+        />
+      </Suspense>
     </>
   );
 }

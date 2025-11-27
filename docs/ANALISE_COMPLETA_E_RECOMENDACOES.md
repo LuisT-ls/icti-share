@@ -77,29 +77,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 ---
 
-#### 3. **Busca Full-Text com PostgreSQL**
-
-**Status:** Já documentado em `SUGESTOES_MELHORIAS.md`
-
-**Impacto:** Alto - Melhora qualidade dos resultados de busca
-
-**Benefícios:**
-
-- Busca mais relevante e rápida
-- Ranking por relevância
-- Sem infraestrutura adicional
-
-**Implementação:**
-
-- Migration para adicionar coluna `search_vector` (tsvector)
-- Criar índice GIN
-- Atualizar query em `app/materiais/page.tsx`
-- Adicionar trigger para atualização automática
-
-**Estimativa:** 4-6 horas
-
----
-
 ### Prioridade MÉDIA 🟡
 
 #### 4. **Sistema de Notificações**

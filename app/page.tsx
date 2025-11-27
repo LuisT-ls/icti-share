@@ -1,5 +1,6 @@
 import { getServerSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { cachedQuery, generateCacheKey } from "@/lib/cache";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
@@ -61,21 +62,29 @@ export default async function Home() {
   const session = await getServerSession();
 
   // Buscar materiais em destaque (mais recentes ou mais baixados)
-  // Tratamento de erro para evitar 500 se o banco não estiver disponível
+  // Usar cache para melhorar performance
   let featuredMaterials: MaterialWithUploader[] = [];
   try {
-    featuredMaterials = await prisma.material.findMany({
-      take: 6,
-      orderBy: [{ downloadsCount: "desc" }, { createdAt: "desc" }],
-      include: {
-        uploadedBy: {
-          select: {
-            name: true,
-            email: true,
+    const cacheKey = generateCacheKey("featured_materials", { limit: 6 });
+    featuredMaterials = await cachedQuery(
+      cacheKey,
+      async () => {
+        return await prisma.material.findMany({
+          take: 6,
+          where: { status: "APPROVED" },
+          orderBy: [{ downloadsCount: "desc" }, { createdAt: "desc" }],
+          include: {
+            uploadedBy: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
-        },
+        });
       },
-    });
+      5 * 60 * 1000 // Cache por 5 minutos
+    );
   } catch (error) {
     // Log do erro em produção (não expor detalhes ao usuário)
     console.error("Erro ao buscar materiais:", error);
@@ -123,3 +132,6 @@ export default async function Home() {
     </div>
   );
 }
+
+// Revalidação a cada 5 minutos para manter dados atualizados
+export const revalidate = 300;

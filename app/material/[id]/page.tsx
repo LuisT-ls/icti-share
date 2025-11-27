@@ -27,8 +27,23 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { generateMaterialStructuredData, getBaseUrl } from "@/lib/seo";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
-import { PDFPreview } from "@/components/PDFPreview";
-import { PDFViewerWrapper } from "@/components/PDFViewerWrapper";
+import dynamic from "next/dynamic";
+
+// Lazy load de componentes pesados
+const PDFViewerWrapper = dynamic(
+  () =>
+    import("@/components/PDFViewerWrapper").then((mod) => ({
+      default: mod.PDFViewerWrapper,
+    })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 const baseUrl = getBaseUrl();
 
@@ -313,3 +328,6 @@ export default async function MaterialDetailPage({
     </div>
   );
 }
+
+// Revalidação a cada 2 minutos para manter dados atualizados
+export const revalidate = 120;
