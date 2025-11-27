@@ -75,18 +75,136 @@ const MAX_LIMIT = 50;
 async function getMaterials(
   searchParams: SearchParams
 ): Promise<PaginatedMaterials> {
+  // Paginação
+  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
+  const limit = Math.min(
+    MAX_LIMIT,
+    Math.max(1, parseInt(searchParams.limit || String(DEFAULT_LIMIT), 10))
+  );
+  const skip = (page - 1) * limit;
+
+  // Se houver busca por texto, usar full-text search
+  if (searchParams.q) {
+    const searchQuery = searchParams.q.trim();
+
+    // Sanitizar e preparar termos de busca para tsquery
+    // Escapar caracteres especiais e converter para formato tsquery
+    const sanitizedTerms = searchQuery
+      .split(/\s+/)
+      .map((word) => word.trim().replace(/[&|!():'"]/g, ""))
+      .filter(Boolean)
+      .map((word) => `${word}:*`) // Prefix matching para melhor busca
+      .join(" & ");
+
+    if (sanitizedTerms) {
+      // Construir condições de filtro
+      const filterParts: string[] = [];
+      const filterValues: any[] = [];
+
+      // Status sempre aprovado
+      filterParts.push(`status = 'APPROVED'`);
+
+      // Adicionar filtros opcionais
+      if (searchParams.course) {
+        filterParts.push(`course = $${filterValues.length + 1}`);
+        filterValues.push(searchParams.course);
+      }
+      if (searchParams.discipline) {
+        filterParts.push(`discipline = $${filterValues.length + 1}`);
+        filterValues.push(searchParams.discipline);
+      }
+      if (searchParams.semester) {
+        filterParts.push(`semester = $${filterValues.length + 1}`);
+        filterValues.push(searchParams.semester);
+      }
+      if (searchParams.type) {
+        filterParts.push(`type = $${filterValues.length + 1}`);
+        filterValues.push(searchParams.type);
+      }
+
+      const whereClause = filterParts.join(" AND ");
+      const searchTermParam = `$${filterValues.length + 1}`;
+      filterValues.push(sanitizedTerms);
+
+      // Query para buscar IDs com ranking
+      const materialsQuery = `
+        SELECT 
+          id,
+          ts_rank(search_vector, to_tsquery('portuguese', ${searchTermParam})) as rank
+        FROM materials
+        WHERE ${whereClause} AND search_vector @@ to_tsquery('portuguese', ${searchTermParam})
+        ORDER BY rank DESC, "createdAt" DESC
+        LIMIT $${filterValues.length + 1} OFFSET $${filterValues.length + 2}
+      `;
+      filterValues.push(limit, skip);
+
+      // Query para contar total
+      const countQuery = `
+        SELECT COUNT(*)::int as count
+        FROM materials
+        WHERE ${whereClause} AND search_vector @@ to_tsquery('portuguese', ${searchTermParam})
+      `;
+
+      // Executar queries usando $queryRawUnsafe (necessário para queries dinâmicas)
+      const [materialsRaw, countRaw] = await Promise.all([
+        prisma.$queryRawUnsafe<Array<{ id: string; rank: number }>>(
+          materialsQuery,
+          ...filterValues
+        ),
+        prisma.$queryRawUnsafe<Array<{ count: number }>>(
+          countQuery,
+          ...filterValues.slice(0, -2) // Remover limit e offset
+        ),
+      ]);
+
+      const total = countRaw[0]?.count || 0;
+      const materialIds = materialsRaw.map((m) => m.id);
+
+      // Buscar materiais completos com relacionamentos usando Prisma
+      const materials =
+        materialIds.length > 0
+          ? await prisma.material.findMany({
+              where: {
+                id: { in: materialIds },
+                status: MATERIAL_STATUS_APPROVED,
+              },
+              include: {
+                uploadedBy: {
+                  select: {
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            })
+          : [];
+
+      // Ordenar materiais pela ordem do ranking (manter ordem do resultado da query)
+      const materialMap = new Map(materials.map((m) => [m.id, m]));
+      const materialsOrdered = materialIds
+        .map((id) => materialMap.get(id))
+        .filter((m): m is NonNullable<typeof m> => m !== undefined);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        materials: materialsOrdered,
+        pagination: {
+          total,
+          totalPages,
+          currentPage: page,
+          limit,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    }
+  }
+
+  // Busca sem full-text (usar Prisma normal)
   const where: Prisma.MaterialWhereInput = {
-    // Apenas materiais aprovados são exibidos publicamente
     status: MATERIAL_STATUS_APPROVED,
   } as Prisma.MaterialWhereInput;
-
-  // Busca por texto
-  if (searchParams.q) {
-    where.OR = [
-      { title: { contains: searchParams.q, mode: "insensitive" } },
-      { description: { contains: searchParams.q, mode: "insensitive" } },
-    ];
-  }
 
   // Filtros
   if (searchParams.course) {
@@ -101,14 +219,6 @@ async function getMaterials(
   if (searchParams.type) {
     where.type = searchParams.type;
   }
-
-  // Paginação
-  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
-  const limit = Math.min(
-    MAX_LIMIT,
-    Math.max(1, parseInt(searchParams.limit || String(DEFAULT_LIMIT), 10))
-  );
-  const skip = (page - 1) * limit;
 
   // Executar contagem e busca em paralelo para melhor performance
   const [materials, total] = await Promise.all([

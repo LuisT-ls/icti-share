@@ -77,29 +77,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 ---
 
-#### 2. **Preview de PDF com pdf.js**
-
-**Status:** Já documentado em `SUGESTOES_MELHORIAS.md`
-
-**Impacto:** Alto - Melhora significativamente a UX
-
-**Benefícios:**
-
-- Usuários podem visualizar PDF antes de baixar
-- Reduz downloads desnecessários
-- Melhora taxa de engajamento
-
-**Implementação:**
-
-- Adicionar `pdfjs-dist` como dependência
-- Criar componente `PDFPreview.tsx` (Client Component)
-- Criar componente `PDFViewer.tsx` (modal completo)
-- Integrar na página `/material/[id]`
-
-**Estimativa:** 6-8 horas
-
----
-
 #### 3. **Busca Full-Text com PostgreSQL**
 
 **Status:** Já documentado em `SUGESTOES_MELHORIAS.md`
@@ -109,7 +86,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 **Benefícios:**
 
 - Busca mais relevante e rápida
-- Suporte a múltiplos idiomas (portuguese)
 - Ranking por relevância
 - Sem infraestrutura adicional
 
@@ -275,22 +251,6 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
 
 ---
 
-#### 11. **Compartilhamento Social**
-
-**Status:** Não implementado
-
-**Impacto:** Baixo - Aumenta alcance orgânico
-
-**Funcionalidades:**
-
-- Botões de compartilhamento (WhatsApp, Twitter, Facebook, LinkedIn)
-- Link de compartilhamento com parâmetros de tracking
-- Página de landing para compartilhamento
-
-**Estimativa:** 4-6 horas
-
----
-
 #### 12. **Sistema de Versões de Materiais**
 
 **Status:** Não implementado
@@ -421,22 +381,17 @@ A aplicação **ICTI Share** é uma plataforma acadêmica bem estruturada para c
    - **Impacto:** Alto
    - **Esforço:** Médio
 
-2. **Preview de PDF** 🔴
-   - **Por quê:** Melhora significativamente a UX
-   - **Impacto:** Alto
-   - **Esforço:** Médio
-
-3. **Busca Full-Text** 🔴
+2. **Busca Full-Text** 🔴
    - **Por quê:** Melhora qualidade dos resultados
    - **Impacto:** Alto
    - **Esforço:** Baixo
 
-4. **Sistema de Notificações** 🟡
+3. **Sistema de Notificações** 🟡
    - **Por quê:** Aumenta engajamento e comunicação
    - **Impacto:** Médio
    - **Esforço:** Médio
 
-5. **Comentários e Avaliações** 🟡
+4. **Comentários e Avaliações** 🟡
    - **Por quê:** Aumenta interação e qualidade
    - **Impacto:** Médio
    - **Esforço:** Alto
