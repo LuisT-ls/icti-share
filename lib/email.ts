@@ -44,6 +44,16 @@ export async function sendPasswordResetEmail({
   const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
   const fromName = process.env.RESEND_FROM_NAME || "ICTI Share";
 
+  // Log de debug (apenas em desenvolvimento)
+  if (process.env.NODE_ENV === "development") {
+    console.log("📧 Tentando enviar email:", {
+      from: `${fromName} <${fromEmail}>`,
+      to: email,
+      hasApiKey: !!process.env.RESEND_API_KEY,
+      apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 7),
+    });
+  }
+
   try {
     const { data, error } = await resend.emails.send({
       from: `${fromName} <${fromEmail}>`,
@@ -100,19 +110,70 @@ export async function sendPasswordResetEmail({
     });
 
     if (error) {
-      console.error("Erro ao enviar email:", error);
+      console.error("❌ Erro detalhado do Resend:", {
+        error,
+        code: error?.message || "unknown",
+        name: error?.name || "unknown",
+      });
+
+      // Mensagens de erro mais específicas
+      let errorMessage = "Erro ao enviar email";
+
+      if (
+        error?.message?.includes("403") ||
+        error?.message?.includes("Forbidden")
+      ) {
+        errorMessage =
+          "Acesso negado. Verifique sua API Key e permissões do Resend.";
+      } else if (
+        error?.message?.includes("Invalid") ||
+        error?.message?.includes("invalid")
+      ) {
+        errorMessage =
+          "Email inválido ou não autorizado. Se usar resend.dev, adicione o email em 'Test Recipients'.";
+      } else if (
+        error?.message?.includes("domain") ||
+        error?.message?.includes("Domain")
+      ) {
+        errorMessage =
+          "Domínio não autorizado. Verifique o email remetente (RESEND_FROM_EMAIL).";
+      } else if (error?.message) {
+        errorMessage = `Erro: ${error.message}`;
+      }
+
       return {
         success: false,
-        error: "Erro ao enviar email",
+        error: errorMessage,
       };
+    }
+
+    // Log de sucesso
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ Email enviado com sucesso:", data);
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Erro ao enviar email:", error);
+    console.error("❌ Erro ao enviar email (catch):", error);
+
+    let errorMessage = "Erro ao enviar email";
+
+    if (error instanceof Error) {
+      if (
+        error.message.includes("403") ||
+        error.message.includes("Forbidden")
+      ) {
+        errorMessage = "Acesso negado. Verifique sua API Key do Resend.";
+      } else if (error.message.includes("Invalid API key")) {
+        errorMessage = "API Key inválida. Verifique RESEND_API_KEY no .env";
+      } else {
+        errorMessage = `Erro: ${error.message}`;
+      }
+    }
+
     return {
       success: false,
-      error: "Erro ao enviar email",
+      error: errorMessage,
     };
   }
 }
