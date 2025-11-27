@@ -26,6 +26,7 @@ import { formatBytes } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { generateMaterialStructuredData, getBaseUrl } from "@/lib/seo";
+import { SocialShareButtons } from "@/components/SocialShareButtons";
 
 const baseUrl = getBaseUrl();
 
@@ -251,6 +252,15 @@ export default async function MaterialDetailPage({
                   </span>
                 </div>
               )}
+            </div>
+
+            {/* Compartilhamento Social */}
+            <div className="pt-6 border-t border-border/50">
+              <SocialShareButtons
+                materialId={material.id}
+                title={material.title}
+                description={material.description}
+              />
             </div>
 
             {/* Botão de Download */}
