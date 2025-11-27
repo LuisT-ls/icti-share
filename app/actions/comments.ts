@@ -10,7 +10,10 @@ import { CommentStatus } from "@prisma/client";
 const createCommentSchema = z.object({
   materialId: z.string().min(1),
   content: z.string().min(1).max(2000),
-  parentId: z.string().optional(),
+  parentId: z
+    .string()
+    .nullish()
+    .transform((val) => (val === null || val === "" ? undefined : val)),
 });
 
 const updateCommentSchema = z.object({
@@ -44,10 +47,13 @@ export async function createComment(formData: FormData) {
     }
 
     console.log("[createComment] Extraindo dados do FormData...");
+    const parentIdRaw = formData.get("parentId");
     const rawData = {
       materialId: formData.get("materialId") as string,
       content: formData.get("content") as string,
-      parentId: formData.get("parentId") as string | undefined,
+      // Transformar null ou string vazia em undefined
+      parentId:
+        parentIdRaw && parentIdRaw !== "" ? (parentIdRaw as string) : undefined,
     };
 
     console.log("[createComment] Dados extraídos (tipos e valores):", {
