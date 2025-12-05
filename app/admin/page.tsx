@@ -32,7 +32,16 @@ export default async function AdminPage() {
     prisma.material.count(),
     prisma.material.count({ where: { status: MaterialStatus.PENDING } }),
     prisma.material.count({ where: { status: MaterialStatus.APPROVED } }),
-    prisma.download.count(),
+    // Contar apenas downloads de usuários autenticados (com userId)
+    // Isso garante consistência com a contagem na seção de usuários
+    prisma.download.count({
+      where: {
+        userId: { not: null },
+        material: {
+          status: MaterialStatus.APPROVED,
+        },
+      },
+    }),
     prisma.user.count(),
     prisma.user.count({ where: { role: "ADMIN" } }),
     prisma.material.findMany({
@@ -64,18 +73,53 @@ export default async function AdminPage() {
         },
       },
     }),
-    prisma.material.findMany({
-      take: 10,
-      orderBy: { downloadsCount: "desc" },
-      include: {
-        uploadedBy: {
-          select: {
-            name: true,
-            email: true,
+    // Buscar top materiais usando contagem real da tabela downloads
+    // ao invés do campo downloadsCount que pode estar desatualizado
+    (async () => {
+      // Primeiro, buscar contagem de downloads por material (apenas usuários autenticados)
+      const downloadCounts = await prisma.download.groupBy({
+        by: ["materialId"],
+        where: {
+          userId: { not: null },
+        },
+        _count: {
+          materialId: true,
+        },
+      });
+
+      // Criar um mapa de materialId -> contagem
+      const countMap = new Map(
+        downloadCounts.map((item) => [item.materialId, item._count.materialId])
+      );
+
+      // Buscar todos os materiais aprovados
+      const materials = await prisma.material.findMany({
+        where: {
+          status: MaterialStatus.APPROVED,
+        },
+        include: {
+          uploadedBy: {
+            select: {
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    }),
+      });
+
+      // Adicionar contagem de downloads e ordenar
+      const materialsWithCounts = materials.map((material) => ({
+        ...material,
+        _count: {
+          downloads: countMap.get(material.id) ?? 0,
+        },
+      }));
+
+      // Ordenar por contagem de downloads (apenas usuários autenticados) e pegar top 10
+      return materialsWithCounts
+        .sort((a, b) => (b._count?.downloads ?? 0) - (a._count?.downloads ?? 0))
+        .slice(0, 10);
+    })(),
   ]);
 
   return (

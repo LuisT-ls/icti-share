@@ -50,12 +50,15 @@ interface PendingMaterial {
 interface TopMaterial {
   id: string;
   title: string;
-  downloadsCount: number;
+  downloadsCount?: number; // Campo legado, pode não estar presente
   createdAt: Date;
   uploadedBy: {
     name: string | null;
     email: string;
   } | null;
+  _count?: {
+    downloads: number;
+  };
 }
 
 interface User {
@@ -298,7 +301,9 @@ export function AdminContent({
                       </TableCell>
                       <TableCell>
                         <span className="font-semibold text-foreground">
-                          {material.downloadsCount}
+                          {material._count?.downloads ??
+                            material.downloadsCount ??
+                            0}
                         </span>
                       </TableCell>
                       <TableCell>
