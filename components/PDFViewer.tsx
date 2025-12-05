@@ -156,7 +156,7 @@ export function PDFViewer({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b border-border/50 flex-shrink-0">
+        <DialogHeader className="px-6 py-4 border-b border-light-divider dark:border-border/50 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1 mr-4 min-w-0">
               <DialogTitle className="text-lg font-semibold truncate">
@@ -178,7 +178,7 @@ export function PDFViewer({
         </DialogHeader>
 
         {/* Controles */}
-        <div className="px-6 py-3 border-b border-border/50 flex items-center justify-between gap-4 flex-shrink-0 bg-muted/30">
+        <div className="px-6 py-3 border-b border-light-divider dark:border-border/50 flex items-center justify-between gap-4 flex-shrink-0 bg-muted/30">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -264,7 +264,7 @@ export function PDFViewer({
             <div className="flex justify-center">
               <canvas
                 ref={canvasRef}
-                className="shadow-lg border border-border/50 bg-white"
+                className="shadow-lg border border-light-divider dark:border-border/50 bg-light-base dark:bg-white"
               />
             </div>
           )}

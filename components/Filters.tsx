@@ -65,7 +65,7 @@ export function Filters({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="border-border/50 shadow-lg">
+      <Card className="border-light-divider dark:border-border/50 shadow-lg">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <Search className="h-5 w-5 text-accent-light" />

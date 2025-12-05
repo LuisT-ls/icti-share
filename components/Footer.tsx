@@ -10,7 +10,7 @@ export function Footer() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="border-t border-border/50 bg-muted/30 mt-auto"
+      className="border-t border-light-divider dark:border-border/50 bg-light-secondary dark:bg-muted/30 mt-auto"
       role="contentinfo"
     >
       <div className="container mx-auto px-4 py-12 md:py-16">
@@ -76,7 +76,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border/50">
+        <div className="mt-12 pt-8 border-t border-light-divider dark:border-border/50">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
             <p>
               © {new Date().getFullYear()} ICTI Share. Todos os direitos

@@ -50,6 +50,21 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
+        // Cores personalizadas para light mode
+        light: {
+          base: "#F8F9FA",
+          secondary: "#F0F2F5",
+          hover: "#F5F7FB",
+          divider: "#E5E7EB",
+        },
+        dark: {
+          primary: "#1F2937",
+          secondary: "#6B7280",
+        },
+        blue: {
+          primary: "#2563EB",
+          "primary-hover": "#1D4ED8",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

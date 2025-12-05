@@ -59,7 +59,7 @@ export function MaterialCard({
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 border-border/50 group overflow-hidden">
+      <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 border-light-divider dark:border-border/50 group overflow-hidden">
         {/* Gradient accent bar */}
         <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/80 to-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -125,7 +125,7 @@ export function MaterialCard({
           </div>
 
           {uploadedBy && variant === "default" && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-border/50">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-light-divider dark:border-border/50">
               <User className="h-3.5 w-3.5" />
               <span className="truncate">
                 {uploadedBy.name || uploadedBy.email}
@@ -134,7 +134,7 @@ export function MaterialCard({
           )}
         </CardContent>
 
-        <CardFooter className="pt-4 border-t border-border/50">
+        <CardFooter className="pt-4 border-t border-light-divider dark:border-border/50">
           <Button
             asChild
             variant="default"
