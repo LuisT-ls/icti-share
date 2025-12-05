@@ -25,9 +25,7 @@ export function Header() {
             <div className="absolute inset-0 rounded-lg bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <FileText className="relative h-6 w-6 text-primary transition-transform duration-200 group-hover:scale-110" />
           </div>
-          <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            ICTI Share
-          </span>
+          <span className="text-gray-900 dark:text-gray-100">ICTI Share</span>
         </Link>
 
         <nav
