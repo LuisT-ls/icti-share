@@ -69,6 +69,7 @@ model User {
   comments          Comment[]
   ratings           Rating[]
   auditLogs         AuditLog[]
+  collections       Collection[]
 
   @@index([email])
   @@index([role])
@@ -99,6 +100,7 @@ model Material {
   downloads Download[]
   comments  Comment[]
   ratings   Rating[]
+  collectionItems CollectionItem[]
 
   @@index([uploadedById])
   @@index([course])
@@ -239,4 +241,33 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Collection {
+  id          String           @id @default(cuid())
+  title       String
+  description String?          @db.Text
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPublic    Boolean          @default(true)
+  items       CollectionItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+  @@map("collections")
+}
+
+model CollectionItem {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  materialId   String
+  material     Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  addedAt      DateTime   @default(now())
+
+  @@unique([collectionId, materialId]) // Evitar duplicatas na mesma coleção
+  @@index([collectionId])
+  @@index([materialId])
+  @@map("collection_items")
 }
