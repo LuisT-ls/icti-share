@@ -18,6 +18,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
+          prefetch={false}
           className="group flex items-center space-x-2.5 text-xl font-bold transition-all duration-200 hover:opacity-80"
           aria-label="ICTI Share - Página inicial"
         >

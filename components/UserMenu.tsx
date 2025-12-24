@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { User, LogOut, Settings, Shield, FileText } from "lucide-react";
+import { User, LogOut, Settings, Shield, FileText, Folder } from "lucide-react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
@@ -69,6 +69,17 @@ export function UserMenu() {
         </Button>
       </Link>
 
+      <Link href="/colecoes">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hidden sm:flex items-center gap-2"
+        >
+          <Folder className="h-4 w-4" />
+          <span>Coleções</span>
+        </Button>
+      </Link>
+
       {/* Botão Admin - apenas para admins */}
       {session.user.role === "ADMIN" && (
         <Button
@@ -119,6 +130,12 @@ export function UserMenu() {
             <Link href="/perfil" className="flex items-center cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               <span>Meu Perfil</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/colecoes" className="flex items-center cursor-pointer">
+              <Folder className="mr-2 h-4 w-4" />
+              <span>Minhas Coleções</span>
             </Link>
           </DropdownMenuItem>
           {session.user.role === "ADMIN" && (
