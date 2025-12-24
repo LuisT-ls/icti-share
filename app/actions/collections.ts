@@ -23,7 +23,7 @@ export async function createCollection(formData: FormData) {
 
     const rawData = {
       title: formData.get("title"),
-      description: formData.get("description"),
+      description: formData.get("description") || undefined,
       isPublic: formData.get("isPublic") === "true",
     };
 
