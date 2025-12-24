@@ -6,7 +6,12 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <SessionProvider>{children}</SessionProvider>
     </ThemeProvider>
   );
