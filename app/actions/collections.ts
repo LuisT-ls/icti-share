@@ -143,7 +143,7 @@ export async function getCollectionDetails(id: string) {
     where: { id },
     include: {
       user: {
-        select: { name: true, image: true },
+        select: { name: true },
       },
       items: {
         include: {
