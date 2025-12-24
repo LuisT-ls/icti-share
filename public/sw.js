@@ -71,6 +71,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Ignorar esquemas não suportados (como chrome-extension)
+  if (!url.protocol.startsWith("http")) {
+    return;
+  }
+
   // Ignorar requisições de API e autenticação
   if (
     url.pathname.startsWith("/api/") ||
