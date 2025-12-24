@@ -20,13 +20,12 @@ import {
   uploadMaterialSchema,
   type UploadMaterialFormData,
 } from "@/lib/validations/schemas";
+import { toast } from "sonner";
 
 export function UploadForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
@@ -48,16 +47,13 @@ export function UploadForm() {
   }
 
   const onSubmit = async (data: UploadMaterialFormData) => {
-    setError(null);
-    setSuccess(null);
-
     startTransition(async () => {
       // Obter o arquivo do FileList, não do data.file
       const fileList = getValues("file") as FileList | undefined;
       const file = fileList && fileList.length > 0 ? fileList[0] : null;
 
       if (!file || !(file instanceof File)) {
-        setError("Arquivo é obrigatório");
+        toast.error("Arquivo é obrigatório");
         return;
       }
 
@@ -94,7 +90,7 @@ export function UploadForm() {
 
         if (result.success) {
           console.log("✅ Upload realizado com sucesso!");
-          setSuccess("Upload realizado com sucesso!");
+          toast.success("Upload realizado com sucesso!");
           reset();
           setFilePreview(null);
           // Resetar o input de arquivo manualmente
@@ -108,11 +104,11 @@ export function UploadForm() {
           }, 1500);
         } else {
           console.error("❌ Erro no upload:", result.error);
-          setError(result.error);
+          toast.error(result.error);
         }
       } catch (error) {
         console.error("❌ Erro ao chamar uploadMaterial:", error);
-        setError(
+        toast.error(
           error instanceof Error
             ? `Erro: ${error.message}`
             : "Erro ao fazer upload. Tente novamente."
@@ -305,25 +301,6 @@ export function UploadForm() {
           )}
         </div>
       </div>
-
-      {/* Mensagens de erro e sucesso */}
-      {error && (
-        <div
-          className="rounded-md bg-destructive/10 p-4 border border-destructive/20"
-          role="alert"
-        >
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div
-          className="rounded-md bg-green-50 p-4 border border-green-200"
-          role="alert"
-        >
-          <p className="text-sm text-green-800">{success}</p>
-        </div>
-      )}
 
       {/* Botão de submit */}
       <Button type="submit" disabled={isPending} className="w-full" size="lg">
