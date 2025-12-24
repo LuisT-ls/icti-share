@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { uploadMaterial } from "@/app/actions/upload";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -27,6 +27,7 @@ export function UploadForm() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
@@ -97,9 +98,9 @@ export function UploadForm() {
           reset();
           setFilePreview(null);
           // Resetar o input de arquivo manualmente
-          const fileInput = document.getElementById("file") as HTMLInputElement;
-          if (fileInput) {
-            fileInput.value = "";
+          // Resetar o input de arquivo via ref
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
           }
           setTimeout(() => {
             router.push(`/meus-materiais`);
@@ -182,16 +183,25 @@ export function UploadForm() {
             id="file"
             type="file"
             accept="application/pdf"
-            {...register("file", {
-              onChange: (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setFilePreview(file.name);
-                } else {
-                  setFilePreview(null);
-                }
-              },
-            })}
+            {...(() => {
+              const { ref: registerRef, ...rest } = register("file", {
+                onChange: (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setFilePreview(file.name);
+                  } else {
+                    setFilePreview(null);
+                  }
+                },
+              });
+              return {
+                ...rest,
+                ref: (e: HTMLInputElement | null) => {
+                  registerRef(e);
+                  fileInputRef.current = e;
+                },
+              };
+            })()}
             className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
             aria-required="true"
             aria-invalid={errors.file ? "true" : "false"}
