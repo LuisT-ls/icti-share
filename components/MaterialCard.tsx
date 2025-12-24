@@ -109,11 +109,11 @@ export function MaterialCard({
 
           {/* Estatísticas e informações */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
               <Download className="h-3.5 w-3.5" />
               <span className="font-medium">{downloadsCount}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span>
                 {formatDistanceToNow(new Date(createdAt), {
