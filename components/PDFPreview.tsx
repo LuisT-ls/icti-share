@@ -39,6 +39,19 @@ export function PDFPreview({
 
         const pdfUrl = `/api/material/preview/${materialId}`;
 
+        // 1. Validar resposta antes de passar para o pdf.js
+        const response = await fetch(pdfUrl, { method: "HEAD" });
+        if (!response.ok) {
+          if (response.status === 404)
+            throw new Error("Arquivo PDF não encontrado");
+          throw new Error(`Erro ao verificar PDF: ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && !contentType.includes("application/pdf")) {
+          throw new Error("O arquivo retornado não é um PDF válido");
+        }
+
         // Carregar PDF
         const loadingTask = pdfjsLib.getDocument({
           url: pdfUrl,
@@ -70,10 +83,10 @@ export function PDFPreview({
 
         setPageNumber(1);
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Erro ao carregar PDF:", err);
         if (isMounted) {
-          setError("Erro ao carregar preview do PDF");
+          setError(err.message || "Erro ao carregar preview do PDF");
           setLoading(false);
         }
       }

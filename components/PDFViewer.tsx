@@ -63,6 +63,19 @@ export function PDFViewer({
 
         const pdfUrl = `/api/material/preview/${materialId}`;
 
+        // 1. Validar resposta antes de passar para o pdf.js
+        const response = await fetch(pdfUrl, { method: "HEAD" });
+        if (!response.ok) {
+          if (response.status === 404)
+            throw new Error("Arquivo PDF não encontrado");
+          throw new Error("Erro ao carregar PDF");
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && !contentType.includes("application/pdf")) {
+          throw new Error("O conteúdo não é um PDF válido");
+        }
+
         const loadingTask = pdfjsLib.getDocument({
           url: pdfUrl,
         });
@@ -75,10 +88,12 @@ export function PDFViewer({
         setTotalPages(pdf.numPages);
         await renderPage(pdf, 1);
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Erro ao carregar PDF:", err);
         if (isMounted) {
-          setError("Erro ao carregar PDF. Tente fazer o download.");
+          setError(
+            err.message || "Erro ao carregar PDF. Tente fazer o download."
+          );
           setLoading(false);
         }
       }
