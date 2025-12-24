@@ -302,6 +302,7 @@ export default async function MaterialDetailPage({
                   totalRatings={ratingStats.total}
                   showStats={true}
                   interactive={!!session}
+                  isOwner={session?.user?.id === material.uploadedById}
                 />
               </div>
             </div>

@@ -42,6 +42,13 @@ export async function createOrUpdateRating(formData: FormData) {
       };
     }
 
+    if (material.uploadedById === session.user.id) {
+      return {
+        success: false,
+        error: "Você não pode avaliar seu próprio material",
+      };
+    }
+
     // Criar ou atualizar avaliação (upsert)
     const rating = await prisma.rating.upsert({
       where: {

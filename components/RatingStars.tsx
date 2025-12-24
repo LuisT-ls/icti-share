@@ -13,6 +13,7 @@ interface RatingStarsProps {
   totalRatings?: number;
   showStats?: boolean;
   interactive?: boolean;
+  isOwner?: boolean;
 }
 
 export function RatingStars({
@@ -22,6 +23,7 @@ export function RatingStars({
   totalRatings = 0,
   showStats = true,
   interactive = true,
+  isOwner = false,
 }: RatingStarsProps) {
   const router = useRouter();
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
@@ -59,13 +61,13 @@ export function RatingStars({
               key={star}
               type="button"
               onClick={() => handleStarClick(star)}
-              onMouseEnter={() => interactive && setHoveredStar(star)}
+              onMouseEnter={() => interactive && !isOwner && setHoveredStar(star)}
               onMouseLeave={() => setHoveredStar(null)}
-              disabled={!interactive || isSubmitting}
+              disabled={!interactive || isSubmitting || isOwner}
               className={cn(
                 "transition-colors duration-200",
-                interactive && "cursor-pointer hover:scale-110",
-                !interactive && "cursor-default"
+                interactive && !isOwner && "cursor-pointer hover:scale-110",
+                (!interactive || isOwner) && "cursor-default"
               )}
               aria-label={`Avaliar com ${star} estrela${star > 1 ? "s" : ""}`}
             >
@@ -76,8 +78,8 @@ export function RatingStars({
                     ? "fill-yellow-400 text-yellow-400"
                     : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600",
                   interactive &&
-                    !isSubmitting &&
-                    "hover:fill-yellow-300 hover:text-yellow-300"
+                  !isSubmitting &&
+                  "hover:fill-yellow-300 hover:text-yellow-300"
                 )}
               />
             </button>
@@ -94,9 +96,14 @@ export function RatingStars({
           </div>
         )}
       </div>
-      {interactive && userRating && (
+      {interactive && userRating && !isOwner && (
         <p className="text-xs text-muted-foreground">
           Sua avaliação: {userRating} estrela{userRating > 1 ? "s" : ""}
+        </p>
+      )}
+      {isOwner && (
+        <p className="text-xs text-muted-foreground italic">
+          Você não pode avaliar seu próprio material.
         </p>
       )}
     </div>
