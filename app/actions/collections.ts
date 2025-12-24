@@ -39,8 +39,11 @@ export async function createCollection(formData: FormData) {
     revalidatePath("/colecoes");
     return { success: true, collection };
   } catch (error) {
-    console.error("Erro ao criar coleção:", error);
-    return { success: false, error: "Erro ao criar coleção" };
+    console.error("[CREATE COLLECTION ERROR]", error);
+    // Return detailed error for debugging
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    return { success: false, error: `Erro ao criar coleção: ${errorMessage}` };
   }
 }
 
