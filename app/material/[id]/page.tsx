@@ -33,6 +33,7 @@ import { CommentSection } from "@/components/CommentSection";
 import { getComments } from "@/app/actions/comments";
 import { getRatingStats, getUserRating } from "@/app/actions/ratings";
 import { getServerSession } from "@/lib/session";
+import { AddToCollectionDialog } from "@/components/AddToCollectionDialog";
 
 const baseUrl = getBaseUrl();
 
@@ -345,6 +346,23 @@ export default async function MaterialDetailPage({
                   Voltar
                 </Link>
               </Button>
+              {session && (
+                <div className="w-full sm:w-auto">
+                  <AddToCollectionDialog
+                    materialId={material.id}
+                    trigger={
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="w-full h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] sm:hover:scale-105"
+                      >
+                        <BookOpen className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                        Salvar na Coleção
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
