@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/auth";
 import {
   getCollectionDetails,
   removeFromCollection,
@@ -118,7 +118,7 @@ export default async function CollectionDetailsPage({
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {collection.items.map((item) => (
+          {collection.items.map((item: any) => (
             <Card key={item.id} className="overflow-hidden">
               <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
