@@ -42,7 +42,7 @@ export default async function CollectionDetailsPage({
   const isOwner = session?.user?.id === collection.userId;
 
   return (
-    <div className="container py-8 max-w-5xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
       <div className="mb-6">
         <Link
           href="/colecoes"
