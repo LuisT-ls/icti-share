@@ -4,8 +4,21 @@ import { cachedQuery, generateCacheKey } from "@/lib/cache";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
-import { FeaturedMaterialsSection } from "@/components/FeaturedMaterialsSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
+import dynamic from "next/dynamic";
+
+const FeaturedMaterialsSection = dynamic(
+  () =>
+    import("@/components/FeaturedMaterialsSection").then(
+      (mod) => mod.FeaturedMaterialsSection
+    ),
+  { ssr: true }
+);
+
+const FeaturesSection = dynamic(
+  () =>
+    import("@/components/FeaturesSection").then((mod) => mod.FeaturesSection),
+  { ssr: true }
+);
 import type { Prisma } from "@prisma/client";
 import type { Metadata } from "next";
 
