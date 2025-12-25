@@ -88,6 +88,10 @@ export const metadata: Metadata = {
   },
 };
 
+import { MotionProvider } from "@/components/MotionProvider";
+
+// ... (previous content)
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -96,9 +100,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <Providers>{children}</Providers>
-        <Toaster position="top-right" richColors />
-        <ServiceWorkerRegistration />
+        <MotionProvider>
+          <Providers>{children}</Providers>
+          <Toaster position="top-right" richColors />
+          <ServiceWorkerRegistration />
+        </MotionProvider>
       </body>
     </html>
   );
