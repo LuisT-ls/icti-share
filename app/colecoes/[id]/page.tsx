@@ -86,12 +86,14 @@ export default async function CollectionDetailsPage({
               </p>
             )}
           </div>
-
+          import {ShareCollectionButton} from
+          "@/components/ShareCollectionButton"; // ... (inside the component)
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Share2 className="mr-2 h-4 w-4" />
-              Compartilhar
-            </Button>
+            <ShareCollectionButton
+              collectionId={collection.id}
+              title={collection.title}
+              description={collection.description}
+            />
 
             {isOwner && (
               <DropdownMenu>
