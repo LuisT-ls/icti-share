@@ -50,13 +50,15 @@ export default async function CollectionDetailsPage({
       <Header />
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
         <div className="mb-6">
-          <Link
-            href="/colecoes"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para minhas coleções
-          </Link>
+          {session?.user && (
+            <Link
+              href="/colecoes"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para minhas coleções
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
