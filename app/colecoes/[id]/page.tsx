@@ -22,7 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MaterialCard } from "@/components/MaterialCard"; // Assuming we can reuse or adapt this
+import { MaterialCard } from "@/components/MaterialCard";
+import { ShareCollectionButton } from "@/components/ShareCollectionButton";
 // Note: We might need a specialized list item or just reuse MaterialCard.
 // For now, I'll create a simple list view to ensure we can handle the removal action easily.
 
@@ -86,8 +87,7 @@ export default async function CollectionDetailsPage({
               </p>
             )}
           </div>
-          import {ShareCollectionButton} from
-          "@/components/ShareCollectionButton"; // ... (inside the component)
+
           <div className="flex items-center gap-2">
             <ShareCollectionButton
               collectionId={collection.id}
